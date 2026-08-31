@@ -377,7 +377,7 @@ export async function registerApi(
       if (!theme) return await reply.code(404).send({
         error: { code: 'THEME_NOT_FOUND', message: 'テーマが見つかりません。' }
       });
-      return { data: { runtime: themeRuntime(theme, runtimeManager) } };
+      return { data: { runtime: await runtimeManager.recheck(theme) } };
     }
   );
 

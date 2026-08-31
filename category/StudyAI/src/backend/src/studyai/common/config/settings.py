@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 10
     max_bulk_files: int = 5
     text_pdf_threshold: int = 50
+    allow_demo_header_auth: bool = False
     mlflow_tracking_uri: str = "./data/mlruns"
     mlflow_experiment_name: str = "system01_invoice_extraction"
     system02_mlflow_experiment_name: str = "system02_contract_risk_review"

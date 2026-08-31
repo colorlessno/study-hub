@@ -113,8 +113,8 @@ npm ci
 npm run dev
 ```
 
-- 開発画面: `http://127.0.0.1:3000/`
-- ローカルAPI: `http://127.0.0.1:3100/`
+- 開発画面・ローカルAPI: `http://127.0.0.1:3100/`
+- Python教材はPATH上の`python`（Windows）または`python3`（その他）を使用します。別の実行ファイルを使う場合は、StudyHub起動前に`STUDYHUB_PYTHON_COMMAND`へ実行ファイルのパスを設定します。
 
 ビルドとテストは`app`で次の順に実行します。
 

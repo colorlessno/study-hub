@@ -519,6 +519,34 @@ describe('テーマの実行制御', () => {
     expect((await manager.stop(theme)).state).toBe('stopped');
   }, networkTestTimeoutMilliseconds);
 
+  it('404を返す起動確認URLを準備完了として扱わない', async () => {
+    const port = await findFreePort();
+    const manager = new RuntimeManager(sampleDataRoot);
+    managers.push(manager);
+    const theme = requestFeaturesTheme(port);
+    theme.timeoutSeconds = 1;
+    theme.operations.start!.processes[0]!.healthUrl = `http://127.0.0.1:${port}/missing`;
+
+    const runtime = await manager.start(theme);
+
+    expect(runtime.state).toBe('failed');
+    expect(runtime.message).toContain('起動確認が制限時間を超えました');
+  }, networkTestTimeoutMilliseconds);
+
+  it('状態の再確認で実際のヘルスチェック失敗を返す', async () => {
+    const port = await findFreePort();
+    const manager = new RuntimeManager(sampleDataRoot);
+    managers.push(manager);
+    const theme = requestFeaturesTheme(port);
+
+    await expectRuntimeReady(manager, theme);
+    theme.operations.start!.processes[0]!.healthUrl = `http://127.0.0.1:${port}/missing`;
+    const runtime = await manager.recheck(theme);
+
+    expect(runtime.state).toBe('failed');
+    expect(runtime.message).toContain('HTTP 404');
+  }, networkTestTimeoutMilliseconds);
+
   it('複数処理を停止した直後に同じポートで再起動できる', async () => {
     const dependencyPort = await findFreePort();
     let apiPort = await findFreePort();
@@ -594,6 +622,34 @@ describe('テーマの実行制御', () => {
     });
     await manager.run(theme, '', 'logout');
     expect(await manager.run(theme, '', 'me')).toMatchObject({
+      ok: false,
+      statusCode: 401
+    });
+  }, networkTestTimeoutMilliseconds);
+
+  it('ある接続先で受け取ったCookieを別オリジンへ送らない', async () => {
+    const firstPort = await findFreePort();
+    let secondPort = await findFreePort();
+    while (secondPort === firstPort) secondPort = await findFreePort();
+    const manager = new RuntimeManager(sampleDataRoot);
+    managers.push(manager);
+    const theme = requestFeaturesTheme(firstPort);
+    theme.operations.start!.processes.push({
+      id: 'other-api',
+      command: 'node',
+      args: ['materials/runtime/request-features-server.mjs', '--port', String(secondPort)],
+      healthUrl: `http://127.0.0.1:${secondPort}/health`
+    });
+    theme.operations.run!.requests!.push({
+      id: 'other-me',
+      label: '別オリジンの状態確認',
+      method: 'GET',
+      url: `http://127.0.0.1:${secondPort}/me`
+    });
+
+    await expectRuntimeReady(manager, theme);
+    expect((await manager.run(theme, '', 'login')).ok).toBe(true);
+    expect(await manager.run(theme, '', 'other-me')).toMatchObject({
       ok: false,
       statusCode: 401
     });

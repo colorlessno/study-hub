@@ -1,16 +1,20 @@
 import axios from 'axios'
 
-// デフォルトユーザー（開発用）
-const DEFAULT_USER_ID = 'user01'
-const DEFAULT_USER_ROLES = 'admin'
+const demoUserId = import.meta.env.VITE_DEMO_USER_ID?.trim()
+const demoUserRoles = import.meta.env.VITE_DEMO_USER_ROLES?.trim()
+const demoAuthHeaders = demoUserId && demoUserRoles
+  ? {
+      'X-User-Id': demoUserId,
+      'X-User-Roles': demoUserRoles,
+    }
+  : {}
 
 // System01 向けのデフォルトクライアント
 export const apiClient = axios.create({
   baseURL: '/api/system01',
   headers: {
     'Content-Type': 'application/json',
-    'X-User-Id': DEFAULT_USER_ID,
-    'X-User-Roles': DEFAULT_USER_ROLES,
+    ...demoAuthHeaders,
   },
 })
 
@@ -43,8 +47,7 @@ export function createSystemClient(systemId: string) {
     baseURL: `/api/${systemId}`,
     headers: {
       'Content-Type': 'application/json',
-      'X-User-Id': DEFAULT_USER_ID,
-      'X-User-Roles': DEFAULT_USER_ROLES,
+      ...demoAuthHeaders,
     },
   })
 }

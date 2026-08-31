@@ -23,7 +23,10 @@ def create_base_app() -> FastAPI:
     @app.middleware("http")
     async def add_trace_id(request: Request, call_next):
         request.state.trace_id = str(uuid.uuid4())
-        request.state.current_user = parse_user_from_headers(request.headers)
+        request.state.current_user = parse_user_from_headers(
+            request.headers,
+            enabled=settings.allow_demo_header_auth,
+        )
         started_at = log_request_start(request, request.state.trace_id)
         try:
             response = await call_next(request)

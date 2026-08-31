@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: repository-validation-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   validate-documents:
     runs-on: windows-latest
@@ -16,6 +20,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install StudyHub dependencies
+        run: npm ci
+        working-directory: app
+
+      - name: Build StudyHub
+        run: npm run build
+        working-directory: app
+
+      - name: Test StudyHub
+        run: npm test
+        working-directory: app
 
       - name: Validate UTF-8, links, and learning catalog
         shell: pwsh

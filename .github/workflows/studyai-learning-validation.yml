@@ -14,13 +14,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: studyai-learning-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: repository-validation-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   validate-ai-learning:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -37,8 +37,33 @@ jobs:
           "httpx>=0.28.1,<1.0.0"
           "pydantic-settings>=2.10.0,<3.0.0"
 
+      - name: Install StudyAI backend and test dependencies
+        run: python -m pip install -e ".[dev]"
+        working-directory: category/StudyAI/src/backend
+
+      - name: Run StudyAI backend tests
+        run: python -m pytest -p asyncio -q
+        working-directory: category/StudyAI/src/backend
+        env:
+          ALLOW_DEMO_HEADER_AUTH: "true"
+
       - name: Run AI learning validation
         run: python category/StudyAI/scripts/validate-ai-learning.py
 
       - name: Run dependency-free system03 RAG validation
         run: python category/StudyAI/scripts/validate-system03-rag-learning.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: category/StudyAI/src/frontend/package-lock.json
+
+      - name: Install StudyAI frontend dependencies
+        run: npm ci
+        working-directory: category/StudyAI/src/frontend
+
+      - name: Build StudyAI frontend
+        run: npm run build
+        working-directory: category/StudyAI/src/frontend

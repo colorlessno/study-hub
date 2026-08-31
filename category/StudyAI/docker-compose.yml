@@ -9,7 +9,7 @@
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       TZ: Asia/Tokyo
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - studyai_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -44,7 +44,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18000:8000"
+      - "127.0.0.1:18000:8000"
     volumes:
       - ./src/backend/data:/app/backend/data
     extra_hosts:
@@ -69,10 +69,12 @@
     depends_on:
       - backend
     ports:
-      - "15173:5173"
+      - "127.0.0.1:15173:5173"
     environment:
       TZ: Asia/Tokyo
       VITE_API_PROXY_TARGET: http://backend:8000
+      VITE_DEMO_USER_ID: ${STUDYAI_DEMO_USER_ID:-user01}
+      VITE_DEMO_USER_ROLES: ${STUDYAI_DEMO_USER_ROLES:-admin}
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
     restart: unless-stopped
 
@@ -104,7 +106,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18002:8002"
+      - "127.0.0.1:18002:8002"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system02_main:app", "--host", "0.0.0.0", "--port", "8002"]
@@ -122,7 +124,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18003:8003"
+      - "127.0.0.1:18003:8003"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system03_main:app", "--host", "0.0.0.0", "--port", "8003"]
@@ -140,7 +142,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18004:8004"
+      - "127.0.0.1:18004:8004"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system04_main:app", "--host", "0.0.0.0", "--port", "8004"]
@@ -158,7 +160,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18005:8005"
+      - "127.0.0.1:18005:8005"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system05_main:app", "--host", "0.0.0.0", "--port", "8005"]
@@ -176,7 +178,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18006:8006"
+      - "127.0.0.1:18006:8006"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system06_main:app", "--host", "0.0.0.0", "--port", "8006"]
@@ -194,7 +196,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18007:8007"
+      - "127.0.0.1:18007:8007"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system07_main:app", "--host", "0.0.0.0", "--port", "8007"]
@@ -212,7 +214,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18008:8008"
+      - "127.0.0.1:18008:8008"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system08_main:app", "--host", "0.0.0.0", "--port", "8008"]
@@ -230,7 +232,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18009:8009"
+      - "127.0.0.1:18009:8009"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system09_main:app", "--host", "0.0.0.0", "--port", "8009"]
@@ -248,7 +250,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18010:8010"
+      - "127.0.0.1:18010:8010"
     volumes:
       - ./src/backend/tests/fixtures/system10:/mnt/scan/project:ro
     extra_hosts:
@@ -268,7 +270,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18011:8011"
+      - "127.0.0.1:18011:8011"
     volumes:
       - ./src/backend/tests/fixtures/system11:/mnt/organize/sample:ro
       - system11_work:/mnt/organize/work
@@ -289,7 +291,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18012:8012"
+      - "127.0.0.1:18012:8012"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system12_main:app", "--host", "0.0.0.0", "--port", "8012"]
@@ -307,7 +309,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18013:8013"
+      - "127.0.0.1:18013:8013"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system13_main:app", "--host", "0.0.0.0", "--port", "8013"]
@@ -325,7 +327,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18014:8014"
+      - "127.0.0.1:18014:8014"
     volumes:
       - ./src/backend/data:/app/backend/data
     extra_hosts:
@@ -345,7 +347,7 @@
       db:
         condition: service_healthy
     ports:
-      - "18016:8016"
+      - "127.0.0.1:18016:8016"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: ["uvicorn", "studyai.system16_main:app", "--host", "0.0.0.0", "--port", "8016"]

@@ -12,7 +12,9 @@ USER_ROLES_HEADER = "X-User-Roles"
 PROJECT_IDS_HEADER = "X-Project-Ids"
 
 
-def parse_user_from_headers(headers) -> AuthenticatedUser:
+def parse_user_from_headers(headers, *, enabled: bool = False) -> AuthenticatedUser:
+    if not enabled:
+        return AuthenticatedUser(user_id=None, roles=[], project_ids=[])
     user_id = headers.get(USER_ID_HEADER)
     roles = _split_header_values(headers.get(USER_ROLES_HEADER))
     project_ids = _split_header_values(headers.get(PROJECT_IDS_HEADER))
@@ -23,7 +25,7 @@ async def get_current_user(request: Request) -> AuthenticatedUser:
     cached = getattr(request.state, "current_user", None)
     if cached is not None:
         return cached
-    user = parse_user_from_headers(request.headers)
+    user = parse_user_from_headers(request.headers, enabled=False)
     request.state.current_user = user
     return user
 

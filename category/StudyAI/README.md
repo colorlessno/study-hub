@@ -82,6 +82,8 @@ docker compose up -d
 ```
 
 - `db`（PostgreSQL + pgvector）→ `migrate`（Alembic マイグレーション）→ `backend` の順に起動します。
+- Composeで公開する画面・API・DBのポートは、ローカル教材環境だけから利用できるよう`127.0.0.1`へバインドします。
+- `.env.docker`では教材用のヘッダー認証を明示的に有効化し、フロントエンドが送る教材用ユーザーとロールは`STUDYAI_DEMO_USER_ID`、`STUDYAI_DEMO_USER_ROLES`で変更できます。この方式を外部公開環境の認証に使用せず、外部公開時は教材用認証を無効化してAPI Gateway等の実認証へ置き換えてください。
 - バックエンド単体やフロントエンドの起動方法は各 `src/backend` / `src/frontend` を参照してください。
 - AI を使うシステムは、OpenAI 互換のローカル LLM サーバ（LM Studio 等）を前提とします。
 - **重要: 自然言語検索・Q&A（RAG）を使うシステム（System03 など）は、会話用 LLM に加えて Embedding モデルが必須です。**

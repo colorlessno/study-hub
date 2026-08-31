@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import gzip
+import os
 import shutil
 import subprocess
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -80,15 +80,32 @@ class BackupService:
         if pg_dump is None:
             raise RuntimeError("pg_dump is not available.")
         parsed = urlparse(self.settings.database_url.replace("+asyncpg", ""))
-        target = backup_dir / f"backup_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json.gz"
-        db_url = parsed._replace(scheme="postgresql").geturl()
+        database_name = parsed.path.lstrip("/")
+        if not parsed.hostname or not database_name:
+            raise RuntimeError("DATABASE_URL does not contain a PostgreSQL host and database name.")
+        target = backup_dir / f"backup_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.dump"
+        environment = os.environ.copy()
+        if parsed.password:
+            environment["PGPASSWORD"] = unquote(parsed.password)
         result = subprocess.run(
-            [pg_dump, db_url],
+            [
+                pg_dump,
+                "--host",
+                parsed.hostname,
+                "--port",
+                str(parsed.port or 5432),
+                "--username",
+                unquote(parsed.username or "postgres"),
+                "--dbname",
+                database_name,
+                "--format",
+                "custom",
+            ],
             check=False,
             capture_output=True,
+            env=environment,
         )
         if result.returncode != 0:
             raise RuntimeError(result.stderr.decode("utf-8", errors="ignore") or "pg_dump failed.")
-        with gzip.open(target, "wb") as fp:
-            fp.write(result.stdout)
+        target.write_bytes(result.stdout)
         return str(target)

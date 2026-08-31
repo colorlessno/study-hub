@@ -51,7 +51,7 @@ export function shouldHideProcessWindow(command: ProcessDefinition['command']): 
 export class RuntimeManager {
   private readonly runtimes = new Map<string, RuntimeRecord>();
   private readonly logs = new Map<string, LogEntry[]>();
-  private readonly cookies = new Map<string, Map<string, string>>();
+  private readonly cookies = new Map<string, Map<string, Map<string, string>>>();
   private readonly events = new EventEmitter();
   private operationTail: Promise<void> = Promise.resolve();
   private sequence = 0;
@@ -137,6 +137,45 @@ export class RuntimeManager {
     return this.enqueueOperation(() => this.startSequential(theme));
   }
 
+  recheck(theme: Theme): Promise<RuntimeView> {
+    return this.enqueueOperation(() => this.recheckSequential(theme));
+  }
+
+  private async recheckSequential(theme: Theme): Promise<RuntimeView> {
+    const runtimeId = theme.operations.start?.runtimeId;
+    if (!runtimeId) return this.status(theme);
+    const record = this.runtimes.get(runtimeId);
+    if (!record) return this.status(theme);
+    if (theme.lifecycle === 'shared' && !record.consumers.has(theme.id)) return this.status(theme);
+
+    const exited = record.processes.find(({ child }) => child.exitCode !== null);
+    if (exited) {
+      record.state = 'failed';
+      record.message = `${exited.definition.id} が終了しています。終了コード: ${String(exited.child.exitCode)}`;
+      return this.status(theme);
+    }
+
+    const healthUrls = [...new Set([
+      ...record.processes.map(({ definition }) => definition.healthUrl),
+      ...record.exposed.map((definition) => definition.healthUrl)
+    ].filter((url): url is string => Boolean(url)))];
+    if (healthUrls.length === 0) return this.status(theme);
+    try {
+      for (const healthUrl of healthUrls) {
+        await this.probeReady(healthUrl, Math.min(record.timeoutSeconds * 1000, 2000));
+      }
+      if (record.state !== 'starting') {
+        record.state = 'ready';
+        record.message = '利用できます。';
+      }
+    } catch (error) {
+      record.state = 'failed';
+      record.message = error instanceof Error ? error.message : '起動状態を確認できません。';
+      this.appendForConsumers(record, 'StudyHub', 'error', record.message);
+    }
+    return this.status(theme);
+  }
+
   private async startSequential(theme: Theme): Promise<RuntimeView> {
     const start = theme.operations.start;
     if (!start) return this.status(theme);
@@ -148,7 +187,7 @@ export class RuntimeManager {
       return this.status(theme);
     }
     if (existing) await this.stopRecord(existing);
-    this.cookies.delete(theme.id);
+    this.clearCookies(theme.id);
 
     const record: RuntimeRecord = {
       id: start.runtimeId,
@@ -204,7 +243,7 @@ export class RuntimeManager {
   }
 
   private async stopSequential(theme: Theme): Promise<RuntimeView> {
-    this.cookies.delete(theme.id);
+    this.clearCookies(theme.id);
     const runtimeId = theme.operations.start?.runtimeId;
     if (!runtimeId) return this.status(theme);
     const record = this.runtimes.get(runtimeId);
@@ -258,12 +297,6 @@ export class RuntimeManager {
         ...(selectedRequest?.headers ?? run.request?.headers ?? {})
       };
       const hasCookieHeader = Object.keys(headers).some((name) => name.toLowerCase() === 'cookie');
-      const storedCookies = this.cookies.get(theme.id);
-      if (!hasCookieHeader && storedCookies?.size) {
-        headers.Cookie = [...storedCookies.entries()]
-          .map(([name, value]) => `${name}=${value}`)
-          .join('; ');
-      }
       const configuredBody = selectedRequest?.body ?? run.request?.body;
       const requestBody: Record<string, unknown> = typeof configuredBody === 'object' && configuredBody !== null
         ? { ...configuredBody }
@@ -300,6 +333,12 @@ export class RuntimeManager {
       if (/\{[^}]+\}/.test(resolvedUrl)) throw new Error('URLに必要な値が入力されていません。');
 
       const requestUrl = new URL(resolvedUrl);
+      const storedCookies = this.cookies.get(theme.id)?.get(requestUrl.origin);
+      if (!hasCookieHeader && storedCookies?.size) {
+        headers.Cookie = [...storedCookies.entries()]
+          .map(([name, value]) => `${name}=${value}`)
+          .join('; ');
+      }
       const inputDefinition = run.request?.input;
       if (inputDefinition?.target === 'query') {
         requestUrl.searchParams.set(inputDefinition.name, String(input));
@@ -350,7 +389,7 @@ export class RuntimeManager {
             ?? (response.headers.get('set-cookie') ? [response.headers.get('set-cookie') as string] : []);
           if (setCookies.length) {
             responseHeaders['set-cookie'] = setCookies;
-            this.updateCookies(theme.id, setCookies);
+            this.updateCookies(theme.id, requestUrl.origin, setCookies);
           }
           this.appendLog(
             theme.id,
@@ -459,12 +498,13 @@ export class RuntimeManager {
       items.push({ id: 'node', label: 'Node.js', status: 'ready', message: process.version });
     }
     if (requiresPython) {
+      const python = this.resolveSystemPython();
       items.push(await this.probeReadinessCommand(
         'python',
         'Python',
-        process.platform === 'win32' ? 'rtk' : 'python3',
-        process.platform === 'win32' ? ['python', '--version'] : ['--version'],
-        'Pythonの実行環境が設定されていません。rtkのPython設定を確認してください。'
+        python.command,
+        [...python.args, '--version'],
+        'Pythonの実行環境が設定されていません。PATHまたはSTUDYHUB_PYTHON_COMMANDを確認してください。'
       ));
     }
     if (requirements.has('Docker Desktop')) {
@@ -552,8 +592,9 @@ export class RuntimeManager {
     return result;
   }
 
-  private updateCookies(themeId: string, setCookies: string[]): void {
-    const stored = this.cookies.get(themeId) ?? new Map<string, string>();
+  private updateCookies(themeId: string, origin: string, setCookies: string[]): void {
+    const themeCookies = this.cookies.get(themeId) ?? new Map<string, Map<string, string>>();
+    const stored = themeCookies.get(origin) ?? new Map<string, string>();
     for (const setCookie of setCookies) {
       const [pair, ...attributes] = setCookie.split(';').map((part) => part.trim());
       if (!pair) continue;
@@ -566,8 +607,18 @@ export class RuntimeManager {
       if (expired) stored.delete(name);
       else stored.set(name, value);
     }
-    if (stored.size) this.cookies.set(themeId, stored);
-    else this.cookies.delete(themeId);
+    if (stored.size) {
+      themeCookies.set(origin, stored);
+      this.cookies.set(themeId, themeCookies);
+    } else {
+      themeCookies.delete(origin);
+      if (themeCookies.size) this.cookies.set(themeId, themeCookies);
+      else this.cookies.delete(themeId);
+    }
+  }
+
+  private clearCookies(themeId: string): void {
+    this.cookies.delete(themeId);
   }
 
   private spawnProcess(definition: ProcessDefinition, record: RuntimeRecord): ChildProcessWithoutNullStreams {
@@ -662,9 +713,12 @@ export class RuntimeManager {
       });
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
+      let timedOut = false;
       const timer = setTimeout(() => {
-        child.kill();
-        reject(new Error('コマンドが制限時間を超えました。'));
+        timedOut = true;
+        void this.stopChild(child).finally(() => {
+          reject(new Error('コマンドが制限時間を超えました。'));
+        });
       }, (theme.timeoutSeconds ?? 10) * 1000);
       child.stdout.on('data', (chunk: Buffer) => stdout.push(chunk));
       child.stderr.on('data', (chunk: Buffer) => stderr.push(chunk));
@@ -674,6 +728,7 @@ export class RuntimeManager {
       });
       child.once('close', (exitCode) => {
         clearTimeout(timer);
+        if (timedOut) return;
         const outputText = Buffer.concat(stdout).toString('utf8').trim();
         const errorText = Buffer.concat(stderr).toString('utf8').trim();
         if (outputText) this.appendLog(theme.id, definition.id, 'info', outputText);
@@ -708,9 +763,12 @@ export class RuntimeManager {
         windowsHide: true,
         stdio: 'pipe'
       });
+      let timedOut = false;
       const timer = setTimeout(() => {
-        child.kill();
-        reject(new Error(`${definition.id}が制限時間を超えました。`));
+        timedOut = true;
+        void this.stopChild(child).finally(() => {
+          reject(new Error(`${definition.id}が制限時間を超えました。`));
+        });
       }, timeoutSeconds * 1000);
       child.stdout.on('data', (chunk: Buffer) => {
         this.appendForConsumers(record, definition.id, 'info', chunk.toString('utf8').trimEnd());
@@ -724,6 +782,7 @@ export class RuntimeManager {
       });
       child.once('close', (exitCode) => {
         clearTimeout(timer);
+        if (timedOut) return;
         if (exitCode === 0 || definition.allowFailure) resolve();
         else reject(new Error(`${definition.id}が終了コード${String(exitCode)}で失敗しました。`));
       });
@@ -848,7 +907,7 @@ export class RuntimeManager {
         resolve({ id, label, status, message });
       };
       const timer = setTimeout(() => {
-        child.kill();
+        void this.stopChild(child);
         finish('missing', '確認が制限時間を超えました。');
       }, 8000);
       child.stdout.on('data', (chunk: Buffer) => output.push(chunk));
@@ -928,11 +987,10 @@ export class RuntimeManager {
     }
     if (definition.command === 'python') {
       this.assertPythonEntry(definition, workingDirectory);
+      const python = this.resolveSystemPython();
       return {
-        command: process.platform === 'win32' ? 'rtk' : 'python3',
-        args: process.platform === 'win32'
-          ? ['python', ...definition.args]
-          : definition.args
+        command: python.command,
+        args: [...python.args, ...definition.args]
       };
     }
     if (definition.command === 'python-venv') {
@@ -987,7 +1045,7 @@ export class RuntimeManager {
       );
       try {
         const response = await fetch(url, { signal: controller.signal });
-        if (response.status < 500) return;
+        if (response.ok) return;
       } catch {
         // 起動途中は接続できないため、期限内だけ再確認します。
       } finally {
@@ -998,14 +1056,39 @@ export class RuntimeManager {
     throw new Error(`起動確認が制限時間を超えました: ${url}`);
   }
 
+  private async probeReady(url: string, timeoutMilliseconds: number): Promise<void> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMilliseconds);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`起動確認に失敗しました: ${url} (HTTP ${response.status})`);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('起動確認に失敗しました:')) throw error;
+      throw new Error(`起動確認に失敗しました: ${url}`);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private resolveSystemPython(): ResolvedCommand {
+    const configured = process.env.STUDYHUB_PYTHON_COMMAND?.trim();
+    return {
+      command: configured || (process.platform === 'win32' ? 'python' : 'python3'),
+      args: []
+    };
+  }
+
   private async waitUntilSpawned(
     child: ChildProcessWithoutNullStreams,
     timeoutSeconds: number
   ): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
-        child.kill();
-        reject(new Error('プロセスの起動が制限時間を超えました。'));
+        void this.stopChild(child).finally(() => {
+          reject(new Error('プロセスの起動が制限時間を超えました。'));
+        });
       }, timeoutSeconds * 1000);
       const complete = (action: () => void) => {
         clearTimeout(timer);
