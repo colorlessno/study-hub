@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "system21",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "同じ指示、複数のTemperature、試行回数を指定し、生成を一件ずつ順番に実モデルで比較した"
+    },
+    {
+      "id": "check-02",
+      "label": "各Temperatureで指定回数分の回答とモデル名が表示されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "Temperature以外の比較条件が同じであることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "Temperature別の異なる回答数、平均文字数、再現性の簡易比率を比較した"
+    },
+    {
+      "id": "check-05",
+      "label": "定型業務または発想業務で採用する設定と理由を学習メモへ記録した"
+    },
+    {
+      "id": "check-06",
+      "label": "実モデルと明示的なモックを区別し、保存した結果を実行履歴から再表示した"
+    }
+  ]
+}

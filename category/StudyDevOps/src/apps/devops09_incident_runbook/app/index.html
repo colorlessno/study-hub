@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>障害対応記録</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <p class="theme-id">devops09</p>
+      <h1>障害対応記録</h1>
+      <p>固定された教材シナリオを使い、事実・仮説・判断を分けて障害対応を記録します。</p>
+      <p class="safety-note">秘密情報、個人情報、実顧客情報は入力しないでください。入力内容はこのブラウザ内だけに保存されます。</p>
+    </header>
+
+    <nav class="step-tabs" aria-label="記録手順">
+      <button type="button" data-step="0" aria-current="step">1. 受付</button>
+      <button type="button" data-step="1">2. 証拠</button>
+      <button type="button" data-step="2">3. 判断</button>
+      <button type="button" data-step="3">4. 対応・保存</button>
+    </nav>
+
+    <form id="incident-form" novalidate>
+      <section class="step-panel" data-panel="0">
+        <h2>受付情報と影響</h2>
+        <div class="field-grid">
+          <label>Incident ID
+            <input id="incident-id" autocomplete="off">
+          </label>
+          <label>受付時刻
+            <input id="detected-at" autocomplete="off">
+          </label>
+          <label>検知経路
+            <input id="detected-by" autocomplete="off">
+          </label>
+          <label>現在の状態
+            <select id="status">
+              <option value="調査中">調査中</option>
+              <option value="一時対応済み">一時対応済み</option>
+              <option value="回復確認済み">回復確認済み</option>
+              <option value="対応完了">対応完了</option>
+            </select>
+          </label>
+          <label>調査担当
+            <input id="investigator" autocomplete="off">
+          </label>
+          <label>判断者
+            <input id="decision-maker" autocomplete="off">
+          </label>
+        </div>
+        <label>一文の概要
+          <textarea id="summary" rows="3"></textarea>
+        </label>
+        <label>確認できた利用者影響
+          <textarea id="impact" rows="3"></textarea>
+        </label>
+        <label>未確認の範囲
+          <textarea id="unknown-scope" rows="2"></textarea>
+        </label>
+        <div class="field-grid">
+          <label>Severity
+            <select id="severity">
+              <option value="">選択してください</option>
+              <option value="S1">S1: 全停止、データ消失・漏えいの懸念</option>
+              <option value="S2">S2: 主要機能停止、回避策なし</option>
+              <option value="S3">S3: 一部機能停止、教材内の限定障害</option>
+            </select>
+          </label>
+          <label>Severityの根拠
+            <textarea id="severity-reason" rows="3"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="step-panel" data-panel="1" hidden>
+        <h2>変更前に保存する証拠</h2>
+        <p>再起動や設定変更より先に、確認できた値と証拠の場所を記録します。</p>
+        <label>health / ready
+          <textarea id="health-ready" rows="3" placeholder="例: health 200、ready 503"></textarea>
+        </label>
+        <label>containerの状態 / 終了コード
+          <textarea id="container-status" rows="3" placeholder="例: app-runtime-error は running"></textarea>
+        </label>
+        <label>request ID / error code / ログの場所
+          <textarea id="request-evidence" rows="3"></textarea>
+        </label>
+        <label>直近のCI結果 / 変更内容
+          <textarea id="recent-change" rows="3"></textarea>
+        </label>
+      </section>
+
+      <section class="step-panel" data-panel="2" hidden>
+        <h2>事実・仮説・判断</h2>
+        <label>確認できた事実
+          <textarea id="facts" rows="5" placeholder="観測した状態、応答、ログだけを記入します"></textarea>
+        </label>
+        <label>原因の仮説と反証方法
+          <textarea id="hypothesis" rows="5" placeholder="推測と、その推測を確かめる方法を記入します"></textarea>
+        </label>
+        <label>判断と根拠
+          <textarea id="decision" rows="5" placeholder="実施すること、見送ること、判断理由を記入します"></textarea>
+        </label>
+      </section>
+
+      <section class="step-panel" data-panel="3" hidden>
+        <h2>対応と記録の保存</h2>
+        <label>一時対応と結果
+          <textarea id="temporary-action" rows="3"></textarea>
+        </label>
+        <label>回復確認
+          <textarea id="recovery-check" rows="3"></textarea>
+        </label>
+        <label>恒久対応
+          <textarea id="permanent-action" rows="3"></textarea>
+        </label>
+        <label>再発防止
+          <textarea id="prevention" rows="3"></textarea>
+        </label>
+
+        <div class="action-row">
+          <button type="button" id="save-report" class="primary">ブラウザ内に保存</button>
+          <button type="button" id="download-report">Markdownをダウンロード</button>
+          <button type="button" id="clear-report">保存内容をクリア</button>
+        </div>
+        <p id="save-status" class="save-status" role="status"></p>
+        <h3>Markdownプレビュー</h3>
+        <pre id="markdown-preview">まだ保存されていません。</pre>
+      </section>
+
+      <div class="step-navigation">
+        <button type="button" id="previous-step">前の手順</button>
+        <span id="step-position">1 / 4</span>
+        <button type="button" id="next-step">次の手順</button>
+      </div>
+    </form>
+  </main>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

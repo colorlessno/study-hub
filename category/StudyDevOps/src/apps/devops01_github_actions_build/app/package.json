@@ -1,0 +1,10 @@
+{
+  "name": "studydevops-devops01-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/index.js",
+    "check": "npm run build"
+  }
+}

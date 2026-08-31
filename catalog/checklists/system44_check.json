@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "system44",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "既定値で実行し、基準側と変更側の成果率、AI品質、成果単価、応答時間、自動判断を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "variant_resultsの対象人数または成果数を変更し、事業KPIと自動判断の変化を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "ai_quality_metricsの変更側品質を最低品質より小さくし、AI品質の条件違反と改善候補を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "cost_metricsの変更側コストを増やし、成果単価の条件違反と改善候補を確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "failure_casesの分類と件数を変更し、失敗分類と改善候補が対応することを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "human_review_resultをdecidedにして確認者・判断・理由・改善内容・次の実験を入力し、意思決定が保存されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "実行履歴で事業KPI・AI品質・コスト・失敗分類・改善候補・意思決定が同じ実験記録に含まれることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "バックエンドを再起動し、意思決定を含む直前の実行履歴がJSONファイルから復元されることを確認した"
+    }
+  ]
+}

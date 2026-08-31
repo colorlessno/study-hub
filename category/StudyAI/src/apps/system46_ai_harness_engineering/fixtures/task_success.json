@@ -1,0 +1,7 @@
+{
+  "task_goal": "create a short markdown summary",
+  "target": "samples/input.md",
+  "expected_output": "summary with residual risk",
+  "allowed_actions": ["read_fixture", "write_sample_output"]
+}
+

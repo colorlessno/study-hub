@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: system47
+      POSTGRES_USER: system47
+      POSTGRES_PASSWORD: system47-local-password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U system47 -d system47"]
+      interval: 2s
+      timeout: 3s
+      retries: 30

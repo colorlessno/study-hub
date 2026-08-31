@@ -1,0 +1,1 @@
+{"name":"app-role","statements":[{"effect":"Allow","actions":["s3:GetObject","s3:PutObject","logs:PutLogEvents"],"resources":["arn:aws:s3:::study-bucket/*","arn:aws:logs:::study-app"]},{"effect":"Deny","actions":["s3:DeleteObject"],"resources":["arn:aws:s3:::study-bucket/*"]}]}

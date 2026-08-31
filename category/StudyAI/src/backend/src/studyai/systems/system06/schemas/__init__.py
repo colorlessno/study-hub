@@ -1,0 +1,33 @@
+from studyai.systems.system06.schemas.support import (
+    FAQCreateRequest,
+    FAQCreateResponse,
+    FAQImportResponse,
+    InquiryCreateRequest,
+    InquiryCreateResponse,
+    InquiryFeedbackRequest,
+    InquiryFeedbackResponse,
+    InquiryListItem,
+    InquiryListResponse,
+    InquiryResponseBody,
+    InquiryStatusUpdateRequest,
+    InquiryStatusUpdateResponse,
+    StatsSummaryResponse,
+    SupportClassification,
+)
+
+__all__ = [
+    "FAQCreateRequest",
+    "FAQCreateResponse",
+    "FAQImportResponse",
+    "InquiryCreateRequest",
+    "InquiryCreateResponse",
+    "InquiryFeedbackRequest",
+    "InquiryFeedbackResponse",
+    "InquiryListItem",
+    "InquiryListResponse",
+    "InquiryResponseBody",
+    "InquiryStatusUpdateRequest",
+    "InquiryStatusUpdateResponse",
+    "StatsSummaryResponse",
+    "SupportClassification",
+]

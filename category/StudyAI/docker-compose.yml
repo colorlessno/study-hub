@@ -1,0 +1,357 @@
+﻿services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: studyai-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-studyai}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: Asia/Tokyo
+    ports:
+      - "5432:5432"
+    volumes:
+      - studyai_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d studyai"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-migrate
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-backend
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18000:8000"
+    volumes:
+      - ./src/backend/data:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      [
+        "uvicorn",
+        "studyai.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/Dockerfile
+    container_name: studyai-frontend
+    working_dir: /app/frontend
+    depends_on:
+      - backend
+    ports:
+      - "15173:5173"
+    environment:
+      TZ: Asia/Tokyo
+      VITE_API_PROXY_TARGET: http://backend:8000
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    restart: unless-stopped
+
+  backend-test:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile.test
+    container_name: studyai-backend-test
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    environment:
+      PYTHONPATH: /app/backend/src
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["python", "-m", "pytest", "-p", "asyncio", "-q", "tests/systems/test_ai_learning_systems.py", "tests/systems/test_enterprise_ai_systems.py"]
+    restart: "no"
+
+  system02:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system02
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18002:8002"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system02_main:app", "--host", "0.0.0.0", "--port", "8002"]
+    restart: unless-stopped
+
+  system03:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system03
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18003:8003"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system03_main:app", "--host", "0.0.0.0", "--port", "8003"]
+    restart: unless-stopped
+
+  system04:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system04
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18004:8004"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system04_main:app", "--host", "0.0.0.0", "--port", "8004"]
+    restart: unless-stopped
+
+  system05:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system05
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18005:8005"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system05_main:app", "--host", "0.0.0.0", "--port", "8005"]
+    restart: unless-stopped
+
+  system06:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system06
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18006:8006"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system06_main:app", "--host", "0.0.0.0", "--port", "8006"]
+    restart: unless-stopped
+
+  system07:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system07
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18007:8007"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system07_main:app", "--host", "0.0.0.0", "--port", "8007"]
+    restart: unless-stopped
+
+  system08:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system08
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18008:8008"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system08_main:app", "--host", "0.0.0.0", "--port", "8008"]
+    restart: unless-stopped
+
+  system09:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system09
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18009:8009"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system09_main:app", "--host", "0.0.0.0", "--port", "8009"]
+    restart: unless-stopped
+
+  system10:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system10
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18010:8010"
+    volumes:
+      - ./src/backend/tests/fixtures/system10:/mnt/scan/project:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system10_main:app", "--host", "0.0.0.0", "--port", "8010"]
+    restart: unless-stopped
+
+  system11:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system11
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18011:8011"
+    volumes:
+      - ./src/backend/tests/fixtures/system11:/mnt/organize/sample:ro
+      - system11_work:/mnt/organize/work
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system11_main:app", "--host", "0.0.0.0", "--port", "8011"]
+    restart: unless-stopped
+
+  system12:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system12
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18012:8012"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system12_main:app", "--host", "0.0.0.0", "--port", "8012"]
+    restart: unless-stopped
+
+  system13:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system13
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18013:8013"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system13_main:app", "--host", "0.0.0.0", "--port", "8013"]
+    restart: unless-stopped
+
+  system14:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system14
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18014:8014"
+    volumes:
+      - ./src/backend/data:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system14_main:app", "--host", "0.0.0.0", "--port", "8014"]
+    restart: unless-stopped
+
+  system16:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: studyai-system16
+    working_dir: /app/backend
+    env_file:
+      - src/backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18016:8016"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["uvicorn", "studyai.system16_main:app", "--host", "0.0.0.0", "--port", "8016"]
+    restart: unless-stopped
+
+volumes:
+  studyai_postgres_data:
+  system11_work:
+

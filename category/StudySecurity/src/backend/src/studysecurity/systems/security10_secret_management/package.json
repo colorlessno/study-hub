@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/config.js","check":"node --check app/config.js"},"dependencies":{},"devDependencies":{}}

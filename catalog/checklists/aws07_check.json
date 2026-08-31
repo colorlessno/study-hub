@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws07",
+  "title": "学習項目",
+  "items": [
+    { "id": "check-01", "label": "正常なeventを渡し、statusCode 200とhelloメッセージを確認した" },
+    { "id": "check-02", "label": "nameがないeventを渡し、statusCode 400とname_requiredを確認した" },
+    { "id": "check-03", "label": "eventのqueryStringParameters.nameがhandlerの応答へ使われる流れを確認した" },
+    { "id": "check-04", "label": "contextのawsRequestIdが正常時と入力不足時の応答へ入ることを確認した" },
+    { "id": "check-05", "label": "実行環境を確認し、環境変数、メモリ上限、残り時間、function名がhandlerのcontextへ渡ることを確認した" },
+    { "id": "check-06", "label": "SAM templateを確認し、SAM CLIなしの直接呼出しがIAM、実タイムアウト、コールドスタートを再現しないことを確認した" }
+  ]
+}

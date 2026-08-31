@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web02",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "F12でブラウザ開発者ツールを開き、Network（通信）タブを選んでからページを再読み込みした"
+    },
+    {
+      "id": "check-02",
+      "label": "通信一覧で、ページ本体・CSS・JavaScript・プロフィール画像のStatus列が200（読込成功）になっていることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "index.htmlがページ本体を構成し、profile-placeholder.svgがプロフィール画像として表示されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "style.cssがページの見た目を整えていることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "main.jsがボタンの動作を制御していることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「読み込み状態を表示」を押し、JavaScriptの読込時刻が画面に表示されることを確認した"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+[project]
+name = "studyai-backend"
+version = "0.1.0"
+description = "StudyAI backend implementation"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.116.0,<1.0.0",
+    "uvicorn[standard]>=0.35.0,<1.0.0",
+    "sqlalchemy[asyncio]>=2.0.41,<3.0.0",
+    "asyncpg>=0.30.0,<1.0.0",
+    "alembic>=1.16.0,<2.0.0",
+    "pydantic-settings>=2.10.0,<3.0.0",
+    "python-multipart>=0.0.20,<1.0.0",
+    "httpx>=0.28.1,<1.0.0",
+    "mlflow>=3.0.0,<4.0.0",
+    "langgraph>=0.2.67,<1.0.0",
+    "apscheduler>=3.10.0,<4.0.0",
+    "faster-whisper>=1.0.0,<2.0.0",
+    "beautifulsoup4>=4.13.4,<5.0.0",
+    "PyMuPDF>=1.26.0,<2.0.0",
+    "Pillow>=11.2.1,<12.0.0",
+    "openpyxl>=3.1.5,<4.0.0",
+    "python-pptx>=1.0.2,<2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0,<9.0.0",
+    "pytest-asyncio>=1.0.0,<2.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

@@ -1,0 +1,1 @@
+{"scripts":{"backup":"node scripts/recovery_drill.js backup","restore:dry-run":"node scripts/recovery_drill.js dry-run","restore":"node scripts/recovery_drill.js restore","restore:missing":"node scripts/recovery_drill.js missing-backup","check":"node --check scripts/backup.js scripts/restore.js scripts/recovery_drill.js"},"dependencies":{},"devDependencies":{}}

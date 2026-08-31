@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs/cli": "latest",
+    "@nestjs/common": "latest",
+    "@nestjs/core": "latest",
+    "@nestjs/platform-express": "latest",
+    "@prisma/client": "^6.19.0",
+    "class-transformer": "latest",
+    "class-validator": "latest",
+    "prisma": "^6.19.0",
+    "reflect-metadata": "latest",
+    "rxjs": "latest",
+    "typescript": "latest"
+  }
+}

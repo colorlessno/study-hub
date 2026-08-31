@@ -1,0 +1,56 @@
+# ===== 管理用メモ（GitHub 非公開。ルート直下の作業管理ファイル） =====
+Claude_作業引き継ぎ_20260709.md
+Claude_作業タスクリスト_20260709.md
+Claude_作業記録_引き継ぎ用_20260709.md
+進捗表.md
+テーマ型仕分け_20260709.md
+動作確認マップ_20260709.md
+ユーザー用_動作確認手順書.md
+StudyXX_テーマ一覧.md
+StudyXX完成度マップ.md
+StudyAI_起動手順_復元版.md
+STUDY_PROJECT_INVENTORY.md
+STUDY_HUB_ROADMAP.md
+DEFERRED_WORK.md
+security_path_review.md
+セキュリティ修正点まとめ.md
+登録対象外フォルダから戻すべきファイル.md
+看板_公開前修正リスト.md
+dir.txt
+GitHub登録_引き継ぎ_20260709.md
+GitHub登録用プロンプト.md
+
+# ===== 開発が継続中のため別管理（GitHub 登録は別途判断） =====
+book_summarization_cli/
+
+# ===== 共通の生成物・秘密情報 =====
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+coverage/
+*.tsbuildinfo
+app/dist/
+app/dist-server/
+
+# ===== StudyHub ローカル確認資料（GitHub 非公開） =====
+study-hub/docs/
+study-hub/mock/
+category/StudyAIIdeaGeneration/verify/results/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+category/StudyAI/src/samples/audio_generation/*.mp3
+category/StudyAI/src/apps/system46_ai_harness_engineering/samples/run_logs/
+category/StudyAI/src/apps/system47_sales_data_analysis_ai/outputs/
+# system48の実行ごとの成果物とログはローカルに保存する
+category/StudyAI/src/apps/system48_local_llm_agent_organization/runs/

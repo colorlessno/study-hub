@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>静的Webテーマ</title>
+  <style>
+    body { max-width: 720px; margin: 32px auto; padding: 0 20px; font-family: sans-serif; }
+    button { padding: 8px 14px; }
+  </style>
+</head>
+<body>
+  <h1>静的Webテーマ</h1>
+  <p>サーバーを起動せず、ブラウザだけで動く疑似教材です。</p>
+  <button id="count" type="button">0 回</button>
+  <script>
+    const button = document.querySelector('#count');
+    let count = 0;
+    button.addEventListener('click', () => {
+      count += 1;
+      button.textContent = `${count} 回`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "base08",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "Issueに目的、作業内容、完了条件が記録されていることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "Issueに対応する作業ブランチを作成し、リモートへpushしたことを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "Pull Requestに関連Issue、変更内容、検証結果、未確認事項が記録されていることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "レビュー指摘への修正を同じ作業ブランチへ追加し、再確認結果を記録した"
+    },
+    {
+      "id": "check-05",
+      "label": "承認後にサーバー側のmainへマージされたことを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "ローカルmainをpull --ff-onlyで同期し、origin/mainと同じコミットになったことを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "Giteaの起動、状態確認、停止を行い、停止後も演習データが保持されることを確認した"
+    }
+  ]
+}

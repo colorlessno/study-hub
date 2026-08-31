@@ -1,0 +1,74 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 28px 16px;
+  color: #2d3038;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.7;
+  background: #f5f2ec;
+}
+
+.page {
+  width: min(100%, 840px);
+  margin: 0 auto;
+}
+
+.sample-label {
+  margin: 0 0 8px;
+  color: #735c37;
+  font-weight: 700;
+}
+
+.banner {
+  width: 100%;
+  height: auto;
+  margin: 18px 0;
+  border-radius: 8px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 18px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #ded3bf;
+  border-radius: 8px;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+}
+
+button,
+a {
+  color: #6b4d16;
+  font-weight: 700;
+}
+
+button {
+  min-height: 40px;
+  padding: 0 14px;
+  background: #f0dba9;
+  border: 1px solid #c8a862;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.path-message {
+  min-height: 42px;
+  padding: 10px 12px;
+  background: #fffaf0;
+  border: 1px solid #e6d7b9;
+  border-radius: 6px;
+}
+
+@media (max-width: 560px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+}

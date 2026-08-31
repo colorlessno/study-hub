@@ -1,0 +1,1 @@
+{"scripts":{"invoke":"node scripts/local_invoke.js","check":"node --check src/handler.js scripts/local_invoke.js"},"dependencies":{},"devDependencies":{}}

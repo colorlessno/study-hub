@@ -1,0 +1,188 @@
+:root {
+  color: #17212b;
+  background: #eef2f5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  width: min(920px, calc(100% - 32px));
+  margin: 24px auto;
+}
+
+.page-header,
+form {
+  padding: 24px;
+  border: 1px solid #bcc5cc;
+  background: #fff;
+}
+
+.theme-id {
+  margin: 0 0 6px;
+  color: #4d6375;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.safety-note {
+  margin-bottom: 0;
+  padding: 12px;
+  border-left: 4px solid #9a5f00;
+  background: #fff7e8;
+}
+
+.step-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 16px 0;
+}
+
+button {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1px solid #60717f;
+  border-radius: 8px;
+  color: #17212b;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:hover:not(:disabled) {
+  background: #eaf2f8;
+}
+
+button[aria-current="step"],
+button.primary {
+  border-color: #155f8b;
+  color: #fff;
+  background: #155f8b;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.step-panel {
+  min-height: 530px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #7f8b94;
+  border-radius: 4px;
+  color: inherit;
+  background: #fff;
+  font: inherit;
+  font-weight: 400;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.action-row,
+.step-navigation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-row button {
+  flex: 1;
+}
+
+.step-navigation {
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #d4dade;
+}
+
+.step-navigation button {
+  width: 160px;
+}
+
+.save-status {
+  min-height: 24px;
+  margin: 14px 0;
+}
+
+.save-status.error {
+  color: #a12222;
+}
+
+.save-status.success {
+  color: #17632d;
+}
+
+pre {
+  max-height: 280px;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #c5ccd2;
+  background: #f6f8fa;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 720px) {
+  main {
+    width: min(100% - 16px, 920px);
+    margin: 8px auto;
+  }
+
+  .page-header,
+  form {
+    padding: 16px;
+  }
+
+  .step-tabs,
+  .field-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .action-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .action-row button {
+    width: 100%;
+  }
+
+  .step-navigation button {
+    width: 120px;
+  }
+}

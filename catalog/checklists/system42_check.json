@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "system42",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "既定値で実行し、取引・ログイン・端末・過去履歴の加点、リスク点、拒否判定、アラートを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "transaction_eventのamountを通常金額に近づけ、リスク点と判定が変わることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "device_signalとlogin_historyを変更し、端末とログイン履歴の加点が変わることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "rule_thresholdsのrisk_holdとrisk_rejectを変更し、リスク点を変えずに許可・保留・拒否を切り替えられることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "confirmation_resultへ正常取引の確認結果を設定し、false positiveと誤検知コストが記録されることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "許可した取引へ不正の確認結果を設定し、false negativeと見逃しコストが記録されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "判定・アラート・確認結果・評価結果がUTF-8のJSON実行履歴と監査ログへ保存され、保存状態に上限20件と表示されることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "StudyAIバックエンドを再起動し、再起動前のsystem42実行履歴を画面から再表示できることを確認した"
+    }
+  ]
+}

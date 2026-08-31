@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web13",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "`GET /hello`を呼び、HTTP状態番号200と応答内容を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "存在しないURLを呼び、HTTP状態番号404になることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "Controllerが要求を受け、Serviceが応答内容を作る流れを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "ModuleにControllerとServiceが登録され、依存性注入で結び付くことを確認した"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web25",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "空入力・タイトルだけ・タイトルと説明の3通りで送信結果を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "FormClient.tsxからactions.tsのcreateTaskが呼ばれる流れを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "送信中はボタン表示が変わり、完了後に結果メッセージが表示されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "送信後も同じページにとどまり、入力結果だけが更新されることを確認した"
+    }
+  ]
+}

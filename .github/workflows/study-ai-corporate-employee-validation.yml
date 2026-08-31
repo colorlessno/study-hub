@@ -1,0 +1,36 @@
+name: StudyAICorporateEmployee validation
+
+on:
+  push:
+    paths:
+      - "category/StudyAICorporateEmployee/**"
+      - ".github/workflows/study-ai-corporate-employee-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyAICorporateEmployee/**"
+      - ".github/workflows/study-ai-corporate-employee-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: study-ai-corporate-employee-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-role-boundaries:
+    name: Validate role boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate profiles and cases
+        run: python category/StudyAICorporateEmployee/exercise/scripts/validate_profiles.py
+      - name: Run standard-library tests
+        run: python -m unittest discover -s category/StudyAICorporateEmployee/exercise/scripts -p "test_*.py"

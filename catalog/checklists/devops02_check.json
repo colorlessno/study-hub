@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "devops02",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「静的検査を実行」を選び、検査が成功した"
+    },
+    {
+      "id": "check-02",
+      "label": "「単体テストを実行」を選び、3件のテストが成功した"
+    },
+    {
+      "id": "check-03",
+      "label": "計算処理のソースと単体テストを見比べ、入力と期待結果の対応を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "静的検査がソースの書式を調べ、単体テストが計算結果を調べることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「静的検査と単体テストを続けて実行」を選び、両方が順番に成功した"
+    },
+    {
+      "id": "check-06",
+      "label": "失敗ログの再現手順を読み、lint failureとunit test failureのログの違いを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "DockerfileとGitHub Actions定義で、静的検査の後に単体テストを実行することを確認した"
+    }
+  ]
+}

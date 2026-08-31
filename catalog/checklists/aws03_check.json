@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws03",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "起動後に「healthの正常応答」を実行し、HTTP 200とok: trueを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「コンテナのログ」を実行し、サーバーのlisten開始記録を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「コンテナ内のprocessと環境」を実行し、PID 1、作業フォルダー、Node.js version、PORTを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「ホストへ公開したポート」を実行し、コンテナの4103がホストの43103へ割り当てられていることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「停止中の接続失敗と復旧」を実行し、停止中は接続できず、再起動後はhealthが200へ戻ることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "この教材がEC2、SSH鍵、IAM role、EBS、metadata service、Security Groupを再現しないことを確認した"
+    }
+  ]
+}

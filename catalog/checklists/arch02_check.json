@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "arch02",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "arch02を起動し、レビュー対象と期待仕様の確認範囲を画面で確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "タスク登録APIを実行し、期待するHTTP 201に対して実際は202になることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "登録したタスクがSQLiteのタスク一覧に保存されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "healthとreadyの応答を取得し、HTTPサーバーとSQLiteが利用可能である証拠を確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "実行ログからタスク登録のTrace ID・要求先・HTTP 202を確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "状態コードの不一致について、証拠・発見事項・影響・修正案を一組として整理した"
+    },
+    {
+      "id": "check-07",
+      "label": "対応状態と残リスクを入力し、レビュー結果をSQLiteへ保存した"
+    },
+    {
+      "id": "check-08",
+      "label": "Playwrightのテストが画面操作・API応答・SQLite一覧・実行ログ・レビュー保存・ヘルス確認の証拠を順番に取得することを確認した"
+    }
+  ]
+}

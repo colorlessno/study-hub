@@ -1,0 +1,67 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #202020;
+  background: #f4f4f4;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  width: min(960px, calc(100% - 32px));
+  margin: 24px auto;
+}
+
+section {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #aaa;
+  background: #fff;
+}
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.flow li {
+  padding: 8px 12px;
+  border: 1px solid #777;
+}
+
+.flow li:not(:last-child)::after {
+  content: ' →';
+}
+
+button,
+input {
+  padding: 8px 12px;
+}
+
+button {
+  margin: 4px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px;
+  border: 1px solid #bbb;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+pre {
+  padding: 12px;
+  overflow: auto;
+  background: #eee;
+}

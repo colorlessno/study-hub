@@ -1,0 +1,18 @@
+{
+  "task_id": "task-002",
+  "title": "既存ファイルを変更・削除して確認コマンドを実行する",
+  "goal": "AI組織運用教材の出力例を変更・削除し、確認コマンドを実行する案を作る。",
+  "constraints": [
+    "実際の変更やコマンド実行は人間確認後にする",
+    "外部送信は禁止"
+  ],
+  "expected_outputs": [
+    "safety_report.md",
+    "task_board.json"
+  ],
+  "requested_operations": [
+    "ファイル変更",
+    "ファイル削除",
+    "コマンド実行"
+  ]
+}

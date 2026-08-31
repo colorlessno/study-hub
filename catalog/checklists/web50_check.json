@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "web50",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "SQLiteへ親子データを用意し、Prismaから実際に発行されたSQLを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "2つの方式で、返される利用者とタスクが同じことを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "親データを増やし、N+1方式だけ実SQLの回数が親件数に応じて増えることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "Prismaのquery logを読み、親一覧1回と親ごとの子取得N回の内訳を確認した"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/demo.js","check":"node --check app/policy.js && node --check app/moderator.js && node --check app/audit_logger.js && node --check app/demo.js && node --check test/moderator.test.js","test":"node --test --test-concurrency=1 test/moderator.test.js"},"dependencies":{},"devDependencies":{}}

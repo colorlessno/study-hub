@@ -1,0 +1,1 @@
+{"name":"web34-cors","version":"1.0.0","private":true,"scripts":{"backend:deny":"node backend/src/server.js","backend:allow":"set PORT=3036&& set ALLOW_CORS=1&& node backend/src/server.js","frontend":"node frontend/src/server.js","build":"node --check backend/src/server.js && node --check frontend/src/server.js"}}

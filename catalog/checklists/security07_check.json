@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security07",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "確認状態を初期化してからCookieなしで送信し、401 login_requiredが返ることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "CookieとCSRF tokenを発行し、応答のtokenとSet-Cookieを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "Cookie発行後にCSRF tokenなしで送信し、403 invalid_csrfが返ることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "発行されたtokenを入力して送信し、200と更新後の残高が返ることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "同じtokenを再利用し、使用済みtokenが403で拒否されることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "攻撃ページ風の教材画面でCookieが自動送信されても、tokenなしの状態変更が403で拒否されることを確認した"
+    }
+  ]
+}

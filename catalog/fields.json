@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "repository": "study-hub",
+  "numberedThemeCount": 163,
+  "fields": [
+    {
+      "id": "study-web",
+      "name": "StudyWeb",
+      "path": "category/StudyWeb",
+      "entryFile": "category/StudyWeb/README.md",
+      "themePrefix": "web",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyWeb/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyWeb/src/backend/src/studyweb/systems",
+          "category/StudyWeb/src/frontend/src/studyweb/systems",
+          "category/StudyWeb/src/frontend/static/studyweb/systems",
+          "category/StudyWeb/src/infra/compose",
+          "category/StudyWeb/src/infra/db",
+          "category/StudyWeb/src/infra/env",
+          "category/StudyWeb/src/infra/nginx"
+        ]
+      },
+      "numberedThemes": 52,
+      "unitKind": "mixed",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "npm",
+          "args": ["--prefix", "category/StudyWeb/src/backend/src/studyweb/systems/web28_env_config/backend", "test"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-ai",
+      "name": "StudyAI",
+      "path": "category/StudyAI",
+      "entryFile": "category/StudyAI/README.md",
+      "themePrefix": "system",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyAI/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyAI/src/apps"
+        ]
+      },
+      "numberedThemes": 48,
+      "unitKind": "mixed",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "python",
+          "args": ["category/StudyAI/scripts/validate-ai-learning.py"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-db",
+      "name": "StudyDB",
+      "path": "category/StudyDB",
+      "entryFile": "category/StudyDB/README.md",
+      "themePrefix": "db",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyDB/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyDB/src/apps"
+        ]
+      },
+      "numberedThemes": 7,
+      "unitKind": "shared-environment",
+      "lifecycle": {
+        "mode": "managed-check",
+        "managesCleanup": true,
+        "check": {
+          "command": "node",
+          "args": ["category/StudyDB/scripts/validate-studydb.mjs"],
+          "timeoutSeconds": 300
+        }
+      }
+    },
+    {
+      "id": "study-security",
+      "name": "StudySecurity",
+      "path": "category/StudySecurity",
+      "entryFile": "category/StudySecurity/README.md",
+      "themePrefix": "security",
+      "themeDirectories": {
+        "documentationRoot": "category/StudySecurity/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudySecurity/src/backend/src/studysecurity/systems"
+        ]
+      },
+      "numberedThemes": 21,
+      "unitKind": "implementation",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "npm",
+          "args": ["--prefix", "category/StudySecurity/src/backend/src/studysecurity/systems/security03_rbac", "test"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-aws",
+      "name": "StudyAWS",
+      "path": "category/StudyAWS",
+      "entryFile": "category/StudyAWS/README.md",
+      "themePrefix": "aws",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyAWS/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyAWS/src/backend/src/studyaws/systems",
+          "category/StudyAWS/src/infra"
+        ]
+      },
+      "numberedThemes": 10,
+      "unitKind": "mixed",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "node",
+          "args": ["category/StudyAWS/scripts/validate-studyaws.mjs"],
+          "timeoutSeconds": 180
+        }
+      }
+    },
+    {
+      "id": "study-devops",
+      "name": "StudyDevOps",
+      "path": "category/StudyDevOps",
+      "entryFile": "category/StudyDevOps/README.md",
+      "themePrefix": "devops",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyDevOps/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyDevOps/src/apps"
+        ]
+      },
+      "numberedThemes": 10,
+      "unitKind": "mixed",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "npm",
+          "args": ["--prefix", "category/StudyDevOps/src/apps/devops03_api_test", "test"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-base",
+      "name": "StudyBase",
+      "path": "category/StudyBase",
+      "entryFile": "category/StudyBase/README.md",
+      "themePrefix": "base",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyBase/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyBase/src/apps",
+          "category/StudyBase/src/samples"
+        ]
+      },
+      "numberedThemes": 12,
+      "unitKind": "mixed",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "node",
+          "args": ["category/StudyBase/scripts/validate-studybase.mjs"],
+          "timeoutSeconds": 180
+        }
+      }
+    },
+    {
+      "id": "study-architecture",
+      "name": "StudyArchitecture",
+      "path": "category/StudyArchitecture",
+      "entryFile": "category/StudyArchitecture/README.md",
+      "themePrefix": "arch",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyArchitecture/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyArchitecture/src/apps"
+        ]
+      },
+      "numberedThemes": 2,
+      "unitKind": "document",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "node",
+          "args": ["category/StudyArchitecture/scripts/validate-architecture-learning.mjs"],
+          "timeoutSeconds": 180
+        }
+      }
+    },
+    {
+      "id": "study-desktop",
+      "name": "StudyDesktop",
+      "path": "category/StudyDesktop",
+      "entryFile": "category/StudyDesktop/README.md",
+      "themePrefix": "desktop",
+      "themeDirectories": {
+        "documentationRoot": "category/StudyDesktop/doc/learning_notes",
+        "implementationRoots": [
+          "category/StudyDesktop/src/apps"
+        ]
+      },
+      "numberedThemes": 1,
+      "unitKind": "application",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "npm",
+          "args": ["--prefix", "category/StudyDesktop/src/apps/desktop01_electron_local_environment_automation", "run", "verify"],
+          "timeoutSeconds": 180
+        }
+      }
+    },
+    {
+      "id": "study-idea-forge",
+      "name": "StudyIdeaForge",
+      "path": "category/StudyIdeaForge",
+      "entryFile": "category/StudyIdeaForge/README.md",
+      "numberedThemes": 0,
+      "unitKind": "application",
+      "lifecycle": {
+        "mode": "manual-app",
+        "startGuide": "category/StudyIdeaForge/ideaforge/README.md",
+        "check": {
+          "command": "python",
+          "args": ["-m", "unittest", "discover", "-s", "category/StudyIdeaForge/ideaforge/backend/tests", "-v"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-ai-idea-generation",
+      "name": "StudyAIIdeaGeneration",
+      "path": "category/StudyAIIdeaGeneration",
+      "entryFile": "category/StudyAIIdeaGeneration/README.md",
+      "numberedThemes": 0,
+      "unitKind": "exercise",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "python",
+          "args": ["category/StudyAIIdeaGeneration/verify/verify_prompts.py", "--check-only"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-ai-corporate-employee",
+      "name": "StudyAICorporateEmployee",
+      "path": "category/StudyAICorporateEmployee",
+      "entryFile": "category/StudyAICorporateEmployee/README.md",
+      "numberedThemes": 0,
+      "unitKind": "exercise",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "python",
+          "args": ["category/StudyAICorporateEmployee/exercise/scripts/validate_profiles.py"],
+          "timeoutSeconds": 120
+        }
+      }
+    },
+    {
+      "id": "study-api",
+      "name": "StudyAPI",
+      "path": "category/StudyAPI",
+      "entryFile": "category/StudyAPI/README.md",
+      "numberedThemes": 0,
+      "unitKind": "implementation",
+      "lifecycle": {
+        "mode": "check-only",
+        "check": {
+          "command": "python",
+          "args": ["-m", "unittest", "discover", "-s", "category/StudyAPI/tests", "-p", "test_*.py", "-v"],
+          "timeoutSeconds": 120
+        }
+      }
+    }
+  ]
+}

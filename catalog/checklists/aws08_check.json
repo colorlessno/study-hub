@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws08",
+  "title": "学習項目",
+  "items": [
+    { "id": "check-01", "label": "GET /itemsを実行し、item一覧とstatusCode 200を確認した" },
+    { "id": "check-02", "label": "GET /items/item-1?include=sourceを実行し、path parameterとquery stringがeventへ変換されることを確認した" },
+    { "id": "check-03", "label": "POST /itemsへ正常なJSONを送り、登録結果とstatusCode 201を確認した" },
+    { "id": "check-04", "label": "POST /itemsへnameのないJSONを送り、name_requiredとstatusCode 400を確認した" },
+    { "id": "check-05", "label": "POST /itemsへ壊れたJSONを送り、invalid_jsonとstatusCode 400を確認した" },
+    { "id": "check-06", "label": "存在しない経路へGETを送り、not_foundとstatusCode 404を確認した" },
+    { "id": "check-07", "label": "local_api.jsでHTTPのmethod、path、query、bodyをLambda eventへ変換する処理を確認した" },
+    { "id": "check-08", "label": "SAM templateを確認し、このローカルサーバーではAPI Gatewayの認証、stage、quota、課金を再現しないことを確認した" }
+  ]
+}

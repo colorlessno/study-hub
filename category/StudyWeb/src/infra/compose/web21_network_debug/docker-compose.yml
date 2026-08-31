@@ -1,0 +1,14 @@
+﻿services:
+  backend:
+    build: ../../../backend/src/studyweb/systems/web21_network_debug/backend
+    ports:
+      - "13021:3000"
+  frontend:
+    build: ../../../frontend/src/studyweb/systems/web21_network_debug/frontend
+    environment:
+      VITE_API_URL: http://localhost:13021
+    ports:
+      - "5181:5173"
+    depends_on:
+      - backend
+

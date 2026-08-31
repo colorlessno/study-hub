@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws02",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "起動後に「ホストへ公開したWeb」を実行し、127.0.0.1:43102からwebサービスの応答を取得できることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「コンテナ間だけのAPI」を実行し、webコンテナからapi:5102へ通信できることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「APIからDBへの内部通信」を実行し、webからapiを経由してdb:5432の応答を取得できることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「ホストへ公開していないAPI」を実行し、127.0.0.1:5102への接続が拒否されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「ホストへ公開していないDB」を実行し、dbのPublishersがPublishedPort 0・URL空で、検証用host port 54322へ接続できないことを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "Docker Compose定義を表示し、portsで公開するWebとexposeだけのAPI・DBを照合した"
+    },
+    {
+      "id": "check-07",
+      "label": "Dockerのport mappingはSecurity Groupそのものではなく、実AWSではVPC、subnet、route、NACL、OS firewallも確認することを理解した"
+    }
+  ]
+}

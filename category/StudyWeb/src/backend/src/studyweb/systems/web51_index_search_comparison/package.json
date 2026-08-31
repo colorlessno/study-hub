@@ -1,0 +1,1 @@
+{"name":"web51-index-search-comparison","version":"1.0.0","private":true,"scripts":{"build":"node --check app/src/explain-note.js","start":"node app/src/explain-note.js"}}

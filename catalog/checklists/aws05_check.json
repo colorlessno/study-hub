@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "aws05",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "save-read",
+      "label": "「保存して読み出す」を実行し、docs/sample.txtのkey、bytes、本文、content-type、private設定が表示されることを確認した"
+    },
+    {
+      "id": "metadata-access",
+      "label": "「metadataと公開範囲を比較」を実行し、privateとpublicのmetadata差分、および期限付きURLを使う推奨方針を確認した"
+    },
+    {
+      "id": "list-objects",
+      "label": "「object一覧」を実行し、docsとarchiveの2つのkeyが一覧に表示されることを確認した"
+    },
+    {
+      "id": "delete-object",
+      "label": "「objectを削除」を実行し、保存したkeyが削除後に存在しないことを確認した"
+    },
+    {
+      "id": "reject-unsafe-key",
+      "label": "「危険なkeyを拒否」を実行し、親フォルダー参照と絶対パスがinvalid_object_keyで拒否されることを確認した"
+    },
+    {
+      "id": "source-boundary",
+      "label": "保存処理を表示し、object keyから一時保存先の外へ移動できない判定を確認した"
+    },
+    {
+      "id": "scope",
+      "label": "この教材が実S3、IAM、署名URLの発行、versioning、lifecycleを再現せず、metadataで概念を比較する範囲だと確認した"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+# 競合練習用リポジトリ
+
+`conflict_target.txt`のDecision行をmainとfeature/aで別々に変更し、マージ競合と解消を確認するための原本です。StudyHubは一時フォルダへコピーして使用するため、この原本へGit履歴や練習中の変更は残りません。

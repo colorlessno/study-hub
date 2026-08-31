@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security03",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "利用者を特定できない要求が401で拒否されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "viewerは注文を閲覧できることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "viewerの注文取消が403で拒否されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "operatorは注文を取り消せることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "利用者・ロール・権限の関係と401・403の違いを説明した"
+    },
+    {
+      "id": "check-06",
+      "label": "viewerでは取消ボタンが非表示でも、APIへ直接要求するとサーバー側の認可で403になることを確認した"
+    }
+  ]
+}

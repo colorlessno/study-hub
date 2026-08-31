@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ファイルアップロード制御</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f5f7f8; color: #1d2730; }
+    main { max-width: 760px; margin: 32px auto; padding: 24px; background: white; border: 1px solid #bcc5ca; }
+    label { display: block; margin: 16px 0 6px; font-weight: bold; }
+    input, select, button { font: inherit; padding: 8px; }
+    input, select { box-sizing: border-box; width: 100%; }
+    button { margin-top: 18px; }
+    pre { min-height: 120px; padding: 14px; background: #eef1f2; white-space: pre-wrap; }
+    .note { color: #4a555d; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ファイルアップロード制御</h1>
+    <p>ファイル名とサイズから、受け付ける前に拒否すべき入力を確認します。</p>
+
+    <label for="example">確認例</label>
+    <select id="example">
+      <option value="allowed">許可されるCSV</option>
+      <option value="extension">許可されない拡張子</option>
+      <option value="too-large">サイズ上限を超えるPDF</option>
+      <option value="negative">負のサイズ</option>
+      <option value="uppercase">大文字の拡張子</option>
+    </select>
+
+    <label for="name">ファイル名</label>
+    <input id="name" value="sample.csv">
+
+    <label for="size">ファイルサイズ（バイト）</label>
+    <input id="size" type="number" value="1000">
+
+    <button id="check" type="button">入力を検証</button>
+
+    <h2>検証結果</h2>
+    <pre id="result">ボタンを押すと結果が表示されます。</pre>
+    <p class="note">この画面で確認するのは拡張子とサイズだけです。ファイル内容の検査は行っていません。</p>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>

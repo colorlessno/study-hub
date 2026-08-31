@@ -1,0 +1,17 @@
+{
+  "name": "web39-error-boundary",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild app/src/main.jsx --bundle --format=iife --outfile=app/bundle/main.js",
+    "test": "node --test --test-concurrency=1"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}

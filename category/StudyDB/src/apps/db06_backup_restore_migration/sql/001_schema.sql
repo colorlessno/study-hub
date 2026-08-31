@@ -1,0 +1,16 @@
+DROP SCHEMA IF EXISTS db06 CASCADE;
+CREATE SCHEMA db06;
+SET search_path TO db06;
+
+CREATE TABLE customers (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  customer_id INTEGER NOT NULL REFERENCES customers(id),
+  ordered_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+

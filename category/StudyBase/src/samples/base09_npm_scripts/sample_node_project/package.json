@@ -1,0 +1,12 @@
+{
+  "name": "studybase-npm-scripts-practice",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node src/index.js --mode=dev",
+    "build": "node --check src/index.js",
+    "test": "node test/smoke.test.js",
+    "start": "node src/index.js"
+  }
+}

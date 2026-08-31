@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "web07",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "加算・減算・リセットの各ボタンが正しく動くことを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "useStateが現在の数値を保持していることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "ボタンのonClickで数値を変更すると、画面が再表示されることを確認した"
+    }
+  ]
+}

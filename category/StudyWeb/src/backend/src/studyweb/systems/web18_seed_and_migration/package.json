@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "prisma": "^6.19.0",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

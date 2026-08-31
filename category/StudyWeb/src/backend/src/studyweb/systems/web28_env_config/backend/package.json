@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "node server.js",
+    "build": "node --check server.js && node --check test/server.test.js",
+    "test": "node --test --test-concurrency=1 test/server.test.js"
+  },
+  "dependencies": {}
+}

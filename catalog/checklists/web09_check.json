@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "web09",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「すべて」「未完了」「完了」を選び、表示内容と件数が変わることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "propsが親部品から子部品へデータを渡すための値であることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "stateが現在選ばれている表示条件を保持していることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "AppからTaskList、TaskItemへタスクが渡る順番をソースで確認した"
+    }
+  ]
+}

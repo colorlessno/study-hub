@@ -1,0 +1,42 @@
+﻿__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+
+src/frontend/node_modules/
+src/frontend/dist/
+
+/test/
+/test2/
+/test3/
+/test4/
+
+doc/temp/
+src/backend/data/ai_learning/
+src/backend/data/enterprise_ai/
+boss.wav
+test.pdf
+
+smoketest_result.txt
+tables.txt
+
+# Claude Code 内部ファイル
+.claude/
+
+# 実行環境用 env（.env.example は除く）
+.env.docker
+.env
+.env.*
+!.env.example
+
+# 追記（2026-07-09 公開前整備）
+node_modules/
+.venv/
+venv/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.docker
+*.pem
+*.key

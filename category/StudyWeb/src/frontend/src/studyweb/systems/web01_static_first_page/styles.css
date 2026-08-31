@@ -1,0 +1,113 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 32px 16px;
+  color: #243041;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.7;
+  background: #eef4f8;
+}
+
+.profile-card {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #d8e2ea;
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(36, 48, 65, 0.12);
+}
+
+.sample-label {
+  margin: 0 0 8px;
+  color: #47627a;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 24px;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+h2 {
+  margin-bottom: 8px;
+  font-size: 1.16rem;
+}
+
+section {
+  padding-top: 22px;
+  border-top: 1px solid #e4ebf0;
+}
+
+section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+ul {
+  margin: 0;
+  padding-left: 1.3rem;
+}
+
+li + li {
+  margin-top: 8px;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  background: #176b87;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #12556d;
+}
+
+button:focus-visible {
+  outline: 3px solid #9ed8e8;
+  outline-offset: 3px;
+}
+
+.message-output {
+  min-height: 48px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  background: #f5fafc;
+  border: 1px solid #cfe1ea;
+  border-radius: 6px;
+}
+
+@media (max-width: 520px) {
+  body {
+    padding: 16px 12px;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}

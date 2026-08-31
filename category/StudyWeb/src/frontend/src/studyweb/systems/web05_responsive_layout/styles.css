@@ -1,0 +1,94 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 32px 16px;
+  color: #263238;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.65;
+  background: #f3f6f8;
+}
+
+.site-header,
+.site-footer,
+.card-grid {
+  width: min(100%, 1080px);
+  margin: 0 auto;
+}
+
+.sample-label,
+.category {
+  margin: 0 0 8px;
+  color: #4e6f7a;
+  font-weight: 700;
+}
+
+.site-header {
+  margin-bottom: 24px;
+}
+
+.site-header h1 {
+  margin: 0 0 12px;
+  font-size: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.card {
+  display: flex;
+  min-width: 0;
+  min-height: 240px;
+  flex-direction: column;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #d8e2e6;
+  border-radius: 8px;
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 1.18rem;
+}
+
+.card p:not(.category) {
+  margin-top: 0;
+}
+
+.card button {
+  min-height: 40px;
+  margin-top: auto;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  background: #2d6f83;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.site-footer {
+  margin-top: 24px;
+  color: #52636a;
+}
+
+@media (max-width: 820px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}

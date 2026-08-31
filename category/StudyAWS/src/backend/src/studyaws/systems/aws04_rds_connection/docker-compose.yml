@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: studyaws
+      POSTGRES_USER: studyaws
+      POSTGRES_PASSWORD: studyhub-local-example
+    ports:
+      - "127.0.0.1:54324:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyaws -d studyaws"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  app:
+    build: .
+    profiles: ["tools"]
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: studyaws
+      DB_USER: studyaws
+      DB_PASSWORD: studyhub-local-example
+    depends_on:
+      db:
+        condition: service_healthy

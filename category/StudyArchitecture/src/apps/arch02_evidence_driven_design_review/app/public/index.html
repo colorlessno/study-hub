@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>arch02 実行証拠による設計レビュー</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <h1>実行証拠による設計レビュー</h1>
+    <p>この画面自身が独立したレビュー対象です。操作して証拠を取得し、レビュー結果をSQLiteへ保存します。</p>
+
+    <section>
+      <h2>レビュー対象と期待仕様</h2>
+      <pre id="review-scope"></pre>
+    </section>
+
+    <section>
+      <h2>画面とAPIの証拠を取得する</h2>
+      <form id="task-form">
+        <label>タスク名 <input id="task-title" value="証拠を取得する" required></label>
+        <button type="submit">タスク登録APIを実行</button>
+      </form>
+      <pre id="api-evidence"></pre>
+      <h3>SQLiteに保存されたタスク</h3>
+      <table>
+        <thead><tr><th>ID</th><th>タスク名</th><th>保存日時</th></tr></thead>
+        <tbody id="tasks"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>ヘルスとログの証拠</h2>
+      <button id="load-health" type="button">health / readyを取得</button>
+      <button id="load-logs" type="button">実行ログを取得</button>
+      <pre id="runtime-evidence"></pre>
+    </section>
+
+    <section>
+      <h2>レビュー結果を保存する</h2>
+      <form id="review-form" class="review-form">
+        <label>証拠の種類 <input name="evidenceType" value="API応答"></label>
+        <label>発見事項 <input name="finding" value="期待201に対して実際は202"></label>
+        <label>影響 <input name="impact" value="呼び出し側の成功判定が一致しない可能性"></label>
+        <label>修正案 <input name="fixCandidate" value="設計または実装の状態コードを統一する"></label>
+        <label>対応状態 <select name="status"><option>未対応</option><option>対応済み</option><option>リスク受容</option></select></label>
+        <label>残リスク <input name="residualRisk" value="利用側の期待値を別途確認する"></label>
+        <button type="submit">レビュー結果をSQLiteへ保存</button>
+      </form>
+      <p id="review-result" role="status"></p>
+      <table>
+        <thead><tr><th>証拠</th><th>発見事項</th><th>影響</th><th>状態</th><th>残リスク</th></tr></thead>
+        <tbody id="reviews"></tbody>
+      </table>
+    </section>
+  </main>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

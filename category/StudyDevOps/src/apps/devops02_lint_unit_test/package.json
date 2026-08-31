@@ -1,0 +1,11 @@
+{
+  "name": "studydevops-devops02-lint-unit-test",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "node scripts/lint.js",
+    "test": "node --test --test-concurrency=1",
+    "check": "npm run lint && npm test"
+  }
+}

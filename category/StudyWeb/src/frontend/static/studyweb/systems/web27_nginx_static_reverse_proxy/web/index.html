@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web27 Nginxの静的配信とAPI転送</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <p class="label">web27</p>
+        <h1>Nginxの静的配信とAPI転送</h1>
+        <p>Nginx がこのHTML/CSSを配信し、APIリクエストだけを別コンテナへ転送します。</p>
+        <button id="healthButton" type="button">APIの稼働状態（/api/health）を確認</button>
+        <pre id="result">未確認</pre>
+      </section>
+    </main>
+    <script>
+      const button = document.querySelector("#healthButton");
+      const result = document.querySelector("#result");
+
+      button.addEventListener("click", async () => {
+        result.textContent = "確認中...";
+        button.disabled = true;
+
+        try {
+          const response = await fetch("/api/health");
+          const body = await response.text();
+          let formattedBody = body;
+
+          try {
+            formattedBody = JSON.stringify(JSON.parse(body), null, 2);
+          } catch {
+            // Nginxの502・504ページなど、JSON以外の応答は本文をそのまま表示する。
+          }
+
+          result.textContent = `HTTP ${response.status}\n${formattedBody}`;
+        } catch (error) {
+          result.textContent = `通信エラー\n${error instanceof Error ? error.message : String(error)}`;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

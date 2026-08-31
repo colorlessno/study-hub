@@ -1,0 +1,1 @@
+{"scripts":{"start":"node app/server.js","check":"node --check app/server.js && node --check test/server.test.js","test":"node --test --test-concurrency=1 test/server.test.js"},"dependencies":{},"devDependencies":{}}

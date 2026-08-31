@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/demo.js","check":"node --check app/retention_policy.js && node --check app/demo.js && node --check test/retention_policy.test.js","test":"node --test --test-concurrency=1 test/retention_policy.test.js"},"dependencies":{},"devDependencies":{}}

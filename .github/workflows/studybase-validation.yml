@@ -1,0 +1,36 @@
+name: StudyBase validation
+
+on:
+  push:
+    paths:
+      - "category/StudyBase/**"
+      - "category/StudyArchitecture/doc/learning_notes/arch01_system_anatomy_walkthrough/**"
+      - ".github/workflows/studybase-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyBase/**"
+      - "category/StudyArchitecture/doc/learning_notes/arch01_system_anatomy_walkthrough/**"
+      - ".github/workflows/studybase-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studybase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-foundations:
+    name: Validate foundation lessons
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run isolated StudyBase validation
+        run: node category/StudyBase/scripts/validate-studybase.mjs

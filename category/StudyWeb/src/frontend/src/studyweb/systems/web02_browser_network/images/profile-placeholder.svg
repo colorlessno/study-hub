@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">プロフィール画像プレースホルダー</title>
+  <desc id="desc">Networkタブで画像読み込みを確認するためのSVG画像</desc>
+  <rect width="160" height="160" rx="18" fill="#d9eee5"/>
+  <circle cx="80" cy="58" r="28" fill="#256b54"/>
+  <path d="M35 132c8-28 27-42 45-42s37 14 45 42" fill="#3b7d67"/>
+  <text x="80" y="148" text-anchor="middle" font-family="Arial" font-size="12" fill="#24313d">web02 image</text>
+</svg>

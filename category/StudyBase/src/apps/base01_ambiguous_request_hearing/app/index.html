@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>base01 曖昧依頼のヒアリング</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <p class="theme-id">base01</p>
+    <h1>曖昧依頼のヒアリング</h1>
+    <p>依頼原文と解釈を分け、要件定義へ渡す前の情報を整理します。</p>
+    <p class="notice">秘密情報、個人情報、実顧客情報は入力しないでください。入力内容はこのブラウザ内だけに保存されます。</p>
+
+    <nav class="steps" aria-label="ヒアリングメモ作成手順">
+      <button type="button" data-step-button="1">1. 依頼</button>
+      <button type="button" data-step-button="2">2. 整理</button>
+      <button type="button" data-step-button="3">3. 未確定事項</button>
+      <button type="button" data-step-button="4">4. 要約・保存</button>
+    </nav>
+
+    <form id="hearing-form">
+      <section data-step-panel="1">
+        <h2>依頼をそのまま記録する</h2>
+        <p>解決策へ置き換えず、受け取った言葉と既知情報を分けて記録します。</p>
+        <label>依頼原文<textarea name="originalRequest" rows="5" placeholder="依頼者の言葉を加工せずに記入"></textarea></label>
+        <label>既知情報<textarea name="knownInformation" rows="7" placeholder="1行に1件ずつ記入"></textarea></label>
+        <div class="actions">
+          <button type="button" id="load-scenario">固定シナリオを読み込む</button>
+        </div>
+      </section>
+
+      <section data-step-panel="2" hidden>
+        <h2>依頼を整理する</h2>
+        <div class="field-grid">
+          <label>背景<textarea name="background" rows="3"></textarea></label>
+          <label>目的<textarea name="purpose" rows="3"></textarea></label>
+          <label>現状<textarea name="currentSituation" rows="4" placeholder="1行に1件ずつ記入"></textarea></label>
+          <label>課題<textarea name="issues" rows="4" placeholder="1行に1件ずつ記入"></textarea></label>
+          <label>期限<input name="deadline" placeholder="例: 次回定例まで"></label>
+          <label>予算<input name="budget" placeholder="不明なら未確定と記入"></label>
+          <label>体制<input name="organization" placeholder="関係する担当や部署"></label>
+          <label>環境<input name="environment" placeholder="既存の業務・システム環境"></label>
+          <label>関係者<textarea name="stakeholders" rows="3" placeholder="役割、担当、確認事項を記入"></textarea></label>
+          <label>成功条件<textarea name="successCriteria" rows="3" placeholder="何をもって改善とするか"></textarea></label>
+        </div>
+      </section>
+
+      <section data-step-panel="3" hidden>
+        <h2>確定・仮定・未確定を分ける</h2>
+        <div class="field-grid">
+          <label>確定情報<textarea name="confirmedInformation" rows="4" placeholder="根拠がある情報を1行に1件ずつ記入"></textarea></label>
+          <label>仮定<textarea name="assumption" rows="3" placeholder="暫定的に置く条件"></textarea></label>
+          <label>仮定の根拠<textarea name="assumptionBasis" rows="3"></textarea></label>
+          <label>仮定が外れた場合の影響<textarea name="assumptionImpact" rows="3"></textarea></label>
+          <label>未確定事項<textarea name="unknownMatter" rows="3" placeholder="次に確認する内容"></textarea></label>
+          <label>確認先<input name="confirmationTarget" placeholder="誰に確認するか"></label>
+          <label>確認期限<input name="confirmationDue" placeholder="いつまでに確認するか"></label>
+          <label>次の対応<textarea name="nextAction" rows="3" placeholder="誰が何を行うか"></textarea></label>
+        </div>
+      </section>
+
+      <section data-step-panel="4" hidden>
+        <h2>要件定義へ渡す内容をまとめる</h2>
+        <div class="field-grid">
+          <label>要約<textarea name="summary" rows="4" placeholder="依頼、目的、現状、成功条件を短くまとめる"></textarea></label>
+          <label>推奨する次工程<textarea name="recommendedNextStep" rows="4" placeholder="追加ヒアリング、要件定義など"></textarea></label>
+        </div>
+        <div class="actions">
+          <button type="button" id="save-note">ブラウザ内に保存</button>
+          <button type="button" id="download-hearing">ヒアリングメモをダウンロード</button>
+          <button type="button" id="download-summary">要件定義入力メモをダウンロード</button>
+          <button type="button" id="clear-note" class="secondary">保存内容をクリア</button>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <div class="preview-tabs" aria-label="プレビュー切替">
+          <button type="button" id="show-hearing">ヒアリングメモ</button>
+          <button type="button" id="show-summary">要件定義入力メモ</button>
+        </div>
+        <h3 id="preview-title">ヒアリングメモのプレビュー</h3>
+        <pre id="preview">まだ保存されていません。</pre>
+      </section>
+    </form>
+
+    <footer class="step-footer">
+      <button type="button" id="previous-step">前の手順</button>
+      <span id="step-position">1 / 4</span>
+      <button type="button" id="next-step">次の手順</button>
+    </footer>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

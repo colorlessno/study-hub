@@ -1,0 +1,23 @@
+{
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "tsc -b \u0026\u0026 vite build",
+                    "preview":  "vite preview"
+                },
+    "dependencies":  {
+                         "@vitejs/plugin-react":  "latest",
+                         "autoprefixer":  "^10.4.20",
+                         "lucide-react":  "latest",
+                         "postcss":  "^8.4.49",
+                         "react":  "latest",
+                         "react-dom":  "latest",
+                         "tailwindcss":  "^3.4.17",
+                         "typescript":  "latest",
+                         "vite":  "latest"
+                     },
+    "devDependencies":  {
+                            "@types/react":  "^19.2.14",
+                            "@types/react-dom":  "^19.2.3"
+                        },
+    "type":  "module"
+}

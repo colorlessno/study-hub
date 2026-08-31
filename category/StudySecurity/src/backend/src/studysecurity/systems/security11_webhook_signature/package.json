@@ -1,0 +1,1 @@
+{"scripts":{"start":"node app/server.js","demo":"node app/demo.js","check":"node --check app/server.js && node --check app/signature.js && node --check app/webhook.js && node --check app/demo.js && node --check test/webhook.test.js","test":"node --test --test-concurrency=1 test/webhook.test.js"},"dependencies":{},"devDependencies":{}}

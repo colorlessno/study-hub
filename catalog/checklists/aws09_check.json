@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws09",
+  "title": "学習項目",
+  "items": [
+    { "id": "check-01", "label": "起動ログでDocker imageのビルドとコンテナ起動を確認した" },
+    { "id": "check-02", "label": "Dockerfileの非root実行と.env.exampleのダミー設定を確認した" },
+    { "id": "check-03", "label": "正常時のhealthを実行し、状態コード200とready状態を確認した" },
+    { "id": "check-04", "label": "利用者向け応答と稼働確認用の応答の違いを確認した" },
+    { "id": "check-05", "label": "設定不足の応答から、足りない設定名を確認した" },
+    { "id": "check-06", "label": "実行中の障害を発生させ、healthが状態コード503を返すことを確認した" },
+    { "id": "check-07", "label": "復旧後にhealthが状態コード200へ戻ることを確認した" },
+    { "id": "check-08", "label": "停止後にstudyhub-aws09コンテナが削除されることを確認した" }
+  ]
+}

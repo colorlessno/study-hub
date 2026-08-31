@@ -1,0 +1,1 @@
+{"name":"readonly","statements":[{"effect":"Allow","actions":["s3:GetObject","logs:DescribeLogGroups"],"resources":["*"]}]}

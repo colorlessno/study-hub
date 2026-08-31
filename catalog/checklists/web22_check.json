@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "web22",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "初回読込中・取得成功・再取得中・取得失敗の各表示を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "queryKeyが保存データの識別子、queryFnがデータ取得処理であることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「再取得」を押すとAPIがもう一度呼び出されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "web19と比較し、読込状態やエラー状態をTanStack Queryが管理することを確認した"
+    }
+  ]
+}

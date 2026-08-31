@@ -1,0 +1,38 @@
+name: StudyWeb representative tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "category/StudyWeb/**"
+      - ".github/workflows/studyweb-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyWeb/**"
+      - ".github/workflows/studyweb-validation.yml"
+
+jobs:
+  representative-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - theme: web28_env_config
+            path: category/StudyWeb/src/backend/src/studyweb/systems/web28_env_config/backend
+          - theme: web33_cookie_session
+            path: category/StudyWeb/src/backend/src/studyweb/systems/web33_cookie_session
+          - theme: web42_pagination_sort_filter_api
+            path: category/StudyWeb/src/backend/src/studyweb/systems/web42_pagination_sort_filter_api
+          - theme: web43_idempotency_key
+            path: category/StudyWeb/src/backend/src/studyweb/systems/web43_idempotency_key
+          - theme: web48_job_status_api
+            path: category/StudyWeb/src/backend/src/studyweb/systems/web48_job_status_api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test ${{ matrix.theme }}
+        run: npm --prefix "${{ matrix.path }}" test

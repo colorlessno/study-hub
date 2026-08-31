@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>base02 情報不足時の暫定成果物</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <p class="theme-id">base02</p>
+    <h1>情報不足時の暫定成果物</h1>
+    <p>確認できた事実と判断できない事項を分け、利用条件を明記した暫定成果物を作成します。</p>
+    <p class="notice">秘密情報、個人情報、実顧客情報は入力しないでください。入力内容はこのブラウザ内だけに保存されます。</p>
+
+    <nav class="steps" aria-label="暫定成果物の作成手順">
+      <button type="button" data-step-button="1">1. 情報源</button>
+      <button type="button" data-step-button="2">2. 対象範囲</button>
+      <button type="button" data-step-button="3">3. 仮定・未確定</button>
+      <button type="button" data-step-button="4">4. 限界・保存</button>
+    </nav>
+
+    <form id="deliverable-form">
+      <section data-step-panel="1">
+        <h2>依頼と情報源を記録する</h2>
+        <p>依頼内容、確認できた情報、不足している情報を分けて記録します。</p>
+        <label>依頼内容<textarea name="request" rows="4" placeholder="受け取った依頼を記入"></textarea></label>
+        <label>入手済み情報<textarea name="receivedInformation" rows="6" placeholder="1行に1件ずつ記入"></textarea></label>
+        <label>不足情報<textarea name="missingInformation" rows="6" placeholder="1行に1件ずつ記入"></textarea></label>
+        <div class="field-grid">
+          <label>情報源<input name="informationSource" placeholder="例: 画面キャプチャ1枚"></label>
+          <label>確認日<input name="sourceDate" type="date"></label>
+        </div>
+        <div class="actions">
+          <button type="button" id="load-scenario">固定シナリオを読み込む</button>
+        </div>
+      </section>
+
+      <section data-step-panel="2" hidden>
+        <h2>書ける範囲と書けない範囲を分ける</h2>
+        <div class="field-grid">
+          <label>目的<textarea name="purpose" rows="3"></textarea></label>
+          <label>対象範囲<textarea name="targetScope" rows="3"></textarea></label>
+          <label>書ける範囲<textarea name="writableScope" rows="6" placeholder="確認できた情報から記述できる内容"></textarea></label>
+          <label>書けない範囲<textarea name="unwritableScope" rows="6" placeholder="根拠がなく断定できない内容"></textarea></label>
+        </div>
+        <label>暫定内容<textarea name="provisionalContent" rows="7" placeholder="現時点で提示できる内容"></textarea></label>
+      </section>
+
+      <section data-step-panel="3" hidden>
+        <h2>仮定と未確定事項を記録する</h2>
+        <h3>前提・仮定</h3>
+        <div class="field-grid">
+          <label>仮定<textarea name="assumption" rows="3"></textarea></label>
+          <label>根拠<textarea name="assumptionBasis" rows="3"></textarea></label>
+          <label>外れた場合の影響<textarea name="assumptionImpact" rows="3"></textarea></label>
+          <label>確認先<input name="assumptionTarget"></label>
+          <label>状態
+            <select name="assumptionStatus">
+              <option value="未確認">未確認</option>
+              <option value="確認中">確認中</option>
+              <option value="確認済み">確認済み</option>
+            </select>
+          </label>
+        </div>
+        <h3>未確定事項</h3>
+        <div class="field-grid">
+          <label>不明点<textarea name="unknownMatter" rows="3"></textarea></label>
+          <label>確認する内容<textarea name="confirmationContent" rows="3"></textarea></label>
+          <label>確認先<input name="unknownTarget"></label>
+          <label>期限<input name="confirmationDue" placeholder="例: 次回確認"></label>
+          <label>未解決時の影響<textarea name="unresolvedImpact" rows="3"></textarea></label>
+        </div>
+      </section>
+
+      <section data-step-panel="4" hidden>
+        <h2>利用条件と限界を明記する</h2>
+        <div class="field-grid">
+          <label>利用してよい範囲<textarea name="allowedUse" rows="4"></textarea></label>
+          <label>利用してはいけない範囲<textarea name="prohibitedUse" rows="4"></textarea></label>
+          <label>成果物の限界<textarea name="limitation" rows="4"></textarea></label>
+          <label>レビュー観点<textarea name="reviewPoints" rows="4" placeholder="1行に1件ずつ記入"></textarea></label>
+        </div>
+        <label>確認待ち<textarea name="pendingConfirmation" rows="4" placeholder="確認事項、確認先、期限を記入"></textarea></label>
+        <div class="actions">
+          <button type="button" id="save-deliverable">ブラウザ内に保存</button>
+          <button type="button" id="download-current">表示中の文書をダウンロード</button>
+          <button type="button" id="clear-deliverable" class="secondary">保存内容をクリア</button>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <div class="preview-tabs" aria-label="出力文書の切替">
+          <button type="button" data-preview-kind="deliverable">暫定成果物</button>
+          <button type="button" data-preview-kind="assumptions">前提・仮定一覧</button>
+          <button type="button" data-preview-kind="unknowns">未確定事項一覧</button>
+          <button type="button" data-preview-kind="limitations">成果物限界メモ</button>
+        </div>
+        <h3 id="preview-title">暫定成果物のプレビュー</h3>
+        <pre id="preview">まだ保存されていません。</pre>
+      </section>
+    </form>
+
+    <footer class="step-footer">
+      <button type="button" id="previous-step">前の手順</button>
+      <span id="step-position">1 / 4</span>
+      <button type="button" id="next-step">次の手順</button>
+    </footer>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

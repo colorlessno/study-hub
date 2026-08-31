@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web01",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "自己紹介ページが崩れずに表示されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「あいさつを表示」を3回押し、メッセージとクリック回数が変わることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "index.htmlは内容、styles.cssは見た目、script.jsはボタンの動きを担当していることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "deferを指定したJavaScriptが、HTMLの解析後にボタン操作を登録することを確認した"
+    }
+  ]
+}

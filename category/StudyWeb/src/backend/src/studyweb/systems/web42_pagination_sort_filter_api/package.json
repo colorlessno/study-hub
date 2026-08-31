@@ -1,0 +1,1 @@
+{"name":"web42-pagination-sort-filter-api","version":"1.0.0","private":true,"scripts":{"start":"node api/src/server.js","build":"node --check api/src/server.js && node --check test/server.test.js","test":"node --test --test-concurrency=1 test/server.test.js"}}

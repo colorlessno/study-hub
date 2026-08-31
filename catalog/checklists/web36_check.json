@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "web36",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "メモを保存し、ページ再読み込み後に読み込み、最後に削除できることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "sessionStorageは同じタブの再読み込みでは残り、新しいタブには引き継がれないことを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "localStorageとsessionStorageの保存期間の違いを説明できた"
+    },
+    {
+      "id": "check-04",
+      "label": "ブラウザ開発者ツールで二つの固定キーと保存値を確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "パスワード・認証情報・個人情報をブラウザ保存領域へ保存しない理由を確認した"
+    }
+  ]
+}

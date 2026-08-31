@@ -1,0 +1,7 @@
+{
+  "document_id": "doc-001",
+  "chunk_id": "doc-001-001",
+  "text": "Sample support article chunk.",
+  "embedding": [0.01, 0.02, 0.03]
+}
+

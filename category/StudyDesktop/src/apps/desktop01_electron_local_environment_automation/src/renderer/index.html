@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>desktop01</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main>
+      <h1>desktop01 ローカル環境構築の安全な模擬実行</h1>
+      <section class="toolbar">
+        <label for="task">処理</label>
+        <select id="task"></select>
+        <button id="start">実行</button>
+        <button id="cancel">キャンセル</button>
+        <span id="status">idle</span>
+      </section>
+      <p>許可済みの処理IDだけをメイン処理へ送り、workspace外は操作しません。</p>
+      <pre id="log"></pre>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

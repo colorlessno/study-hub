@@ -1,0 +1,1 @@
+{"scripts":{"start":"node app/server.js","check":"node --check app/server.js app/check_health.js app/container_diagnostics.js"},"dependencies":{},"devDependencies":{}}

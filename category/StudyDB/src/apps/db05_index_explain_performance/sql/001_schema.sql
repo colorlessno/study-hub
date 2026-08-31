@@ -1,0 +1,19 @@
+DROP SCHEMA IF EXISTS db05 CASCADE;
+CREATE SCHEMA db05;
+SET search_path TO db05;
+
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  customer_id INTEGER NOT NULL,
+  status TEXT NOT NULL,
+  ordered_at TIMESTAMPTZ NOT NULL,
+  total_amount NUMERIC(12, 2) NOT NULL
+);
+
+CREATE TABLE order_items (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL,
+  quantity INTEGER NOT NULL
+);
+

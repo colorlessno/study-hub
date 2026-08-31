@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "web34",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "CORSを許可しないAPIと許可するAPIへ、同じPOST要求を送信した"
+    },
+    {
+      "id": "check-02",
+      "label": "Network（通信）で、事前確認のOPTIONSと実際のPOSTを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "許可しないAPIでは応答を利用できず、許可するAPIではHTTP 200の本文を表示できることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "拒否時もAPI自体は動作しており、ブラウザが応答の利用を制限していることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "credentialsなし・ありを順番に実行し、許可APIでCookieが保存・送信されることを確認した"
+    }
+  ]
+}

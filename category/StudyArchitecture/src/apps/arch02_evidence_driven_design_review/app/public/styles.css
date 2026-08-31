@@ -1,0 +1,72 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #202020;
+  background: #f4f4f4;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  width: min(980px, calc(100% - 32px));
+  margin: 24px auto;
+}
+
+section {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #aaa;
+  background: #fff;
+}
+
+button,
+input,
+select {
+  padding: 8px 12px;
+}
+
+button {
+  margin: 4px;
+  cursor: pointer;
+}
+
+.review-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.review-form label {
+  display: grid;
+  gap: 4px;
+}
+
+.review-form button {
+  grid-column: 1 / -1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px;
+  border: 1px solid #bbb;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+pre {
+  padding: 12px;
+  overflow: auto;
+  background: #eee;
+}
+
+@media (max-width: 700px) {
+  .review-form {
+    grid-template-columns: 1fr;
+  }
+}

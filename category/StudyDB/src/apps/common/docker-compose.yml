@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-studydb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: Asia/Tokyo
+    ports:
+      - "${STUDYDB_PORT:-15432}:5432"
+    volumes:
+      - studydb_db:/var/lib/postgresql/data
+      - ../:/work:ro
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d studydb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  studydb_db:
+

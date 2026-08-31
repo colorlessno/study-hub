@@ -1,0 +1,49 @@
+body {
+  margin: 0;
+  padding: 32px 16px;
+  color: #263238;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  background: #f5f7f8;
+}
+
+.app-shell {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 24px;
+  background: white;
+  border: 1px solid #dbe3e7;
+  border-radius: 8px;
+}
+
+.sample-label {
+  color: #356f7d;
+  font-weight: 700;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+input {
+  flex: 1;
+  min-height: 40px;
+  padding: 0 10px;
+  font: inherit;
+}
+
+button {
+  min-height: 40px;
+  padding: 0 16px;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  background: #2d7284;
+  border: 0;
+  border-radius: 6px;
+}
+
+.error {
+  color: #a43146;
+}

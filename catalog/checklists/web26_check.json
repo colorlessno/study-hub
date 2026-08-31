@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web26",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "Web画面でAPIの稼働状態とDBから取得したタスク一覧を表示した"
+    },
+    {
+      "id": "check-02",
+      "label": "Docker ComposeがWeb・API・DBの3サービスを起動することを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "ブラウザからWeb、WebからAPI、APIからDBへ接続する順番と接続先を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "APIを停止して画面の接続エラーを確認し、ログ確認後にAPIを再起動した"
+    }
+  ]
+}

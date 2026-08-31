@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>base04 テスト成立条件チェック</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <p class="theme-id">base04</p>
+    <h1>テスト成立条件チェック</h1>
+    <p>テストを始める前に、対象、環境、アカウント、データ、判定条件、証拠の保存先を確認します。</p>
+    <p class="notice">秘密情報、個人情報、実顧客情報は入力しないでください。入力内容はこのブラウザ内だけに保存されます。</p>
+
+    <nav class="steps" aria-label="テスト成立条件の確認手順">
+      <button type="button" data-step-button="1">1. 対象・環境</button>
+      <button type="button" data-step-button="2">2. アカウント・データ</button>
+      <button type="button" data-step-button="3">3. 判定条件</button>
+      <button type="button" data-step-button="4">4. 開始可否・保存</button>
+    </nav>
+
+    <form id="precondition-form">
+      <section data-step-panel="1">
+        <h2>テスト対象と環境を確認する</h2>
+        <label>テスト名<input name="testName"></label>
+        <label>テスト対象<textarea name="target" rows="3"></textarea></label>
+        <label>対象の状態<select name="targetStatus" data-decision-status></select></label>
+        <h3>環境の確認項目</h3>
+        <div id="environment-items" class="item-list"></div>
+        <div class="actions">
+          <button type="button" id="load-scenario">固定シナリオを読み込む</button>
+        </div>
+      </section>
+
+      <section data-step-panel="2" hidden>
+        <h2>アカウントとテストデータを確認する</h2>
+        <div class="field-grid">
+          <label>アカウント<textarea name="account" rows="3"></textarea></label>
+          <label>必要な権限<textarea name="permission" rows="3"></textarea></label>
+        </div>
+        <label>アカウント・権限の状態<select name="accountStatus" data-decision-status></select></label>
+        <h3>テストデータ</h3>
+        <p>空欄の行は出力しません。使う行はすべての項目を記入します。</p>
+        <div id="data-items" class="item-list"></div>
+      </section>
+
+      <section data-step-panel="3" hidden>
+        <h2>期待結果と中止条件を決める</h2>
+        <label>期待結果<textarea name="expectedResult" rows="4"></textarea></label>
+        <label>合否基準<textarea name="acceptanceCriteria" rows="4"></textarea></label>
+        <label>合否基準の状態<select name="criteriaStatus" data-decision-status></select></label>
+        <label>中止条件<textarea name="stopConditions" rows="4" placeholder="1行に1件ずつ記入"></textarea></label>
+        <div class="field-grid">
+          <label>証拠の保存先<input name="evidenceLocation"></label>
+          <label>判定者<input name="judge"></label>
+        </div>
+        <label>代替確認<textarea name="fallback" rows="3"></textarea></label>
+      </section>
+
+      <section data-step-panel="4" hidden>
+        <h2>開始可否を確認して保存する</h2>
+        <div class="decision-box">
+          <span>現在の判定</span>
+          <strong id="decision">保留</strong>
+          <span id="decision-reason">未確認の項目があります。</span>
+        </div>
+        <div id="status-summary" class="summary"></div>
+        <div class="actions">
+          <button type="button" id="save-check">ブラウザ内に保存</button>
+          <button type="button" id="download-current">表示中の文書をダウンロード</button>
+          <button type="button" id="clear-check" class="secondary">保存内容をクリア</button>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <div class="preview-tabs" aria-label="出力文書の切替">
+          <button type="button" data-preview-kind="checklist">成立条件チェックリスト</button>
+          <button type="button" data-preview-kind="environment">環境確認表</button>
+          <button type="button" data-preview-kind="data">データ確認表</button>
+        </div>
+        <h3 id="preview-title">成立条件チェックリストのプレビュー</h3>
+        <pre id="preview">まだ保存されていません。</pre>
+      </section>
+    </form>
+
+    <footer class="step-footer">
+      <button type="button" id="previous-step">前の手順</button>
+      <span id="step-position">1 / 4</span>
+      <button type="button" id="next-step">次の手順</button>
+    </footer>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

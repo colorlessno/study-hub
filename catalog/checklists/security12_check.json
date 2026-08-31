@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security12",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "成功と拒否の監査ログを比較し、1操作を1行のJSONで記録することを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "成功した操作のログにactor・action・target・result・requestIdが含まれることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "拒否された操作のログにもresultとreasonが記録されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "メールアドレスと秘密情報が[email]と[secret]へ置き換えられることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "監査ログの実装を開き、時刻をUTCのISO 8601形式で生成していることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "監査eventの項目定義を開き、追跡に必要な識別子と記録してはいけない値を区別した"
+    }
+  ]
+}

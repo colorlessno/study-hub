@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "devops09",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "受付、影響確認、Severityの仮決定、変更前の証拠保存という初動の順序を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "固定シナリオの受付情報と利用者影響を記入した"
+    },
+    {
+      "id": "check-03",
+      "label": "health、ready、containerの状態、request IDの証拠を記入した"
+    },
+    {
+      "id": "check-04",
+      "label": "確認できた事実、原因の仮説、対応の判断を分けて記入した"
+    },
+    {
+      "id": "check-05",
+      "label": "一時対応、回復確認、恒久対応、再発防止を区別して記入した"
+    },
+    {
+      "id": "check-06",
+      "label": "記録をブラウザ内へ保存し、再読み込み後に復元されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "Markdownをダウンロードし、入力内容が障害対応記録として整理されていることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "CI workflowがRunbook、記入例、記録変換処理の存在を順番に検査することを確認した"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+name: StudyAWS validation
+
+on:
+  push:
+    paths:
+      - "category/StudyAWS/**"
+      - ".github/workflows/studyaws-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyAWS/**"
+      - ".github/workflows/studyaws-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studyaws-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-local-lessons:
+    name: Validate local cloud lessons
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run StudyAWS validation without AWS credentials
+        run: node category/StudyAWS/scripts/validate-studyaws.mjs

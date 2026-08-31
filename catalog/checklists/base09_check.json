@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "base09",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "package.jsonを開き、dev・build・test・startの4つのscriptと実行コマンドを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "devを実行し、開発用モードを示すメッセージが表示されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "buildを実行し、src/index.jsの構文確認が成功することを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "testを実行し、smoke test passedと表示されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "startを実行し、通常実行を示すメッセージが表示されることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "存在しないscriptを実行し、Missing scriptエラーと確認すべきpackage.jsonの場所を確認した"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "system40",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "既定値で実行し、基礎予測・販促倍率・需要予測・補充量を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "promotion_calendarのliftを変更し、需要予測と補充量が変わることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "現在庫を変更し、欠品の注意点と補充量が変わることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "shelf_capacityを変更し、目標在庫が棚容量を超えないことを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "需要予測の誤差と在庫不足による欠品リスクが別の情報として表示されることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "approval.statusがpendingのとき、補充提案が自動発注されず承認待ちで保存されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "approval.statusをapprovedへ変更し、承認者と発注候補が実行履歴へ保存されることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "入荷予定と季節倍率を変更し、利用可能在庫と需要予測へ反映されることを確認した"
+    },
+    {
+      "id": "check-09",
+      "label": "StudyAIを再起動し、同じ補充提案・承認結果・発注候補・監査記録が実行履歴へ復元されることを確認した"
+    }
+  ]
+}

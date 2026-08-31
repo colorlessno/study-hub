@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security21",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「6件の判定結果」を実行し、M-001〜M-006が期待したdecisionと一致することを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "M-004がcaution、M-006がallow_with_boundaryとなり、同じsexual_nsfw分類でも文脈によってdecisionが変わることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「監査記録」を実行し、入力本文を残さずcategory、reason code、hash、review要否を記録することを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「人による確認対象」を実行し、refuseとescalateになった3件だけが表示されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "判定処理とポリシー定義を表示し、判定順、category、decision、reason codeの対応を確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "分類表、監査ログ項目、安全な応答例、エスカレーション条件を表示し、実装と教材文書の対応を確認した"
+    }
+  ]
+}

@@ -1,0 +1,728 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StudyHub actual theme catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "catalogType",
+    "source",
+    "behaviorSource",
+    "themeCount",
+    "themes"
+  ],
+  "definitions": {
+    "processDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command", "args"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "command": { "enum": ["node", "npm", "docker", "python", "python-venv"] },
+        "args": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "temporaryDirectoryEnv": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "stdinFile": { "type": "string", "pattern": "^category/[^.].*" },
+        "execution": { "enum": ["service", "task"] },
+        "url": {
+          "type": "string",
+          "pattern": "^http://(127\\.0\\.0\\.1|localhost):[0-9]+/.*$"
+        },
+        "healthUrl": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+        "allowFailure": { "type": "boolean" }
+      }
+    },
+    "requestDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "url"],
+      "properties": {
+        "method": { "enum": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
+        "url": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "body": { "oneOf": [{ "type": "object" }, { "type": "string" }] },
+        "input": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "name"],
+          "properties": {
+            "target": { "enum": ["body", "query", "header"] },
+            "name": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "requestInputDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "label", "target"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "target": { "enum": ["path", "body", "query", "header"] },
+        "type": { "enum": ["string", "boolean"] },
+        "required": { "type": "boolean" },
+        "placeholder": { "type": "string" }
+      }
+    },
+    "requestOperationDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "method", "url"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "label": { "type": "string", "minLength": 1 },
+        "method": { "enum": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
+        "url": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "body": { "oneOf": [{ "type": "object" }, { "type": "string" }] },
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/requestInputDefinition" }
+        },
+        "timeoutMilliseconds": { "type": "integer", "minimum": 1, "maximum": 300000 },
+        "retry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxAttempts", "delayMilliseconds", "statusCodes"],
+          "properties": {
+            "maxAttempts": { "type": "integer", "minimum": 2, "maximum": 10 },
+            "delayMilliseconds": { "type": "integer", "minimum": 0, "maximum": 10000 },
+            "statusCodes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "integer", "minimum": 100, "maximum": 599 }
+            }
+          }
+        }
+      }
+    },
+    "commandOperationDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "processes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "label": { "type": "string", "minLength": 1 },
+        "processes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/processDefinition" }
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label"],
+          "properties": {
+            "label": { "type": "string", "minLength": 1 },
+            "defaultValue": { "type": "string" },
+            "placeholder": { "type": "string" }
+          }
+        }
+      }
+    },
+    "themeResourceDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "kind", "format", "path"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "label": { "type": "string", "minLength": 1 },
+        "kind": {
+          "enum": ["material", "readme", "source", "requirements", "design", "template", "artifact"]
+        },
+        "format": { "enum": ["markdown", "text", "source"] },
+        "path": {
+          "type": "string",
+          "anyOf": [
+            { "pattern": "^category/[^.].*" },
+            { "const": ".github/workflows/studydevops-ci.yml" }
+          ]
+        }
+      }
+    }
+  },
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "catalogType": { "const": "actual" },
+    "source": { "const": "THEME_CATALOG.md" },
+    "behaviorSource": { "type": "string", "minLength": 1 },
+    "themeCount": { "const": 167 },
+    "themes": {
+      "type": "array",
+      "minItems": 167,
+      "maxItems": 167,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "fieldId",
+          "name",
+          "entryFile",
+          "presentation",
+          "lifecycle",
+          "integrationStatus"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^((system|web|security|devops|aws|base|db|arch|desktop)[0-9]+|study-(idea-forge|ai-idea-generation|ai-corporate-employee|api))$"
+          },
+          "fieldId": {
+            "enum": [
+              "study-ai",
+              "study-web",
+              "study-security",
+              "study-devops",
+              "study-aws",
+              "study-base",
+              "study-db",
+              "study-architecture",
+              "study-desktop",
+              "study-idea-forge",
+              "study-ai-idea-generation",
+              "study-ai-corporate-employee",
+              "study-api"
+            ]
+          },
+          "relatedFieldIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "study-ai",
+                "study-web",
+                "study-security",
+                "study-devops",
+                "study-aws",
+                "study-base",
+                "study-db",
+                "study-architecture",
+                "study-desktop",
+                "study-idea-forge",
+                "study-ai-idea-generation",
+                "study-ai-corporate-employee",
+                "study-api"
+              ]
+            }
+          },
+          "aliasOf": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "entryFile": {
+            "type": "string",
+            "pattern": "^category/[^.].*"
+          },
+          "resources": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/themeResourceDefinition" }
+          },
+          "presentation": {
+            "enum": ["document", "web", "request", "command", "external-app"]
+          },
+          "materialOpenMode": {
+            "enum": ["embedded", "new-window"]
+          },
+          "lifecycle": {
+            "enum": ["none", "one-shot", "process", "stack", "shared", "manual"]
+          },
+          "integrationStatus": { "enum": ["connected", "metadata-only"] },
+          "connection": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "file"],
+                "properties": {
+                  "type": { "const": "markdown" },
+                  "file": { "type": "string", "pattern": "^category/[^.].*\\.md$" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "root", "entryFile"],
+                "properties": {
+                  "type": { "const": "static-web" },
+                  "root": { "type": "string", "pattern": "^category/[^.].*" },
+                  "entryFile": { "type": "string", "pattern": "^[^/]+\\.html$" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "cwd", "command", "args", "url", "healthUrl"],
+                "properties": {
+                  "type": { "const": "web-process" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "command": { "enum": ["node", "python", "python-venv"] },
+                  "args": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "url": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/$" },
+                  "healthUrl": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "cwd", "command", "args", "environment"],
+                "properties": {
+                  "type": { "const": "external-process" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "command": { "const": "electron" },
+                  "args": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "environment": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "cwd", "command", "args", "env", "url", "healthUrl"],
+                "properties": {
+                  "type": { "const": "request-process" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "command": { "enum": ["node", "python"] },
+                  "args": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "env": {
+                    "type": "object",
+                    "required": ["PORT"],
+                    "properties": { "PORT": { "type": "string", "pattern": "^[0-9]+$" } },
+                    "additionalProperties": { "type": "string" }
+                  },
+                  "url": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+                  "healthUrl": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+                  "request": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["method", "url"],
+                    "properties": {
+                      "method": { "enum": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
+                      "url": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+                      "headers": {
+                        "type": "object",
+                        "additionalProperties": { "type": "string" }
+                      },
+                      "body": { "oneOf": [{ "type": "object" }, { "type": "string" }] },
+                      "input": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["target", "name"],
+                        "properties": {
+                          "target": { "enum": ["body", "query", "header"] },
+                          "name": { "type": "string", "minLength": 1 }
+                        }
+                      }
+                    }
+                  },
+                  "requests": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/requestOperationDefinition" }
+                  }
+                },
+                "anyOf": [
+                  { "required": ["request"], "properties": { "request": {} } },
+                  { "required": ["requests"], "properties": { "requests": {} } }
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type", "cwd", "startup", "cleanup", "environment", "timeoutSeconds"
+                ],
+                "properties": {
+                  "type": { "const": "web-stack" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "startup": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/processDefinition" }
+                  },
+                  "cleanup": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/processDefinition" }
+                  },
+                  "environment": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 300 },
+                  "run": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "operations"],
+                    "properties": {
+                      "type": { "const": "operations" },
+                      "operations": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": { "$ref": "#/definitions/commandOperationDefinition" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type", "runtimeId", "cwd", "startup", "cleanup", "environment", "timeoutSeconds"
+                ],
+                "properties": {
+                  "type": { "const": "web-shared" },
+                  "runtimeId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "startup": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/processDefinition" }
+                  },
+                  "cleanup": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/processDefinition" }
+                  },
+                  "environment": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 300 }
+                }
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "cwd", "commands"],
+                    "properties": {
+                      "type": { "const": "command-one-shot" },
+                      "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                      "commands": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": { "$ref": "#/definitions/processDefinition" }
+                      },
+                      "environment": {
+                        "type": "array",
+                        "items": { "type": "string", "minLength": 1 }
+                      },
+                      "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 300 }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "cwd", "operations"],
+                    "properties": {
+                      "type": { "const": "command-one-shot" },
+                      "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                      "operations": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": { "$ref": "#/definitions/commandOperationDefinition" }
+                      },
+                      "environment": {
+                        "type": "array",
+                        "items": { "type": "string", "minLength": 1 }
+                      },
+                      "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 1800 }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type", "cwd", "startup", "run", "cleanup", "environment", "timeoutSeconds"
+                ],
+                "properties": {
+                  "type": { "const": "command-stack" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "startup": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/processDefinition" }
+                  },
+                  "run": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["type", "operations"],
+                        "properties": {
+                          "type": { "const": "operations" },
+                          "operations": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": { "$ref": "#/definitions/commandOperationDefinition" }
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["type", "commands"],
+                        "properties": {
+                          "type": { "const": "commands" },
+                          "commands": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": { "$ref": "#/definitions/processDefinition" }
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["type", "request"],
+                        "properties": {
+                          "type": { "const": "request" },
+                          "request": { "$ref": "#/definitions/requestDefinition" }
+                        }
+                      }
+                    ]
+                  },
+                  "cleanup": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/processDefinition" }
+                  },
+                  "environment": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 300 }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "cwd", "startup", "cleanup"],
+                "properties": {
+                  "type": { "const": "request-stack" },
+                  "cwd": { "type": "string", "pattern": "^category/[^.].*" },
+                  "startup": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["id", "command", "args", "execution"],
+                      "properties": {
+                        "id": { "type": "string", "minLength": 1 },
+                        "command": { "const": "docker" },
+                        "args": {
+                          "type": "array",
+                          "minItems": 1,
+                          "items": { "type": "string", "minLength": 1 }
+                        },
+                        "execution": { "const": "task" },
+                        "url": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" },
+                        "healthUrl": { "type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/.*$" }
+                      }
+                    }
+                  },
+                  "cleanup": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["id", "command", "args", "execution"],
+                      "properties": {
+                        "id": { "type": "string", "minLength": 1 },
+                        "command": { "const": "docker" },
+                        "args": {
+                          "type": "array",
+                          "minItems": 1,
+                          "items": { "type": "string", "minLength": 1 }
+                        },
+                        "execution": { "const": "task" }
+                      }
+                    }
+                  },
+                  "request": { "$ref": "#/definitions/requestDefinition" },
+                  "requests": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/requestOperationDefinition" }
+                  }
+                },
+                "anyOf": [
+                  { "required": ["request"], "properties": { "request": {} } },
+                  { "required": ["requests"], "properties": { "requests": {} } }
+                ]
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "integrationStatus": { "const": "connected" } }
+            },
+            "then": {
+              "properties": { "connection": {} },
+              "required": ["connection"]
+            },
+            "else": {
+              "properties": { "connection": false }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "properties": {
+                  "presentation": { "const": "document" },
+                  "lifecycle": { "const": "none" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "markdown" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "document" },
+                  "lifecycle": { "const": "manual" },
+                  "connection": false
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "web" },
+                  "lifecycle": { "const": "none" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "static-web" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "web" },
+                  "lifecycle": { "const": "process" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "web-process" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "web" },
+                  "lifecycle": { "const": "stack" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "web-stack" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "web" },
+                  "lifecycle": { "const": "shared" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "web-shared" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "request" },
+                  "lifecycle": { "const": "process" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "request-process" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "request" },
+                  "lifecycle": { "const": "stack" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "request-stack" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "command" },
+                  "lifecycle": { "const": "one-shot" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "command-one-shot" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "command" },
+                  "lifecycle": { "const": "stack" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "command-stack" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "presentation": { "const": "external-app" },
+                  "lifecycle": { "const": "process" },
+                  "connection": {
+                    "type": "object",
+                    "properties": { "type": { "const": "external-process" } }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

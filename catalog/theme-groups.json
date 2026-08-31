@@ -1,0 +1,681 @@
+{
+  "schemaVersion": 1,
+  "groups": [
+    {
+      "id": "web-foundations",
+      "fieldId": "study-web",
+      "name": "HTML・CSS・JavaScriptの基礎",
+      "summary": "Webページの表示、ファイル構成、画面操作の基礎を扱います。",
+      "order": 10,
+      "themeIds": ["web01", "web02", "web03", "web04", "web05", "web06"]
+    },
+    {
+      "id": "web-frontend-ui",
+      "fieldId": "study-web",
+      "name": "ReactとフロントエンドUI",
+      "summary": "React、TypeScript、コンポーネント、画面状態を扱います。",
+      "order": 20,
+      "themeIds": ["web07", "web08", "web09", "web10", "web11", "web12"]
+    },
+    {
+      "id": "web-api-database",
+      "fieldId": "study-web",
+      "name": "API・データベース・画面連携",
+      "summary": "API、データベース、フロントエンドを連携した処理を扱います。",
+      "order": 30,
+      "themeIds": ["web13", "web14", "web15", "web16", "web17", "web18", "web19", "web20", "web21", "web22"]
+    },
+    {
+      "id": "web-nextjs",
+      "fieldId": "study-web",
+      "name": "Next.js",
+      "summary": "Next.jsのページ、データ取得、画面構成を扱います。",
+      "order": 40,
+      "themeIds": ["web23", "web24", "web25"]
+    },
+    {
+      "id": "web-deployment-environment",
+      "fieldId": "study-web",
+      "name": "公開・環境・実行手順",
+      "summary": "ビルド、公開環境、環境変数、実行手順を扱います。",
+      "order": 50,
+      "themeIds": ["web26", "web27", "web28"]
+    },
+    {
+      "id": "web-learning-records",
+      "fieldId": "study-web",
+      "name": "学習記録と共同作業の文書",
+      "summary": "README、エラー記録、共同作業に必要な文書を扱います。",
+      "order": 60,
+      "themeIds": ["web29", "web30", "web31"]
+    },
+    {
+      "id": "web-practical-behavior",
+      "fieldId": "study-web",
+      "name": "実務的なWeb・システムの動き",
+      "summary": "認証、通信、障害、データ処理、性能など実務的な挙動を扱います。",
+      "order": 70,
+      "themeIds": [
+        "web32", "web33", "web34", "web35", "web36", "web37", "web38",
+        "web39", "web40", "web41", "web42", "web43", "web44", "web45",
+        "web46", "web47", "web48", "web49", "web50", "web51", "web52"
+      ]
+    },
+    {
+      "id": "security-auth-authorization",
+      "fieldId": "study-security",
+      "name": "認証・認可",
+      "summary": "Session、JWT、ロール、属性を使った本人確認と権限制御を扱います。",
+      "order": 10,
+      "themeIds": ["security01", "security02", "security03", "security04"]
+    },
+    {
+      "id": "security-input-browser-secrets",
+      "fieldId": "study-security",
+      "name": "入力・ブラウザ・秘密情報の防御",
+      "summary": "入力値、SQL、CSRF、XSS、ファイル、秘密情報の安全な扱いを確認します。",
+      "order": 20,
+      "themeIds": ["security05", "security06", "security07", "security08", "security09", "security10"]
+    },
+    {
+      "id": "security-integration-operation",
+      "fieldId": "study-security",
+      "name": "外部連携・運用時の防御",
+      "summary": "Webhook、監査ログ、レート制限、CORS、HTTPヘッダー、依存関係を扱います。",
+      "order": 30,
+      "themeIds": ["security11", "security12", "security13", "security14", "security15", "security16"]
+    },
+    {
+      "id": "security-ai-data",
+      "fieldId": "study-security",
+      "name": "AI・データの安全な利用",
+      "summary": "AIへの入力、検索文書、保持期間、個人情報、判定結果の監査を扱います。",
+      "order": 40,
+      "themeIds": ["security17", "security18", "security19", "security20", "security21"]
+    },
+    {
+      "id": "db-foundation-modeling",
+      "fieldId": "study-db",
+      "name": "保存方式とデータ設計",
+      "summary": "DBの選び方、正規化、ERモデル、RDB以外の保存方式を比較します。",
+      "order": 10,
+      "themeIds": ["db01", "db03", "db07"]
+    },
+    {
+      "id": "db-sql-consistency-performance",
+      "fieldId": "study-db",
+      "name": "SQL・整合性・性能",
+      "summary": "SQL操作、制約、トランザクション、ロック、索引、実行計画を扱います。",
+      "order": 20,
+      "themeIds": ["db02", "db04", "db05"]
+    },
+    {
+      "id": "db-operation-change-recovery",
+      "fieldId": "study-db",
+      "name": "変更・バックアップ・復旧",
+      "summary": "DBの変更、バックアップ、復元、マイグレーションを扱います。",
+      "order": 30,
+      "themeIds": ["db06"]
+    },
+    {
+      "id": "aws-permission-network",
+      "fieldId": "study-aws",
+      "name": "権限とネットワーク",
+      "summary": "IAMの許可・拒否と、公開・内部通信の境界をローカルで確認します。",
+      "order": 10,
+      "themeIds": ["aws01", "aws02"]
+    },
+    {
+      "id": "aws-compute-database-config",
+      "fieldId": "study-aws",
+      "name": "サーバーとDB接続設定",
+      "summary": "疑似サーバーの状態・復旧と、RDS接続設定の完全・不足状態を確認します。",
+      "order": 20,
+      "themeIds": ["aws03", "aws04"]
+    },
+    {
+      "id": "aws-storage-observability",
+      "fieldId": "study-aws",
+      "name": "保存とログ",
+      "summary": "objectの保存境界と、request IDで追跡できる構造化ログを扱います。",
+      "order": 30,
+      "themeIds": ["aws05", "aws06"]
+    },
+    {
+      "id": "aws-serverless-api",
+      "fieldId": "study-aws",
+      "name": "LambdaとAPI連携",
+      "summary": "Lambda handlerとAPI Gateway形式のHTTP変換をローカルで確認します。",
+      "order": 40,
+      "themeIds": ["aws07", "aws08"]
+    },
+    {
+      "id": "aws-deploy-recovery",
+      "fieldId": "study-aws",
+      "name": "デプロイ運用と復旧",
+      "summary": "疑似デプロイの障害・復旧と、バックアップ・復元を安全なローカル環境で確認します。",
+      "order": 50,
+      "themeIds": ["aws09", "aws10"]
+    },
+    {
+      "id": "devops-ci-automated-test",
+      "fieldId": "study-devops",
+      "name": "CIと自動テスト",
+      "summary": "ローカルの品質確認、API・画面・DBを含む自動テストと、GitHub Actionsでの確認範囲を扱います。",
+      "order": 10,
+      "themeIds": ["devops01", "devops02", "devops03", "devops04", "devops05"]
+    },
+    {
+      "id": "devops-observability-incident",
+      "fieldId": "study-devops",
+      "name": "可観測性と障害調査",
+      "summary": "リクエストID、稼働状態、Dockerログから処理や障害を追跡します。",
+      "order": 20,
+      "themeIds": ["devops06", "devops07", "devops08"]
+    },
+    {
+      "id": "devops-operation-record-release",
+      "fieldId": "study-devops",
+      "name": "運用記録とリリース判定",
+      "summary": "障害対応の手順と記録、証拠に基づくリリース判定を扱います。",
+      "order": 30,
+      "themeIds": ["devops09", "devops10"]
+    },
+    {
+      "id": "base-upstream-management-documents",
+      "fieldId": "study-base",
+      "name": "上流工程と管理文書",
+      "summary": "曖昧な依頼、情報不足、見積り、テスト条件、責任分担を画面で整理します。",
+      "order": 10,
+      "themeIds": ["base01", "base02", "base03", "base04", "base05"]
+    },
+    {
+      "id": "base-git-workflow",
+      "fieldId": "study-base",
+      "name": "Gitと共同開発の流れ",
+      "summary": "Gitの基本状態、ブランチと競合、IssueからPull Requestまでを確認します。",
+      "order": 20,
+      "themeIds": ["base06", "base07", "base08"]
+    },
+    {
+      "id": "base-local-tools",
+      "fieldId": "study-base",
+      "name": "ローカル開発ツール",
+      "summary": "npm scriptsとHTTP要求を、保存済みのローカル教材で実行します。",
+      "order": 30,
+      "themeIds": ["base09", "base10"]
+    },
+    {
+      "id": "base-explanation-structure",
+      "fieldId": "study-base",
+      "name": "説明とシステム構成",
+      "summary": "ポートフォリオの説明と、システム構成を読み解く正規テーマへの入口を扱います。",
+      "order": 40,
+      "themeIds": ["base11", "base12"]
+    },
+    {
+      "id": "architecture-system-understanding",
+      "fieldId": "study-architecture",
+      "name": "システム構成を読み解く",
+      "summary": "対象、構成要素、処理とデータの流れ、失敗時の動きを根拠とともに整理します。",
+      "order": 10,
+      "themeIds": ["arch01"]
+    },
+    {
+      "id": "architecture-design-review",
+      "fieldId": "study-architecture",
+      "name": "設計をレビューする",
+      "summary": "設計上の主張と証拠を対応させ、指摘、未解決事項、残るリスクを整理します。",
+      "order": 20,
+      "themeIds": ["arch02"]
+    },
+    {
+      "id": "desktop-electron-automation",
+      "fieldId": "study-desktop",
+      "name": "Electronアプリによるローカル処理",
+      "summary": "Electronの画面から許可済みの模擬処理を実行し、状態遷移と安全な後片付けを確認します。",
+      "order": 10,
+      "themeIds": ["desktop01"],
+      "listProfile": {
+        "interactionMode": "stateful-sequence",
+        "initialization": "初回のみテーマフォルダでnpm ciとnpm run setup:electronを手動実行",
+        "environmentScope": "ローカルNode.jsとElectronのデスクトップセッション",
+        "cleanupImpact": "停止時に起動中のElectronアプリを終了",
+        "outputNote": "画面の状態遷移・実行ログ・一時作業フォルダの後片付け結果"
+      }
+    },
+    {
+      "id": "idea-forge-workflow-application",
+      "fieldId": "study-idea-forge",
+      "name": "発想手順と保存・LLM連携",
+      "summary": "発想手順の編集とSQLiteへの保存を確認し、必要な場合だけローカルLLMを接続します。",
+      "order": 10,
+      "themeIds": ["study-idea-forge"],
+      "listProfile": {
+        "interactionMode": "stateful-sequence",
+        "initialization": "最初にテーマのPython仮想環境を準備。LLMなしで画面と保存を確認可能",
+        "environmentScope": "テーマのPython仮想環境とSQLite。LLM使用時のみLM Studio（127.0.0.1:5858/v1）",
+        "cleanupImpact": "停止時にIdeaForgeのFastAPIを終了（SQLiteデータは保持）",
+        "outputNote": "発想手順・セッション状態・生成レポート"
+      }
+    },
+    {
+      "id": "ai-idea-method-comparison",
+      "fieldId": "study-ai-idea-generation",
+      "name": "発想法の実行と比較",
+      "summary": "同じ課題を5つの発想法で処理し、基準条件と変更条件の生成結果を比較します。",
+      "order": 10,
+      "themeIds": ["study-ai-idea-generation"],
+      "listProfile": {
+        "interactionMode": "multiple-actions",
+        "initialization": "構造確認と単体テストはLM Studio不要。接続確認・実生成前に127.0.0.1:5858/v1を起動",
+        "environmentScope": "ローカルPython。接続確認・実生成時のみLM Studio",
+        "cleanupImpact": "各コマンドは完了時に終了（LM StudioはStudyHubから停止しない）",
+        "relationshipNote": "StudyAIの生成AI実験を、5つの発想法の比較演習で補完",
+        "outputNote": "基準条件・変更条件の生成結果と比較表"
+      }
+    },
+    {
+      "id": "ai-corporate-role-permission-evaluation",
+      "fieldId": "study-ai-corporate-employee",
+      "name": "役割・権限・応答評価",
+      "summary": "人事と営業の役割定義、禁止操作、判断結果を比較し、権限境界と人間への引き継ぎを確認します。",
+      "order": 10,
+      "themeIds": ["study-ai-corporate-employee"],
+      "listProfile": {
+        "interactionMode": "multiple-actions",
+        "initialization": "設定検証と単体テストはClaude Code不要。実応答を比較するときだけ各役割フォルダでClaude Codeを起動",
+        "environmentScope": "ローカルPython。実応答の比較時のみClaude Code",
+        "cleanupImpact": "各Pythonコマンドは完了時に終了（Claude CodeはStudyHubから停止しない）",
+        "relationshipNote": "StudyAIの業務支援・エージェント学習を、役割・権限境界・評価の演習で補完",
+        "outputNote": "役割別の回答・確認・人間への引き継ぎ・拒否結果と評価表"
+      }
+    },
+    {
+      "id": "python-http-status-and-upstream",
+      "fieldId": "study-api",
+      "name": "HTTP状態とローカルLLM中継",
+      "summary": "Python標準ライブラリでHTTP状態、JSON入力制限、ローカルLLMへの中継を確認します。",
+      "order": 10,
+      "themeIds": ["study-api"],
+      "listProfile": {
+        "interactionMode": "multiple-actions",
+        "initialization": "204・200・400・404・405・413・415・502の確認はLM Studio不要。POST /askの正常中継時だけ127.0.0.1:5858を起動",
+        "environmentScope": "ローカルPython。正常なLLM中継時のみLM Studio",
+        "cleanupImpact": "停止時にStudyAPIのHTTPサーバーを終了（LM StudioはStudyHubから停止しない）",
+        "relationshipNote": "StudyWebのNestJS・API教材を、Python標準ライブラリ実装と入力制限の確認で補完",
+        "outputNote": "204・200・400・404・405・413・415・502の状態、応答ヘッダー、JSON本文"
+      }
+    },
+    {
+      "id": "ai-document-information",
+      "fieldId": "study-ai",
+      "name": "文書と情報をAIで扱う",
+      "summary": "抽出、審査、検索、分析、タグ付け、文書所在検索を業務画面で確認します。",
+      "order": 10,
+      "themeIds": ["system01", "system02", "system03", "system04", "system07", "system10"],
+      "listProfile": {
+        "interactionMode": "stateful-sequence",
+        "initialization": "初回起動時に共有DBを起動してmigrationを実行",
+        "environmentScope": "StudyAI共有Docker環境（actual-study-ai-shared）",
+        "cleanupImpact": "停止時に共有環境を停止（他のStudyAIテーマにも影響、DBボリュームは保持）"
+      }
+    },
+    {
+      "id": "ai-work-assistance-agents",
+      "fieldId": "study-ai",
+      "name": "業務支援とエージェント",
+      "summary": "記録、問い合わせ対応、タスク整理、調査、推薦、教育、顧客分析、案件照合を扱います。",
+      "order": 20,
+      "themeIds": ["system05", "system06", "system08", "system09", "system11", "system12", "system13", "system14", "system16"],
+      "listProfile": {
+        "interactionMode": "stateful-sequence",
+        "initialization": "初回起動時に共有DBを起動してmigrationを実行",
+        "environmentScope": "StudyAI共有Docker環境（actual-study-ai-shared）",
+        "cleanupImpact": "停止時に共有環境を停止（他のStudyAIテーマにも影響、DBボリュームは保持）"
+      }
+    },
+    {
+      "id": "ai-ebook-integration-plan",
+      "fieldId": "study-ai",
+      "name": "電子書籍要約",
+      "summary": "既存のbook_summarization_cliへ実際の処理を依頼し、ジョブ状態と保存された成果物を確認します。",
+      "order": 30,
+      "themeIds": ["system15"],
+      "listProfile": {
+        "interactionMode": "stateful-sequence",
+        "initialization": "book_summarization_cliのPython環境とローカル連携サービスを使用",
+        "environmentScope": "ローカルNode.js・Python・LM Studio・Tesseract OCR",
+        "cleanupImpact": "連携サービスを停止しても、CLIが保存したジョブ成果物は保持"
+      }
+    },
+    {
+      "id": "ai-foundation-experiments",
+      "fieldId": "study-ai",
+      "name": "生成AIの基礎実験",
+      "summary": "トークン、Embedding、Attention、コンテキスト上限、Temperatureの違いを比較します。",
+      "order": 40,
+      "themeIds": ["system17", "system18", "system19", "system20", "system21"],
+      "listProfile": {
+        "interactionMode": "screen-operation",
+        "initialization": "初回起動時に共有DBを起動してmigrationを実行",
+        "environmentScope": "StudyAI共有Docker環境（actual-study-ai-shared）",
+        "cleanupImpact": "停止時に共有環境を停止（他のStudyAIテーマにも影響、DBボリュームは保持）"
+      }
+    },
+    {
+      "id": "ai-retrieval-document-experiments",
+      "fieldId": "study-ai",
+      "name": "検索と文書処理の実験",
+      "summary": "RAG、検索順位、モデル、出力、量子化、画像、OCR、メタデータ、重複検出を比較します。",
+      "order": 50,
+      "themeIds": ["system22", "system23", "system24", "system25", "system26", "system27", "system28", "system29", "system30"],
+      "listProfile": {
+        "interactionMode": "screen-operation",
+        "initialization": "初回起動時に共有DBを起動してmigrationを実行",
+        "environmentScope": "StudyAI共有Docker環境（actual-study-ai-shared）",
+        "cleanupImpact": "停止時に共有環境を停止（他のStudyAIテーマにも影響、DBボリュームは保持）"
+      }
+    },
+    {
+      "id": "ai-evaluation-observability",
+      "fieldId": "study-ai",
+      "name": "評価と実行記録",
+      "summary": "正解データ、RAG、検索結果、回答、Prompt比較、実行TraceでAI品質を評価します。",
+      "order": 60,
+      "themeIds": ["system31", "system32", "system33", "system34", "system35", "system36"],
+      "listProfile": {
+        "interactionMode": "screen-operation",
+        "initialization": "初回起動時に共有DBを起動してmigrationを実行",
+        "environmentScope": "StudyAI共有Docker環境（actual-study-ai-shared）",
+        "cleanupImpact": "停止時に共有環境を停止（他のStudyAIテーマにも影響、DBボリュームは保持）"
+      }
+    },
+    {
+      "id": "ai-business-applications",
+      "fieldId": "study-ai",
+      "name": "業務AIの応用",
+      "summary": "取引、推薦、顧客対応、需要予測、画像、異常検知、最適化、KPI評価を扱います。",
+      "order": 70,
+      "themeIds": ["system37", "system38", "system39", "system40", "system41", "system42", "system43", "system44"],
+      "listProfile": {
+        "interactionMode": "stateful-sequence",
+        "initialization": "初回起動時に共有DBを起動してmigrationを実行",
+        "environmentScope": "StudyAI共有Docker環境（actual-study-ai-shared）",
+        "cleanupImpact": "停止時に共有環境を停止（他のStudyAIテーマにも影響、DBボリュームは保持）"
+      }
+    },
+    {
+      "id": "ai-development-operations",
+      "fieldId": "study-ai",
+      "name": "AI開発と運用の仕組み",
+      "summary": "技能の定義、作業実行基盤、データ分析、役割分担と承認境界をコマンドで検証します。",
+      "order": 80,
+      "themeIds": ["system45", "system46", "system47", "system48"],
+      "listProfile": {
+        "interactionMode": "multiple-actions",
+        "environmentScope": "ローカルNode.js（テーマ固有のコマンド実行）"
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "themeId": "security01",
+      "interactionMode": "stateful-sequence",
+      "initialization": "起動時にSessionを初期化"
+    },
+    {
+      "themeId": "security07",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初に検証状態をリセット"
+    },
+    {
+      "themeId": "security11",
+      "interactionMode": "stateful-sequence",
+      "initialization": "起動時に受信履歴を初期化"
+    },
+    {
+      "themeId": "security13",
+      "interactionMode": "stateful-sequence",
+      "initialization": "必要に応じて時間枠をリセット"
+    },
+    {
+      "themeId": "db02",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にスキーマと初期データを準備",
+      "environmentScope": "db02専用のDocker DB",
+      "cleanupImpact": "停止時にdb02のDBコンテナとボリュームを削除"
+    },
+    {
+      "themeId": "db04",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にテーブルと初期データを準備",
+      "environmentScope": "db04専用のDocker DB",
+      "cleanupImpact": "停止時にdb04のDBコンテナとボリュームを削除"
+    },
+    {
+      "themeId": "db05",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初に検証用データを準備",
+      "environmentScope": "db05専用のDocker DB",
+      "cleanupImpact": "停止時にdb05のDBコンテナとボリュームを削除"
+    },
+    {
+      "themeId": "db06",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にスキーマと初期データを準備",
+      "environmentScope": "db06専用のDocker DB",
+      "cleanupImpact": "停止時にdb06のDBコンテナとボリュームを削除"
+    },
+    {
+      "themeId": "aws01",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルのポリシー判定（実AWS不使用）"
+    },
+    {
+      "themeId": "aws02",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルDocker Compose（実AWS不使用）",
+      "cleanupImpact": "停止時にaws02のDocker環境を削除"
+    },
+    {
+      "themeId": "aws03",
+      "interactionMode": "stateful-sequence",
+      "initialization": "起動時に疑似サーバーを作成",
+      "environmentScope": "ローカルDockerコンテナ（実EC2不使用）",
+      "cleanupImpact": "停止時にaws03のコンテナを削除"
+    },
+    {
+      "themeId": "aws04",
+      "interactionMode": "multiple-actions",
+      "initialization": "起動時にaws04専用のPostgreSQLと接続アプリを準備",
+      "environmentScope": "ローカルDocker PostgreSQL（実RDS不使用）",
+      "cleanupImpact": "停止時にaws04のコンテナと演習用ボリュームを削除"
+    },
+    {
+      "themeId": "aws05",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "専用一時フォルダの疑似保存（実S3不使用）"
+    },
+    {
+      "themeId": "aws06",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルHTTPサーバー（実AWS不使用）"
+    },
+    {
+      "themeId": "aws07",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルNode.js（実Lambda不使用）"
+    },
+    {
+      "themeId": "aws08",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルHTTP変換（実API Gateway・Lambda不使用）"
+    },
+    {
+      "themeId": "aws09",
+      "interactionMode": "stateful-sequence",
+      "initialization": "起動時に正常な疑似デプロイ状態を作成",
+      "environmentScope": "ローカル疑似デプロイAPI（実AWS不使用）"
+    },
+    {
+      "themeId": "aws10",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "専用一時フォルダの復旧演習（実AWS不使用）"
+    },
+    {
+      "themeId": "devops01",
+      "interactionMode": "single-action",
+      "environmentScope": "ローカルNode.js（GitHub Actions本体はGitHub上で確認）"
+    },
+    {
+      "themeId": "devops02",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルNode.js"
+    },
+    {
+      "themeId": "devops03",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にWeb APIコンテナを起動",
+      "environmentScope": "devops03専用Docker環境",
+      "cleanupImpact": "停止時にdevops03のコンテナと関連ボリュームを削除"
+    },
+    {
+      "themeId": "devops04",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にテスト対象Webサーバーを起動",
+      "environmentScope": "ローカルNode.js・Playwright Chromium",
+      "cleanupImpact": "停止時にテスト対象Webサーバーを停止"
+    },
+    {
+      "themeId": "devops05",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にテスト用DBと初期データを準備",
+      "environmentScope": "devops05専用Docker DB",
+      "cleanupImpact": "停止時にdevops05のコンテナと関連ボリュームを削除"
+    },
+    {
+      "themeId": "devops06",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルNode.js API",
+      "cleanupImpact": "停止時にログ確認用APIを停止"
+    },
+    {
+      "themeId": "devops07",
+      "interactionMode": "stateful-sequence",
+      "initialization": "起動時に依存先を利用可能な状態へ初期化",
+      "environmentScope": "ローカルNode.js API",
+      "cleanupImpact": "停止時に状態確認用APIを停止"
+    },
+    {
+      "themeId": "devops08",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初に正常・起動失敗・処理失敗の3コンテナを準備",
+      "environmentScope": "devops08専用Docker環境",
+      "cleanupImpact": "停止時にdevops08のDocker環境を削除"
+    },
+    {
+      "themeId": "devops09",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内"
+    },
+    {
+      "themeId": "devops10",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "relationshipNote": "arch02は設計レビュー、devops10はリリース直前の運用判定を扱う独立テーマ"
+    },
+    {
+      "themeId": "base01",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "outputNote": "ヒアリングメモ・要件定義入力メモ"
+    },
+    {
+      "themeId": "base02",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "outputNote": "暫定成果物・前提・未確定事項・制約"
+    },
+    {
+      "themeId": "base03",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "outputNote": "見積り根拠・作業分解・リスク一覧"
+    },
+    {
+      "themeId": "base04",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "outputNote": "テスト成立条件・環境・データ確認表"
+    },
+    {
+      "themeId": "base05",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "outputNote": "RACI表・判断待ち事項・エスカレーションメモ"
+    },
+    {
+      "themeId": "base06",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "専用一時フォルダ内のローカルGit",
+      "outputNote": "Git状態・差分・コミット履歴"
+    },
+    {
+      "themeId": "base07",
+      "interactionMode": "stateful-sequence",
+      "initialization": "操作ごとに専用一時リポジトリを作成",
+      "environmentScope": "専用一時フォルダ内のローカルGit",
+      "outputNote": "ブランチ・競合・解消後の履歴"
+    },
+    {
+      "themeId": "base08",
+      "interactionMode": "stateful-sequence",
+      "initialization": "最初にローカルGiteaを起動",
+      "environmentScope": "base08専用Docker Gitea",
+      "cleanupImpact": "停止時にGiteaコンテナを削除（データ用ボリュームは保持）",
+      "outputNote": "Issue・Pull Request・マージ・同期結果"
+    },
+    {
+      "themeId": "base09",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルNode.js",
+      "outputNote": "npm scriptsごとの実行結果"
+    },
+    {
+      "themeId": "base10",
+      "interactionMode": "multiple-actions",
+      "environmentScope": "ローカルNode.js API",
+      "cleanupImpact": "停止時にHTTP確認用APIを停止",
+      "outputNote": "HTTP状態コード別のAPI応答"
+    },
+    {
+      "themeId": "base11",
+      "interactionMode": "screen-operation",
+      "environmentScope": "ローカルブラウザ内",
+      "outputNote": "デモ計画・実施記録・振り返り"
+    },
+    {
+      "themeId": "base12",
+      "interactionMode": "read-only",
+      "environmentScope": "StudyHub内の文書表示",
+      "relationshipNote": "正規テーマはarch01（StudyArchitecture）"
+    },
+    {
+      "themeId": "arch01",
+      "interactionMode": "stateful-sequence",
+      "initialization": "arch01専用のNode.jsサーバーとSQLiteを起動",
+      "environmentScope": "arch01専用Node.js・SQLite実行環境",
+      "cleanupImpact": "停止時にarch01のNode.jsサーバーだけを停止",
+      "outputNote": "SQLite保存結果・処理ログ・障害と復旧の確認結果・構成判断メモ"
+    },
+    {
+      "themeId": "arch02",
+      "interactionMode": "stateful-sequence",
+      "initialization": "arch02専用のレビュー対象サーバーとSQLiteを起動",
+      "environmentScope": "arch02専用Node.js・SQLite実行環境",
+      "cleanupImpact": "停止時にarch02のNode.jsサーバーだけを停止",
+      "outputNote": "画面・API・DB・ログ・ヘルスの証拠とSQLiteへ保存したレビュー結果"
+    }
+  ]
+}

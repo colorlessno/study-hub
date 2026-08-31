@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "web43",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "識別キーなしで送信し、400とidempotency_key_requiredが返ることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "同じキーで初回登録と再送を行い、再送時に登録件数と結果IDが増えないことを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "同じキーで異なる内容を送ると409とidempotency_key_payload_conflictが返ることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "別のキーで送信すると、新しい結果IDが作られて登録件数が増えることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "停止して再起動した後に初回登録を行い、メモリ内の識別キーが消えていることを確認した"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポートフォリオの説明を組み立てる</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="theme-id">base11</p>
+      <h1>ポートフォリオの説明を組み立てる</h1>
+      <p>作ったもの、確認した事実、未確認の範囲を分けて、説明時間に合う台本を作ります。</p>
+    </header>
+
+    <section aria-labelledby="input-heading">
+      <div class="section-heading">
+        <h2 id="input-heading">説明する内容</h2>
+        <div class="button-row">
+          <button id="load-example" type="button">記入例を読み込む</button>
+          <button id="reset-input" type="button" class="secondary">入力を消す</button>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label>成果物の名前<input id="title" type="text"></label>
+        <label>想定する聞き手<input id="audience" type="text"></label>
+        <label class="wide">解決する問題<textarea id="problem" rows="2"></textarea></label>
+        <label class="wide">利用者が行う主な操作<textarea id="main-flow" rows="2"></textarea></label>
+        <label class="wide">主な構成<textarea id="components" rows="2" placeholder="画面、API、データ保存など"></textarea></label>
+        <label class="wide">確認できた事実<textarea id="verified" rows="2" placeholder="実行結果やテスト結果を記入"></textarea></label>
+        <label class="wide">見せる証拠<textarea id="evidence" rows="3" placeholder="1行に1件、3件まで"></textarea></label>
+        <label class="wide">現在の制限<textarea id="limitation" rows="2"></textarea></label>
+        <label class="wide">次に改善すること<textarea id="next-step" rows="2"></textarea></label>
+      </div>
+    </section>
+
+    <section aria-labelledby="output-heading">
+      <div class="section-heading">
+        <h2 id="output-heading">説明案</h2>
+        <div class="button-row" role="group" aria-label="作成する説明案">
+          <button type="button" data-output="sixty">60秒</button>
+          <button type="button" data-output="three">3分</button>
+          <button type="button" data-output="five">5分</button>
+          <button type="button" data-output="recording">録画構成</button>
+        </div>
+      </div>
+      <p id="message" class="message" role="status"></p>
+      <pre id="output" tabindex="0">「記入例を読み込む」を押してから、作成する説明案を選んでください。</pre>
+    </section>
+
+    <aside>
+      <h2>確認すること</h2>
+      <ul>
+        <li>実装した事実と、今後の予定を混ぜない。</li>
+        <li>証拠は説明する主張と対応するものだけを選ぶ。</li>
+        <li>個人情報、秘密情報、顧客情報を入力しない。</li>
+      </ul>
+    </aside>
+  </main>
+  <script src="src/presentation.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>

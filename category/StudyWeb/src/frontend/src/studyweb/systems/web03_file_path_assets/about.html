@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web03 補足ページ</title>
+    <link rel="stylesheet" href="./styles/style.css">
+    <script src="./scripts/main.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <p class="sample-label">web03</p>
+      <h1>ファイルパスの補足ページ</h1>
+      <p>別のHTMLファイルからも、同じCSS、JavaScript、画像を相対パスで読み込みます。</p>
+
+      <section class="card">
+        <img class="avatar" src="./images/avatar.svg" alt="アバター画像">
+        <div>
+          <h2>共通ファイル参照</h2>
+          <p>このページも <code>./styles/style.css</code> と <code>./scripts/main.js</code> を参照しています。</p>
+          <button class="path-button" type="button">JavaScriptの読込を確認</button>
+          <p class="path-message" aria-live="polite">about.html 側でもJavaScriptが動きます。</p>
+        </div>
+      </section>
+
+      <p><a href="./index.html">index.html に戻る</a></p>
+    </main>
+  </body>
+</html>

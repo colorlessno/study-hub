@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web29",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "READMEひな形とREADME記入例で、各見出しの役割を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "既存テーマ1件のREADMEに、目的・前提・実行方法・確認方法・終了方法を記載した"
+    },
+    {
+      "id": "check-03",
+      "label": "作成したREADMEの手順だけで教材を起動し、確認後に終了できた"
+    },
+    {
+      "id": "check-04",
+      "label": "秘密情報や未確認の結果がREADMEに含まれていないことを確認した"
+    }
+  ]
+}

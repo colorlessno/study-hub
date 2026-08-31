@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "devops04",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "テスト対象画面で、名前の入力欄、送信ボタン、結果欄の構成を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "名前を入力して送信し、あいさつが表示されるテストを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "名前を入力せずに送信し、入力エラーが表示されるテストを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "Playwrightの設定で、テスト対象画面が自動起動されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「画面操作テストを実行」を選び、2件のテストが成功した"
+    },
+    {
+      "id": "check-06",
+      "label": "Playwright設定で、二つのテストをworker数1で順番に実行することを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "失敗時のscreenshot、trace、HTML reportがGitHub Actionsのartifactとして保存されることを確認した"
+    }
+  ]
+}

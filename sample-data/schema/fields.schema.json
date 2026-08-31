@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "catalogType", "fields"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "catalogType": { "const": "sample" },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "summary", "order"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^sample-[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 1 },
+          "order": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

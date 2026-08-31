@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws01",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「許可された操作」を実行し、ポリシーのAllowとaction・resourceが一致した操作だけがallowになることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「許可の記述がない操作」を実行し、AllowにもDenyにも一致しない操作がimplicitDenyになることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「明示的に拒否された操作」を実行し、Denyに一致した操作がexplicitDenyになることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「管理者権限の危険性」を実行し、actionとresourceを*で許可するadminが全操作をallowにすることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "権限を判定する処理と4つのポリシーを表示し、管理者・開発者・アプリ実行ロール・閲覧者の範囲を照合した"
+    },
+    {
+      "id": "check-06",
+      "label": "この教材がcondition、NotAction、複数ポリシー、SCPを扱わず、実AWSの権限を保証しないことを確認した"
+    }
+  ]
+}

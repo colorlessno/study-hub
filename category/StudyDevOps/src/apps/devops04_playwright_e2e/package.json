@@ -1,0 +1,13 @@
+{
+  "name": "studydevops-devops04-playwright",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node app/src/server.js",
+    "test:e2e": "playwright test --workers=1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.59.1"
+  }
+}

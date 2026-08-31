@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "devops08",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "Docker Compose構成で、正常、起動失敗、処理失敗の3種類を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "コンテナ状態を表示し、正常なコンテナと起動に失敗したコンテナの違いを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "正常応答とcontainer内診断で、200と安全な教材用設定だけが表示された"
+    },
+    {
+      "id": "check-04",
+      "label": "起動失敗のログで、startup_failedとmissing_required_valueを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "処理失敗の応答とログで、500、runtime_error、リクエストIDを対応付けた"
+    },
+    {
+      "id": "check-06",
+      "label": "port競合ではbind errorと使用中PIDを確認し、所有者未確認のprocessを停止しない手順を確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "3種類の障害信号を自動テストし、すべて成功した"
+    },
+    {
+      "id": "check-08",
+      "label": "停止時に、このテーマのDocker Compose環境だけが削除された"
+    }
+  ]
+}

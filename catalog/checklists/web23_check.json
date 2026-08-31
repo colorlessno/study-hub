@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web23",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "トップ・概要・タスクの3ページをメニューから開いた"
+    },
+    {
+      "id": "check-02",
+      "label": "URLと、表示に使われるpage.tsxファイルの対応を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "layout.tsxのヘッダーとフッターが、3ページで共通表示されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "Linkでページを移動し、ページ全体を再読み込みせずに表示が切り替わることを確認した"
+    }
+  ]
+}

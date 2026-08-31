@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "security15",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「防御ヘッダーあり」を実行し、Content-Security-Policyが返ることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "X-Frame-OptionsとCSPのframe-ancestorsが、画面の埋め込みを拒否する設定であることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "X-Content-Type-Options、Referrer-Policy、Permissions-Policyの設定値を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「比較用: 防御ヘッダーなし」を実行し、防御ヘッダーが欠けた応答との差を確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "HSTSはHTTPSで運用するヘッダーであり、このローカルHTTP教材では付与していないことを確認した"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web14",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "正しい内容をPOST送信し、登録成功を表すHTTP状態番号201を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "空のタスク名を送信し、HTTP状態番号400とエラー内容を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "DTOに定義されていない項目を送信し、HTTP状態番号400になることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "Controller、DTO、Serviceが入力の受け取り・検証・応答作成を分担する流れを確認した"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "devops10",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "固定シナリオを読み込み、リリース対象と変更概要を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "build、test、CI、API、DB変更の確認結果を記録した"
+    },
+    {
+      "id": "check-03",
+      "label": "health、readiness、ログ、監視の確認結果を記録した"
+    },
+    {
+      "id": "check-04",
+      "label": "ロールバック手順と未解決のリスクを記録した"
+    },
+    {
+      "id": "check-05",
+      "label": "証拠を根拠にリリース可否を判断した"
+    },
+    {
+      "id": "check-06",
+      "label": "記録をブラウザ内へ保存し、再読み込み後に復元されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "Markdownをダウンロードし、証拠と判断が対応していることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "CI workflowが証拠資料、記入例、判定記録変換処理の存在を順番に検査することを確認した"
+    }
+  ]
+}

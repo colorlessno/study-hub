@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web06 入力フォームと入力検証</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <main class="form-shell">
+      <p class="sample-label">web06</p>
+      <h1>問い合わせフォーム</h1>
+      <p>入力、確認、送信風処理、バリデーションの基本を確認します。</p>
+
+      <form id="contactForm" novalidate>
+        <div class="field">
+          <label for="name">名前 <span>必須</span></label>
+          <input id="name" name="name" type="text" autocomplete="name">
+          <p id="nameError" class="error-message" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="email">メールアドレス <span>必須</span></label>
+          <input id="email" name="email" type="email" autocomplete="email">
+          <p id="emailError" class="error-message" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="category">問い合わせ種別 <span>必須</span></label>
+          <select id="category" name="category">
+            <option value="">選択してください</option>
+            <option value="study">学習について</option>
+            <option value="bug">不具合について</option>
+            <option value="other">その他</option>
+          </select>
+          <p id="categoryError" class="error-message" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="message">本文 <span>必須</span></label>
+          <textarea id="message" name="message" rows="5"></textarea>
+          <p id="messageError" class="error-message" aria-live="polite"></p>
+        </div>
+
+        <div class="button-row">
+          <button type="submit">送信する</button>
+          <button type="reset">リセット</button>
+        </div>
+
+        <p id="formResult" class="form-result" aria-live="polite"></p>
+      </form>
+    </main>
+  </body>
+</html>

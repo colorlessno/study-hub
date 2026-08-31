@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/audit_report_parser.js","check":"node --check app/audit_report_parser.js && node app/audit_report_parser.test.js"},"dependencies":{},"devDependencies":{}}

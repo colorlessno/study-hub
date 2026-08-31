@@ -1,0 +1,10 @@
+{
+  "key": "cart:sample-user-001",
+  "ttl_seconds": 1800,
+  "value": {
+    "items": [
+      { "product_id": 10, "quantity": 2 }
+    ]
+  }
+}
+

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>web46 CSV取込前の内容検証</title>
+</head>
+<body>
+  <main>
+    <h1>CSV取込前の内容検証</h1>
+    <p>CSVファイルを検証APIへ送信し、取込前の内容と行ごとのエラーを確認します。</p>
+
+    <section aria-labelledby="input-heading">
+      <h2 id="input-heading">確認するCSV</h2>
+      <p>
+        <button id="sendValid" type="button">正しい確認用CSVを送信</button>
+        <button id="sendInvalid" type="button">不正な確認用CSVを送信</button>
+      </p>
+      <label for="csvFile">手元のCSVファイル</label><br>
+      <input id="csvFile" type="file" accept=".csv,text/csv"><br>
+      <button id="check" type="button">選択したファイルを送信して検証</button>
+      <p>上限は512KiBです。サーバーは拡張子、容量、UTF-8、必須列、各行の値を再検証します。</p>
+    </section>
+
+    <section aria-labelledby="result-heading">
+      <h2 id="result-heading">検証結果</h2>
+      <pre id="out" role="status"></pre>
+    </section>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

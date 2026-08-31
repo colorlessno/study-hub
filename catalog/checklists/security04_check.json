@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security04",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "aliceは同じsales部署の注文を閲覧できることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "aliceはsales部署のdraft注文を更新し、再取得した注文にnoteと更新者が保存されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "bobは異なるsales部署の注文を閲覧できないことを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "bobは同じsupport部署でもconfirmed注文を更新できないことを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "ロール・部署・注文状態を組み合わせて認可する理由を説明した"
+    },
+    {
+      "id": "check-06",
+      "label": "認証なしは401、存在しない注文は404、属性条件不一致は403になることを確認した"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "web04",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「表示を変える」を押すたびに、文章とクリック回数が変わることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「リセット」を押すと、最初の文章へ戻ることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "HTMLの要素IDと、script.jsが取得している要素の対応を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "JavaScriptがHTMLの表示内容を書き換える流れをソースで確認した"
+    }
+  ]
+}

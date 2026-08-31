@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web19",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "画面で読込中・取得成功・取得失敗の各表示を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "Network（通信）タブで、タスク取得のGET要求と応答本文を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "正常応答に別Originからの通信を許可するヘッダーが含まれることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "API停止時の通信エラーを確認し、API再起動後に一覧表示へ戻した"
+    }
+  ]
+}

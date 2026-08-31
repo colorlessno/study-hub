@@ -1,0 +1,1 @@
+{"name":"web33-cookie-session","version":"1.0.0","private":true,"scripts":{"start":"node server/src/server.js","build":"node --check server/src/server.js && node --check test/server.test.js","test":"node --test --test-concurrency=1 test/server.test.js"}}

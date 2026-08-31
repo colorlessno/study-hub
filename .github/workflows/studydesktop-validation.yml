@@ -1,0 +1,37 @@
+name: StudyDesktop validation
+
+on:
+  push:
+    paths:
+      - "category/StudyDesktop/**"
+      - ".github/workflows/studydesktop-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyDesktop/**"
+      - ".github/workflows/studydesktop-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studydesktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-electron-boundaries:
+    name: Validate Electron learning boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: category/StudyDesktop/src/apps/desktop01_electron_local_environment_automation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run GUI-free validation
+        run: npm run verify

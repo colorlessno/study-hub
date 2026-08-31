@@ -1,0 +1,14 @@
+{
+    "compilerOptions":  {
+                            "module":  "commonjs",
+                            "emitDecoratorMetadata":  true,
+                            "experimentalDecorators":  true,
+                            "target":  "ES2021",
+                            "outDir":  "./dist",
+                            "baseUrl":  "./",
+                            "strict":  true,
+                            "skipLibCheck":  true,
+                            "rootDir":  "./src",
+                            "ignoreDeprecations":  "6.0"
+                        }
+}

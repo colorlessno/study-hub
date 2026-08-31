@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  padding: 32px 16px;
+  color: #263238;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  background: #f5f7f8;
+}
+
+.app-shell {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 24px;
+  background: white;
+  border: 1px solid #dbe4e8;
+  border-radius: 8px;
+}
+
+.sample-label {
+  color: #486f7f;
+  font-weight: 700;
+}
+
+button {
+  min-height: 40px;
+  padding: 0 14px;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  background: #486f7f;
+  border: 0;
+  border-radius: 6px;
+}
+
+.error {
+  color: #a43146;
+}

@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 32px 16px;
+  color: #263238;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  background: #f5f7f5;
+}
+
+.app-shell {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #d9e5d9;
+  border-radius: 8px;
+}
+
+.sample-label {
+  color: #517052;
+  font-weight: 700;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+button {
+  min-height: 40px;
+  padding: 0 14px;
+  color: #263238;
+  font: inherit;
+  font-weight: 700;
+  background: #e4eee4;
+  border: 1px solid #cbdccb;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button.active {
+  color: #ffffff;
+  background: #4d7d4d;
+}
+
+.todo-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid #d9e5d9;
+  border-radius: 6px;
+}
+
+.todo-item span {
+  display: block;
+  margin-top: 4px;
+  color: #66736a;
+}
+
+.status {
+  align-self: flex-start;
+  margin-top: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.status.done {
+  color: #2c6330;
+  background: #e2f0e3;
+}
+
+.status.active {
+  color: #80520d;
+  background: #f7ead2;
+}

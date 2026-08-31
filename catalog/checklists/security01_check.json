@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security01",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "ログイン前の本人情報取得が401になることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "正しい利用者情報でログインし、Session Cookieが発行されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "ログイン後はCookieを使って本人情報を取得できることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "ログアウト後は同じCookieで本人情報を取得できないことを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "Cookieには利用者情報ではなくSession IDだけが保存される理由を説明した"
+    },
+    {
+      "id": "check-06",
+      "label": "誤ったパスワードではSession Cookieを発行せず401で拒否されることを確認した"
+    }
+  ]
+}

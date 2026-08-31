@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "base06",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「変更前の状態を確認」を実行し、git status --shortに何も表示されない理由を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「未ステージの差分を確認」を実行し、git statusとgit diffが示す内容を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「ステージ済みの差分を確認」を実行し、git diffとgit diff --stagedの違いを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "「コミットと履歴を確認」を実行し、コミット後の状態とgit logの履歴を確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「除外ファイルを確認」を実行し、.gitignoreに該当するログが変更一覧へ出ないことを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "作業フォルダ、ステージ、コミットの3つを区別し、コミット前に確認する差分を説明した"
+    }
+  ]
+}

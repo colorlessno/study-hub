@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security11",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "正しい署名を送信し、status 200で受け付けられることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "本文を改ざんした操作を実行し、署名不一致としてstatus 401になることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "期限切れの送信とイベントID不足が、それぞれstatus 401と400になることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "同じイベントIDを2回送信し、2回目がstatus 409で拒否されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "署名と検証の実装を開き、本文・時刻・イベントIDを別々に確認する理由を確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "64KiBを超える本文が413で拒否され、Webhookの再送防止資料からtimestampとevent IDの役割を確認した"
+    }
+  ]
+}

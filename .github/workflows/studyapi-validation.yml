@@ -1,0 +1,34 @@
+name: StudyAPI validation
+
+on:
+  push:
+    paths:
+      - "category/StudyAPI/**"
+      - ".github/workflows/studyapi-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyAPI/**"
+      - ".github/workflows/studyapi-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studyapi-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-http-boundaries:
+    name: Validate HTTP boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run standard-library tests
+        run: python -m unittest discover -s category/StudyAPI/tests -p "test_*.py"

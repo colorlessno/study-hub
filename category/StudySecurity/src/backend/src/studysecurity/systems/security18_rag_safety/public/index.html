@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>検索文書の信頼区分</title>
+<h1>検索文書の信頼区分</h1>
+<p>検索語を切り替え、文書の信頼区分と利用方法を確認します。</p>
+<div aria-label="検索例">
+  <button type="button" data-query="">全件</button>
+  <button type="button" data-query="返品">信頼済み文書</button>
+  <button type="button" data-query="指示">信頼できない文書</button>
+  <button type="button" data-query="社内">利用制限付き文書</button>
+</div>
+<label for="query">検索語</label>
+<input id="query" value="返品">
+<button id="search" type="button">検索する</button>
+<pre id="result"></pre>
+<script src="./app.js"></script>

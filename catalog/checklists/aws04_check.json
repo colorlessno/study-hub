@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws04",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "successful-connection",
+      "label": "「DB接続に成功」を実行し、PostgreSQLからdatabase、user、server address、server portを取得した"
+    },
+    {
+      "id": "masked-password",
+      "label": "正常接続の結果でpasswordの値が表示されず、maskedと表示されることを確認した"
+    },
+    {
+      "id": "authentication-failure",
+      "label": "「パスワード誤りで認証失敗」を実行し、認証error code 28P01を確認した"
+    },
+    {
+      "id": "network-failure",
+      "label": "「接続先ポート誤りで通信失敗」を実行し、認証前の通信失敗を確認した"
+    },
+    {
+      "id": "source-and-environment",
+      "label": "接続処理、Docker Compose、環境変数の記入例を照合した"
+    },
+    {
+      "id": "cleanup",
+      "label": "確認後に停止し、aws04専用のcontainerとvolumeを削除した"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+﻿AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  ItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs20.x
+      Handler: src/handler.handler
+      CodeUri: ../../backend/src/studyaws/systems/aws08_api_gateway_lambda
+      Events:
+        Items:
+          Type: HttpApi
+          Properties:
+            Path: /items
+            Method: ANY
+

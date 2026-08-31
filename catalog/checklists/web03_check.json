@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web03",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "最初のページと補足ページの両方で、CSS・JavaScript・画像が表示されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "各HTMLに書かれたCSS・JavaScript・画像のファイルパスを、実際のフォルダ構成と照合した"
+    },
+    {
+      "id": "check-03",
+      "label": "各ページの確認ボタンを押し、現在表示しているHTMLのファイル名を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "ブラウザ開発者ツールのNetwork（通信）タブで、読み込まれたファイル名を確認した"
+    }
+  ]
+}

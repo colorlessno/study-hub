@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "db02",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "customers、products、orders、order_itemsの役割と関係をスキーマ定義から確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "スキーマを作成し、初期データを登録した"
+    },
+    {
+      "id": "check-03",
+      "label": "SELECT、INSERT、UPDATE、DELETEを実行し、各操作で変わるデータを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "INNER JOINとLEFT JOINの結果の違いを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "主キー、外部キー、一意制約、必須制約、値の制約が何を守るか確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "制約に反するデータが拒否され、エラーの原因が説明できた"
+    },
+    {
+      "id": "check-07",
+      "label": "予想した結果、実際の結果、その理由を実行記録にまとめた"
+    }
+  ]
+}

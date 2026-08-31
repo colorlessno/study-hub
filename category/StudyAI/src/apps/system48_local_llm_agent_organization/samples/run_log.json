@@ -1,0 +1,38 @@
+{
+  "run_id": "run-001",
+  "task_id": "task-001",
+  "requested_mode": "mock",
+  "effective_mode": "mock",
+  "model": null,
+  "role_count": 8,
+  "max_rounds": 2,
+  "max_retries_per_role": 1,
+  "retry_count": 0,
+  "review_reflection": {
+    "review_output": "review_report.md",
+    "status": "included_in_downstream_context",
+    "downstream_roles": ["qa", "recorder", "coordinator"]
+  },
+  "started_at": "2026-05-09T00:00:00+09:00",
+  "ended_at": "2026-05-09T00:00:10+09:00",
+  "roles": [
+    { "role": "planner", "status": "completed", "output": "plan.md", "attempts": 1, "notes": [] },
+    { "role": "designer", "status": "completed", "output": "design_note.md", "attempts": 1, "notes": [] },
+    { "role": "executor", "status": "completed", "output": "execution_proposal.md", "attempts": 1, "notes": [] },
+    { "role": "reviewer", "status": "completed", "output": "review_report.md", "attempts": 1, "notes": [] },
+    { "role": "qa", "status": "completed", "output": "qa_checklist.md", "attempts": 1, "notes": [] },
+    { "role": "safety", "status": "completed", "output": "safety_report.md", "attempts": 1, "notes": [] },
+    { "role": "recorder", "status": "completed", "output": "decision_log.md", "attempts": 1, "notes": [] },
+    { "role": "coordinator", "status": "completed", "output": "final_report.md", "attempts": 1, "notes": [] }
+  ],
+  "checks": [
+    { "name": "check_task_board", "status": "passed", "message": "required fields exist" },
+    { "name": "check_role_outputs", "status": "passed", "message": "required outputs exist" },
+    { "name": "check_approval_boundary", "status": "passed", "message": "unsafe operations are not marked executed" }
+  ],
+  "status": "completed",
+  "blocked_reason": null,
+  "approval_required": [],
+  "forbidden_operations": [],
+  "failure_reason": null
+}

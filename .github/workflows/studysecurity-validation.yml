@@ -1,0 +1,32 @@
+name: StudySecurity representative tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "category/StudySecurity/**"
+      - ".github/workflows/studysecurity-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudySecurity/**"
+      - ".github/workflows/studysecurity-validation.yml"
+
+jobs:
+  representative-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        theme:
+          - security03_rbac
+          - security05_input_validation
+          - security11_webhook_signature
+          - security21_ai_content_moderation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test ${{ matrix.theme }}
+        run: npm --prefix category/StudySecurity/src/backend/src/studysecurity/systems/${{ matrix.theme }} test

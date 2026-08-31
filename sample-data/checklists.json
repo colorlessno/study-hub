@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "catalogType": "sample",
+  "checklistCount": 11,
+  "checklists": [
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-document",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "疑似文書教材がテーマ画面内に表示されることを確認した" },
+        { "id": "check-02", "label": "教材の表示に個別プロセスの起動が不要であることを確認した" },
+        { "id": "check-03", "label": "文書表示と起動不要の組み合わせで扱われることを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-manual",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "利用者が準備する外部環境を前提としたテーマであることを確認した" },
+        { "id": "check-02", "label": "疑似テーマでは外部環境へ接続しないことを確認した" },
+        { "id": "check-03", "label": "外部環境を利用する場合は別画面で手動確認することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-static-web",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "疑似Web画面がテーマ画面内に表示されることを確認した" },
+        { "id": "check-02", "label": "ボタンを押すたびに表示回数が増えることを確認した" },
+        { "id": "check-03", "label": "Webサーバーを起動せずに画面を操作できることを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-web-process",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "起動ボタンで一つのWeb処理が起動することを確認した" },
+        { "id": "check-02", "label": "起動後に疑似Web画面を操作できることを確認した" },
+        { "id": "check-03", "label": "実行ログで起動状態を確認した" },
+        { "id": "check-04", "label": "停止ボタンでWeb処理が停止することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-web-stack",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "起動ボタンでWeb処理とAPI処理が順番に起動することを確認した" },
+        { "id": "check-02", "label": "疑似Web画面からAPI処理を利用できることを確認した" },
+        { "id": "check-03", "label": "実行ログで複数処理の状態を確認した" },
+        { "id": "check-04", "label": "停止ボタンで起動した処理が停止することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-web-shared",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "共有Web環境を起動してテーマ固有の画面を表示できることを確認した" },
+        { "id": "check-02", "label": "同じ実行環境をテーマ間で共有できる構成を確認した" },
+        { "id": "check-03", "label": "実行ログで共有Web環境の状態を確認した" },
+        { "id": "check-04", "label": "停止操作では共有環境の利用だけを解除することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-request-process",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "起動ボタンで疑似APIが起動することを確認した" },
+        { "id": "check-02", "label": "入力した値をAPIへ送信できることを確認した" },
+        { "id": "check-03", "label": "APIの応答内容と終了結果を確認した" },
+        { "id": "check-04", "label": "停止ボタンで疑似APIが停止することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-request-stack",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "依存処理と疑似APIが順番に起動することを確認した" },
+        { "id": "check-02", "label": "疑似APIへ入力した値を送信できることを確認した" },
+        { "id": "check-03", "label": "APIの応答に依存処理の結果が含まれることを確認した" },
+        { "id": "check-04", "label": "停止ボタンで起動した処理が停止することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-command",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "実行ボタンで定義済みコマンドが一度だけ実行されることを確認した" },
+        { "id": "check-02", "label": "コマンドの標準出力が画面に表示されることを確認した" },
+        { "id": "check-03", "label": "コマンドの終了結果を確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-command-stack",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "依存処理が起動してからコマンドが実行されることを確認した" },
+        { "id": "check-02", "label": "コマンドが依存処理の値を利用することを確認した" },
+        { "id": "check-03", "label": "実行ログで処理の順番を確認した" },
+        { "id": "check-04", "label": "コマンド実行後に依存処理が停止することを確認した" }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "revision": 1,
+      "themeId": "sample-desktop",
+      "title": "学習項目",
+      "items": [
+        { "id": "check-01", "label": "起動ボタンで疑似外部アプリが起動することを確認した" },
+        { "id": "check-02", "label": "外部画面を開いて内容を確認した" },
+        { "id": "check-03", "label": "実行ログで外部アプリの状態を確認した" },
+        { "id": "check-04", "label": "停止ボタンで疑似外部アプリが停止することを確認した" }
+      ]
+    }
+  ]
+}

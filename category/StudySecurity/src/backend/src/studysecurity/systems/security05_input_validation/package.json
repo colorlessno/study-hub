@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/server.js","check":"node --check app/server.js && node --check app/validators.js && node --check test/validators.test.js","test":"node --test --test-concurrency=1 test/validators.test.js"},"dependencies":{},"devDependencies":{}}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "aws06",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "normal-request",
+      "label": "「正常な要求」を実行し、200応答とrequest IDが本文と応答ヘッダーに含まれることを確認した"
+    },
+    {
+      "id": "error-request",
+      "label": "「エラーになった要求」を実行し、500応答とその要求専用のrequest IDが表示されることを確認した"
+    },
+    {
+      "id": "correlated-logs",
+      "label": "実行ログで、各要求のrequest.startedとrequest.completedまたはrequest.failedを同じrequest IDから追跡できることを確認した"
+    },
+    {
+      "id": "cloudwatch-mapping",
+      "label": "log group、log stream、eventをアプリ、起動単位、JSON 1行ログへ対応付けて説明できた"
+    },
+    {
+      "id": "sensitive-values",
+      "label": "「機密値を残さない要求」を実行し、tokenとemailの値がログへ出ず、pathだけが記録されることを確認した"
+    },
+    {
+      "id": "scope",
+      "label": "この教材がCloudWatch Logsへの送信、保持期間、metric filter、alarmを再現しないことを確認した"
+    }
+  ]
+}

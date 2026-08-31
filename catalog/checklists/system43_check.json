@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "system43",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "既定値で実行し、優先度順の担当割当、訪問順、距離、時間枠、総コストを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "jobsを追加して担当者の合計上限を超え、未割当の仕事、未割当コスト、調整候補を確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "constraintsのmax_durationまたはmax_route_distanceを小さくし、時間・距離の制約違反とコストを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "time_windowsを短くし、時間枠を超えた仕事、遅延時間、遅延コストを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "must_visitに存在しない仕事を指定し、必須の仕事不足と修正候補を確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "human_adjustmentへ担当者別の仕事と調整者を入力し、人間調整した割当が表示されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "候補解・制約違反・総コスト・人間調整結果がStudyAIバックエンドの実行履歴と監査ログへ保存されることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "バックエンドを再起動し、人間調整を含む直前の実行履歴がJSONファイルから復元されることを確認した"
+    }
+  ]
+}

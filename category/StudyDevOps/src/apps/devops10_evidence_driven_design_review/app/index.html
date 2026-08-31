@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>devops10 リリース判定</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <p class="theme-id">devops10</p>
+    <h1>運用証拠によるリリース判定</h1>
+    <p>確認結果を集め、リリース可否とその根拠を一つの記録にまとめます。</p>
+    <p class="notice">秘密情報、個人情報、実顧客情報は入力しないでください。入力内容はこのブラウザ内だけに保存されます。</p>
+
+    <nav class="steps" aria-label="判定手順">
+      <button type="button" data-step-button="1">1. 対象</button>
+      <button type="button" data-step-button="2">2. 自動確認</button>
+      <button type="button" data-step-button="3">3. 運用確認</button>
+      <button type="button" data-step-button="4">4. 判定・保存</button>
+    </nav>
+
+    <form id="release-form">
+      <section data-step-panel="1">
+        <h2>リリース対象</h2>
+        <div class="field-grid">
+          <label>リリースID<input name="releaseId" value="release-2026-08-studyhub"></label>
+          <label>対象システム<input name="targetSystem" value="StudyHub"></label>
+          <label>対象リビジョン<input name="revision" placeholder="例: 3141690"></label>
+          <label>確認日時<input name="reviewedAt" type="datetime-local"></label>
+          <label>確認者<input name="reviewer" placeholder="教材用の名前"></label>
+          <label>変更概要<textarea name="changeSummary" rows="3" placeholder="何を変更した候補か"></textarea></label>
+        </div>
+      </section>
+
+      <section data-step-panel="2" hidden>
+        <h2>自動確認の証拠</h2>
+        <div class="field-grid">
+          <label>build結果<select name="buildStatus"><option value="">未確認</option><option value="success">成功</option><option value="failure">失敗</option></select></label>
+          <label>test結果<select name="testStatus"><option value="">未確認</option><option value="success">成功</option><option value="failure">失敗</option></select></label>
+          <label>test件数<input name="testCount" placeholder="例: 103件成功"></label>
+          <label>CI結果<select name="ciStatus"><option value="">未確認</option><option value="success">成功</option><option value="failure">失敗</option><option value="not-used">対象外</option></select></label>
+          <label>API確認<input name="apiEvidence" placeholder="例: カタログAPIが200"></label>
+          <label>DB変更<select name="databaseChange"><option value="">未確認</option><option value="none">変更なし</option><option value="verified">適用・後戻り確認済み</option><option value="unverified">変更あり・未確認</option></select></label>
+        </div>
+      </section>
+
+      <section data-step-panel="3" hidden>
+        <h2>運用確認の証拠</h2>
+        <div class="field-grid">
+          <label>health結果<select name="healthStatus"><option value="">未確認</option><option value="success">正常</option><option value="failure">異常</option></select></label>
+          <label>readiness結果<select name="readinessStatus"><option value="">未確認</option><option value="success">受付可能</option><option value="failure">受付不可</option></select></label>
+          <label>request ID<input name="requestId" placeholder="教材用の固定値"></label>
+          <label>ログ確認<textarea name="logEvidence" rows="3" placeholder="確認した正常・失敗ログ"></textarea></label>
+          <label>監視と通知<textarea name="monitoringEvidence" rows="3" placeholder="何を検知し、誰が確認するか"></textarea></label>
+          <label>ロールバック確認<select name="rollbackStatus"><option value="">未確認</option><option value="verified">確認済み</option><option value="unverified">手順あり・未確認</option><option value="none">手順なし</option></select></label>
+          <label>ロールバック手順<textarea name="rollbackProcedure" rows="3" placeholder="戻す対象と確認方法"></textarea></label>
+          <label>未解決のリスク<textarea name="unresolvedRisks" rows="3" placeholder="確認できていないことと影響"></textarea></label>
+        </div>
+      </section>
+
+      <section data-step-panel="4" hidden>
+        <h2>リリース判定</h2>
+        <div class="field-grid">
+          <label>判定<select name="decision"><option value="">選択してください</option><option value="go">リリース可</option><option value="conditional">条件付き可</option><option value="no-go">リリース不可</option></select></label>
+          <label>判断の根拠<textarea name="decisionReason" rows="4" placeholder="証拠と未解決リスクを結び付けて記入"></textarea></label>
+          <label>条件・追加確認<textarea name="conditions" rows="3" placeholder="条件付き可の場合に記入"></textarea></label>
+          <label>対応担当<input name="actionOwner" placeholder="誰が対応するか"></label>
+          <label>確認期限<input name="dueDate" type="date"></label>
+        </div>
+        <div class="actions">
+          <button type="button" id="load-scenario">固定シナリオを読み込む</button>
+          <button type="button" id="save-report">ブラウザ内に保存</button>
+          <button type="button" id="download-report">Markdownをダウンロード</button>
+          <button type="button" id="clear-report" class="secondary">保存内容をクリア</button>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <h3>Markdownプレビュー</h3>
+        <pre id="preview">まだ保存されていません。</pre>
+      </section>
+    </form>
+
+    <footer class="step-footer">
+      <button type="button" id="previous-step">前の手順</button>
+      <span id="step-position">1 / 4</span>
+      <button type="button" id="next-step">次の手順</button>
+    </footer>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

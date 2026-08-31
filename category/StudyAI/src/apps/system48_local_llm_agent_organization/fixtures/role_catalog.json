@@ -1,0 +1,138 @@
+{
+  "execution": {
+    "max_rounds": 2,
+    "max_retries_per_role": 1
+  },
+  "roles": [
+    {
+      "id": "coordinator",
+      "name": "PM",
+      "order": 8,
+      "runs_while_approval_pending": false,
+      "reads": [
+        "task_board.json",
+        "shared_memory.md",
+        "plan.md",
+        "design_note.md",
+        "execution_proposal.md",
+        "review_report.md",
+        "qa_checklist.md",
+        "safety_report.md",
+        "decision_log.md"
+      ],
+      "writes": ["task_board.json", "final_report.md"],
+      "output": {
+        "file": "final_report.md",
+        "title": "最終報告",
+        "headings": ["結論", "作成物", "残課題", "次の作業"]
+      },
+      "can_decide": ["ロール順序", "停止条件", "保留理由"],
+      "must_not_do": ["未承認のファイル削除", "未承認の外部送信", "秘密情報利用"]
+    },
+    {
+      "id": "planner",
+      "name": "計画",
+      "order": 1,
+      "runs_while_approval_pending": true,
+      "reads": ["task_board.json", "shared_memory.md"],
+      "writes": ["plan.md"],
+      "output": {
+        "file": "plan.md",
+        "title": "計画",
+        "headings": ["目的", "対象外", "作業順序", "不足情報"]
+      },
+      "can_decide": ["作業順序案", "対象外案", "不足情報"],
+      "must_not_do": ["ファイル変更", "コマンド実行", "外部送信"]
+    },
+    {
+      "id": "designer",
+      "name": "設計",
+      "order": 2,
+      "runs_while_approval_pending": true,
+      "reads": ["plan.md", "shared_memory.md"],
+      "writes": ["design_note.md"],
+      "output": {
+        "file": "design_note.md",
+        "title": "設計メモ",
+        "headings": ["構成", "データ", "境界", "失敗時の扱い"]
+      },
+      "can_decide": ["構成案", "データ境界", "失敗時の扱い"],
+      "must_not_do": ["ファイル変更", "コマンド実行", "外部送信"]
+    },
+    {
+      "id": "executor",
+      "name": "実装計画",
+      "order": 3,
+      "runs_while_approval_pending": true,
+      "reads": ["design_note.md", "shared_memory.md"],
+      "writes": ["execution_proposal.md"],
+      "output": {
+        "file": "execution_proposal.md",
+        "title": "実行案",
+        "headings": ["実行案", "変更対象", "実行しない操作", "承認待ち"]
+      },
+      "can_decide": ["実行手順案", "実行しない操作"],
+      "must_not_do": ["未承認のファイル変更", "未承認のコマンド実行", "外部送信"]
+    },
+    {
+      "id": "reviewer",
+      "name": "レビュー",
+      "order": 4,
+      "runs_while_approval_pending": false,
+      "reads": ["plan.md", "design_note.md", "execution_proposal.md"],
+      "writes": ["review_report.md"],
+      "output": {
+        "file": "review_report.md",
+        "title": "レビュー結果",
+        "headings": ["指摘事項", "重大度", "対応案", "残リスク"]
+      },
+      "can_decide": ["指摘事項", "重大度", "対応案"],
+      "must_not_do": ["ファイル変更", "コマンド実行", "外部送信"]
+    },
+    {
+      "id": "qa",
+      "name": "QA",
+      "order": 5,
+      "runs_while_approval_pending": false,
+      "reads": ["execution_proposal.md", "review_report.md"],
+      "writes": ["qa_checklist.md"],
+      "output": {
+        "file": "qa_checklist.md",
+        "title": "品質確認",
+        "headings": ["確認観点", "機械的検査", "受入条件"]
+      },
+      "can_decide": ["確認観点", "受入条件", "機械的検査"],
+      "must_not_do": ["ファイル変更", "コマンド実行", "外部送信"]
+    },
+    {
+      "id": "safety",
+      "name": "安全確認",
+      "order": 6,
+      "runs_while_approval_pending": true,
+      "reads": ["task_board.json", "execution_proposal.md", "shared_memory.md"],
+      "writes": ["safety_report.md"],
+      "output": {
+        "file": "safety_report.md",
+        "title": "安全確認",
+        "headings": ["禁止操作", "承認待ち操作", "秘密情報確認"]
+      },
+      "can_decide": ["承認待ち", "禁止操作", "停止理由"],
+      "must_not_do": ["危険操作の実行", "秘密情報利用", "外部送信"]
+    },
+    {
+      "id": "recorder",
+      "name": "記録",
+      "order": 7,
+      "runs_while_approval_pending": true,
+      "reads": ["review_report.md", "qa_checklist.md", "safety_report.md"],
+      "writes": ["decision_log.md"],
+      "output": {
+        "file": "decision_log.md",
+        "title": "判断ログ",
+        "headings": ["判断", "理由", "参照成果物", "次回引き継ぎ"]
+      },
+      "can_decide": ["判断理由の整理", "次回引き継ぎ"],
+      "must_not_do": ["ファイル変更", "コマンド実行", "外部送信"]
+    }
+  ]
+}

@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "catalogType": "sample",
+  "themes": [
+    {
+      "id": "sample-document",
+      "fieldId": "sample-base",
+      "name": "文書を開く",
+      "summary": "起動処理を行わず、疑似教材の文書を表示します。",
+      "presentation": "document",
+      "lifecycle": "none",
+      "material": {
+        "path": "materials/document/index.html",
+        "openMode": "embedded"
+      },
+      "resources": [
+        {
+          "id": "document-source",
+          "label": "文書表示のHTML",
+          "kind": "source",
+          "format": "source",
+          "path": "materials/document/index.html"
+        }
+      ],
+      "environment": {
+        "required": []
+      },
+      "operations": {
+        "open": {
+          "mode": "embedded"
+        }
+      }
+    },
+    {
+      "id": "sample-manual",
+      "fieldId": "sample-base",
+      "name": "外部演習を開く",
+      "summary": "外部環境を自動構築せず、準備状態と入口を表示します。",
+      "presentation": "document",
+      "lifecycle": "manual",
+      "material": {
+        "path": "materials/manual/index.html",
+        "openMode": "new-window"
+      },
+      "environment": {
+        "required": ["利用者が準備する疑似外部環境"]
+      },
+      "operations": {
+        "open": {
+          "mode": "new-window"
+        }
+      }
+    },
+    {
+      "id": "sample-static-web",
+      "fieldId": "sample-web",
+      "name": "静的Webを操作する",
+      "summary": "起動処理なしで疑似Web画面を操作します。",
+      "presentation": "web",
+      "lifecycle": "none",
+      "material": {
+        "path": "materials/static-web/index.html",
+        "openMode": "embedded"
+      },
+      "environment": {
+        "required": []
+      },
+      "operations": {
+        "open": {
+          "mode": "embedded"
+        }
+      }
+    },
+    {
+      "id": "sample-web-process",
+      "fieldId": "sample-web",
+      "name": "Web処理を起動する",
+      "summary": "一つのWeb処理を起動し、画面表示と停止を確認します。",
+      "presentation": "web",
+      "lifecycle": "process",
+      "material": {
+        "path": "materials/runtime/web-server.mjs",
+        "openMode": "embedded"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-web-process",
+          "processes": [
+            {
+              "id": "web",
+              "command": "node",
+              "args": ["materials/runtime/web-server.mjs", "--port", "43101", "--title", "Web処理の疑似テーマ"],
+              "url": "http://127.0.0.1:43101/",
+              "healthUrl": "http://127.0.0.1:43101/health"
+            }
+          ]
+        },
+        "stop": {
+          "mode": "managed"
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-web-stack",
+      "fieldId": "sample-web",
+      "name": "Web構成をまとめて起動する",
+      "summary": "WebとAPIの疑似構成を起動して実際に操作します。",
+      "presentation": "web",
+      "lifecycle": "stack",
+      "material": {
+        "path": "materials/runtime/web-server.mjs",
+        "openMode": "embedded"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-web-stack",
+          "processes": [
+            {
+              "id": "api",
+              "command": "node",
+              "args": ["materials/runtime/api-server.mjs", "--port", "43103"],
+              "healthUrl": "http://127.0.0.1:43103/health"
+            },
+            {
+              "id": "web",
+              "command": "node",
+              "args": ["materials/runtime/web-server.mjs", "--port", "43102", "--title", "Web構成の疑似テーマ", "--api-url", "http://127.0.0.1:43103/run"],
+              "url": "http://127.0.0.1:43102/",
+              "healthUrl": "http://127.0.0.1:43102/health"
+            }
+          ]
+        },
+        "stop": {
+          "mode": "managed"
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-web-shared",
+      "fieldId": "sample-ai",
+      "name": "共有Web環境を利用する",
+      "summary": "既に動いている共有環境を再利用してテーマ別画面を開きます。",
+      "presentation": "web",
+      "lifecycle": "shared",
+      "material": {
+        "path": "materials/runtime/web-server.mjs",
+        "openMode": "embedded"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-shared-web",
+          "processes": [
+            {
+              "id": "shared-web",
+              "command": "node",
+              "args": ["materials/runtime/web-server.mjs", "--port", "43104", "--title", "共有Web環境の疑似テーマ"],
+              "url": "http://127.0.0.1:43104/theme/sample-web-shared",
+              "healthUrl": "http://127.0.0.1:43104/health"
+            }
+          ]
+        },
+        "stop": {
+          "mode": "release"
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-request-process",
+      "fieldId": "sample-web",
+      "name": "APIへリクエストを送る",
+      "summary": "APIを起動し、定義済みリクエストと応答を確認します。",
+      "presentation": "request",
+      "lifecycle": "process",
+      "material": {
+        "path": "materials/runtime/api-server.mjs",
+        "openMode": "none"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-request-process",
+          "processes": [
+            {
+              "id": "api",
+              "command": "node",
+              "args": ["materials/runtime/api-server.mjs", "--port", "43105"],
+              "healthUrl": "http://127.0.0.1:43105/health"
+            }
+          ]
+        },
+        "run": {
+          "mode": "request",
+          "method": "POST",
+          "url": "http://127.0.0.1:43105/run"
+        },
+        "stop": {
+          "mode": "managed"
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-request-stack",
+      "fieldId": "sample-web",
+      "name": "依存環境付きAPIを操作する",
+      "summary": "APIと依存サービスを起動してリクエストを送ります。",
+      "presentation": "request",
+      "lifecycle": "stack",
+      "material": {
+        "path": "materials/runtime/api-server.mjs",
+        "openMode": "none"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-request-stack",
+          "processes": [
+            {
+              "id": "dependency",
+              "command": "node",
+              "args": ["materials/runtime/dependency-server.mjs", "--port", "43106"],
+              "healthUrl": "http://127.0.0.1:43106/health"
+            },
+            {
+              "id": "api",
+              "command": "node",
+              "args": ["materials/runtime/api-server.mjs", "--port", "43107", "--dependency-url", "http://127.0.0.1:43106/value"],
+              "healthUrl": "http://127.0.0.1:43107/health"
+            }
+          ]
+        },
+        "run": {
+          "mode": "request",
+          "requests": [
+            {
+              "id": "health",
+              "label": "稼働確認",
+              "method": "GET",
+              "url": "http://127.0.0.1:43107/health"
+            },
+            {
+              "id": "run",
+              "label": "API実行",
+              "method": "POST",
+              "url": "http://127.0.0.1:43107/run",
+              "inputs": [
+                {
+                  "name": "input",
+                  "label": "入力値",
+                  "target": "body",
+                  "required": true,
+                  "placeholder": "APIへ送る文字列"
+                }
+              ]
+            }
+          ]
+        },
+        "stop": {
+          "mode": "managed"
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-command",
+      "fieldId": "sample-base",
+      "name": "コマンドを1回実行する",
+      "summary": "定義済みコマンドの出力と終了コードを表示します。",
+      "presentation": "command",
+      "lifecycle": "one-shot",
+      "material": {
+        "path": "materials/runtime/command.mjs",
+        "openMode": "none"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "run": {
+          "mode": "command",
+          "process": {
+            "id": "command",
+            "command": "node",
+            "args": ["materials/runtime/command.mjs"]
+          }
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-command-stack",
+      "fieldId": "sample-devops",
+      "name": "依存環境付きコマンドを実行する",
+      "summary": "依存環境の起動、コマンド、ログ、後片付けを確認します。",
+      "presentation": "command",
+      "lifecycle": "stack",
+      "material": {
+        "path": "materials/runtime/command.mjs",
+        "openMode": "none"
+      },
+      "environment": {
+        "required": ["node"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-command-stack",
+          "processes": [
+            {
+              "id": "dependency",
+              "command": "node",
+              "args": ["materials/runtime/dependency-server.mjs", "--port", "43109"],
+              "healthUrl": "http://127.0.0.1:43109/health"
+            }
+          ]
+        },
+        "run": {
+          "mode": "command",
+          "commandOperations": [
+            {
+              "id": "with-dependency",
+              "label": "依存サービス付きで実行",
+              "processes": [
+                {
+                  "id": "command-with-dependency",
+                  "command": "node",
+                  "args": ["materials/runtime/command.mjs", "--dependency-url", "http://127.0.0.1:43109/value"]
+                }
+              ],
+              "input": {
+                "label": "入力値",
+                "defaultValue": "sample"
+              }
+            },
+            {
+              "id": "without-dependency",
+              "label": "単独で実行",
+              "processes": [
+                {
+                  "id": "command-without-dependency",
+                  "command": "node",
+                  "args": ["materials/runtime/command.mjs"]
+                }
+              ],
+              "input": {
+                "label": "入力値",
+                "defaultValue": "sample"
+              }
+            }
+          ]
+        },
+        "stop": {
+          "mode": "managed"
+        }
+      },
+      "timeoutSeconds": 10
+    },
+    {
+      "id": "sample-desktop",
+      "fieldId": "sample-desktop",
+      "name": "外部アプリを起動する",
+      "summary": "外部アプリの起動状態、ログ、終了を確認します。",
+      "presentation": "external-app",
+      "lifecycle": "process",
+      "material": {
+        "path": "materials/runtime/desktop-server.mjs",
+        "openMode": "new-window"
+      },
+      "environment": {
+        "required": ["node", "desktop"]
+      },
+      "operations": {
+        "start": {
+          "runtimeId": "sample-desktop",
+          "processes": [
+            {
+              "id": "desktop",
+              "command": "node",
+              "args": ["materials/runtime/desktop-server.mjs", "--port", "43108"],
+              "url": "http://127.0.0.1:43108/",
+              "healthUrl": "http://127.0.0.1:43108/health"
+            }
+          ]
+        },
+        "stop": {
+          "mode": "managed"
+        }
+      },
+      "timeoutSeconds": 10
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>web45 同時更新を防ぐ楽観ロック</title>
+</head>
+<body>
+  <main>
+    <h1>同時更新を防ぐ楽観ロック</h1>
+    <p>利用者AとBがAPIから同じ版を読み込み、保存時にサーバー上の最新版と比較します。</p>
+
+    <section aria-labelledby="operation-heading">
+      <h2 id="operation-heading">操作</h2>
+      <p>
+        <label for="nameA">利用者Aの更新内容</label>
+        <input id="nameA" type="text" disabled>
+        <button id="loadA" type="button">利用者Aが読込</button>
+        <button id="saveA" type="button">利用者Aが保存</button>
+      </p>
+      <p>
+        <label for="nameB">利用者Bの更新内容</label>
+        <input id="nameB" type="text" disabled>
+        <button id="loadB" type="button">利用者Bが読込</button>
+        <button id="saveB" type="button">利用者Bが保存</button>
+      </p>
+      <button id="reset" type="button">初期状態に戻す</button>
+    </section>
+
+    <section aria-labelledby="result-heading">
+      <h2 id="result-heading">現在の状態</h2>
+      <p id="message" role="status">初期状態です。</p>
+      <p>直近のHTTP状態: <strong id="httpStatus">未実行</strong></p>
+      <dl>
+        <dt>現在のレコード</dt>
+        <dd><code id="currentRecord"></code></dd>
+        <dt>利用者Aの読込内容</dt>
+        <dd><code id="snapshotA"></code></dd>
+        <dt>利用者Bの読込内容</dt>
+        <dd><code id="snapshotB"></code></dd>
+      </dl>
+    </section>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

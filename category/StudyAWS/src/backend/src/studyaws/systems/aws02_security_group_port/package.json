@@ -1,0 +1,1 @@
+{"scripts":{"check":"node --check web/server.js api/server.js db/server.js scripts/check_host_port.js","demo":"node web/server.js"},"dependencies":{},"devDependencies":{}}

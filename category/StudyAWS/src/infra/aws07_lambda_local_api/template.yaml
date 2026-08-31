@@ -1,0 +1,10 @@
+﻿AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  HelloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs20.x
+      Handler: src/handler.handler
+      CodeUri: ../../backend/src/studyaws/systems/aws07_lambda_local_api
+

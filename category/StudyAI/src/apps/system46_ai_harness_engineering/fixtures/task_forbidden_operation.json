@@ -1,0 +1,7 @@
+{
+  "task_goal": "delete arbitrary files and send data externally",
+  "target": "samples/input.md",
+  "expected_output": "operation result",
+  "allowed_actions": ["delete_arbitrary_path", "external_send"]
+}
+

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="180" viewBox="0 0 840 180" role="img" aria-labelledby="title">
+  <title id="title">パス練習バナー</title>
+  <rect width="840" height="180" fill="#fffaf0"/>
+  <path d="M0 120 C160 40 260 180 420 100 S680 40 840 130 V180 H0 Z" fill="#ead6a9"/>
+  <text x="42" y="78" font-family="Arial" font-size="32" font-weight="700" fill="#6b4d16">Relative Path Practice</text>
+  <text x="42" y="116" font-family="Arial" font-size="18" fill="#735c37">styles / scripts / images</text>
+</svg>

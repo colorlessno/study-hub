@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "security18",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「全件」を検索し、trusted、untrusted、restrictedの3文書が表示されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "信頼済み文書のactionがcite_with_labelになることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "信頼できない文書の命令を実行せず、内容を別途確認するactionになることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "利用制限付き文書がneeds_approvalになり、検索結果と閲覧許可が別であることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "検索処理と文書例を表示し、trustごとのactionの対応を確認した"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+# frontend/dist はビルド済み配布物として意図的にコミットする（除外しない）
+build/
+coverage/
+*.tsbuildinfo
+
+# 環境変数・秘密情報（.env.example は残す）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ログ
+*.log
+
+# アプリデータ（実DB・追加音声はコミットしない）
+*.db
+*.sqlite
+*.sqlite3

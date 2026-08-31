@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/storage.js save-read","check":"node --check app/storage.js"},"dependencies":{},"devDependencies":{}}

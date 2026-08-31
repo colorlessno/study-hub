@@ -1,0 +1,160 @@
+name: StudyDevOps CI
+
+on:
+  push:
+    paths:
+      - "category/StudyDevOps/**"
+      - ".github/workflows/studydevops-ci.yml"
+  pull_request:
+    paths:
+      - "category/StudyDevOps/**"
+      - ".github/workflows/studydevops-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-quality:
+    name: Build, lint, and unit test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            category/StudyDevOps/src/apps/devops01_github_actions_build/app/package-lock.json
+            category/StudyDevOps/src/apps/devops02_lint_unit_test/package-lock.json
+      - name: Install devops01 dependencies
+        run: npm ci
+        working-directory: category/StudyDevOps/src/apps/devops01_github_actions_build/app
+      - name: Run devops01 build
+        run: npm run build
+        working-directory: category/StudyDevOps/src/apps/devops01_github_actions_build/app
+      - name: Install devops02 dependencies
+        run: npm ci
+        working-directory: category/StudyDevOps/src/apps/devops02_lint_unit_test
+      - name: Run devops02 lint
+        run: npm run lint
+        working-directory: category/StudyDevOps/src/apps/devops02_lint_unit_test
+      - name: Run devops02 unit tests
+        run: npm test
+        working-directory: category/StudyDevOps/src/apps/devops02_lint_unit_test
+
+  api-integration:
+    name: API integration test
+    needs: node-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build API and test images sequentially
+        run: docker compose --parallel 1 build api test
+        working-directory: category/StudyDevOps/src/apps/devops03_api_test
+      - name: Start API and run tests
+        run: docker compose up --abort-on-container-exit --exit-code-from test
+        working-directory: category/StudyDevOps/src/apps/devops03_api_test
+      - name: Show container logs after failure
+        if: failure()
+        run: docker compose logs
+        working-directory: category/StudyDevOps/src/apps/devops03_api_test
+      - name: Remove API containers
+        if: always()
+        run: docker compose down --volumes
+        working-directory: category/StudyDevOps/src/apps/devops03_api_test
+
+  browser-e2e:
+    name: Playwright E2E test
+    needs: api-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: category/StudyDevOps/src/apps/devops04_playwright_e2e/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: category/StudyDevOps/src/apps/devops04_playwright_e2e
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: category/StudyDevOps/src/apps/devops04_playwright_e2e
+      - name: Run browser tests
+        run: npm run test:e2e
+        working-directory: category/StudyDevOps/src/apps/devops04_playwright_e2e
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: devops04-playwright-failure
+          if-no-files-found: ignore
+          path: |
+            category/StudyDevOps/src/apps/devops04_playwright_e2e/playwright-report/
+            category/StudyDevOps/src/apps/devops04_playwright_e2e/test-results/
+
+  database-integration:
+    name: PostgreSQL integration test
+    needs: browser-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Start PostgreSQL and run tests
+        run: docker compose up --build --abort-on-container-exit --exit-code-from test
+        working-directory: category/StudyDevOps/src/apps/devops05_db_ci
+      - name: Show container logs after failure
+        if: failure()
+        run: docker compose logs
+        working-directory: category/StudyDevOps/src/apps/devops05_db_ci
+      - name: Remove database containers and volumes
+        if: always()
+        run: docker compose down --volumes
+        working-directory: category/StudyDevOps/src/apps/devops05_db_ci
+
+  operations-signals:
+    name: Logging, health, and incident evidence
+    needs: database-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            category/StudyDevOps/src/apps/devops06_request_id_logging/app/package-lock.json
+            category/StudyDevOps/src/apps/devops07_health_check_endpoint/app/package-lock.json
+            category/StudyDevOps/src/apps/devops08_docker_logs_investigation/app/package-lock.json
+      - name: Test request ID logging
+        run: npm ci && npm test
+        working-directory: category/StudyDevOps/src/apps/devops06_request_id_logging/app
+      - name: Test health and readiness
+        run: npm ci && npm test
+        working-directory: category/StudyDevOps/src/apps/devops07_health_check_endpoint/app
+      - name: Test investigation signals
+        run: npm ci && npm test
+        working-directory: category/StudyDevOps/src/apps/devops08_docker_logs_investigation/app
+      - name: Verify incident response artifacts
+        run: |
+          test -s category/StudyDevOps/src/apps/devops09_incident_runbook/docs/runbook.md
+          test -s category/StudyDevOps/src/apps/devops09_incident_runbook/docs/sample_incident_report.md
+          test -s category/StudyDevOps/src/apps/devops09_incident_runbook/app/src/report.js
+      - name: Verify release decision artifacts
+        run: |
+          test -s category/StudyDevOps/doc/learning_notes/devops10_evidence_driven_design_review/docs/evidence_guide.md
+          test -s category/StudyDevOps/doc/learning_notes/devops10_evidence_driven_design_review/docs/sample_release_decision.md
+          test -s category/StudyDevOps/src/apps/devops10_evidence_driven_design_review/app/src/decision-record.js

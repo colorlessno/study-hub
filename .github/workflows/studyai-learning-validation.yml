@@ -1,0 +1,44 @@
+name: StudyAI learning validation
+
+on:
+  push:
+    paths:
+      - "category/StudyAI/**"
+      - ".github/workflows/studyai-learning-validation.yml"
+  pull_request:
+    paths:
+      - "category/StudyAI/**"
+      - ".github/workflows/studyai-learning-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studyai-learning-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-ai-learning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install AI learning validation dependencies
+        run: >-
+          python -m pip install
+          "Pillow>=11.2.1,<12.0.0"
+          "httpx>=0.28.1,<1.0.0"
+          "pydantic-settings>=2.10.0,<3.0.0"
+
+      - name: Run AI learning validation
+        run: python category/StudyAI/scripts/validate-ai-learning.py
+
+      - name: Run dependency-free system03 RAG validation
+        run: python category/StudyAI/scripts/validate-system03-rag-learning.py

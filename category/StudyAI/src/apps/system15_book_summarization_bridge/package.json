@@ -1,0 +1,13 @@
+{
+  "name": "system15-book-summarization-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node app/server.js",
+    "test": "node --test --test-concurrency=1 test/server.test.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "devops01",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「ローカルでビルドを確認」を実行し、JSON形式の結果が表示された"
+    },
+    {
+      "id": "check-02",
+      "label": "package.jsonで、checkからbuildが呼ばれることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "GitHub Actionsで、ソース取得、Node.js準備、依存パッケージ準備、ビルド確認の順に処理されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "GitHub Actionsがローカルと同じnpmの処理を呼び出すことを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "working-directoryがビルド対象のフォルダを指定することを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "実際のGitHub Actions定義で、各jobが一つずつ順番に実行されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "成功ログ、失敗したstep、Dockerfileを見比べ、依存準備とビルド失敗を分類できた"
+    }
+  ]
+}

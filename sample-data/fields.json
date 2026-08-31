@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "catalogType": "sample",
+  "fields": [
+    {
+      "id": "sample-base",
+      "name": "IT基礎（疑似データ）",
+      "summary": "文書、外部演習、1回実行の画面動作を確認します。",
+      "order": 10
+    },
+    {
+      "id": "sample-web",
+      "name": "Web開発（疑似データ）",
+      "summary": "Web画面、API、複数処理の画面動作を確認します。",
+      "order": 20
+    },
+    {
+      "id": "sample-ai",
+      "name": "AI（疑似データ）",
+      "summary": "複数テーマで共有する実行環境の画面動作を確認します。",
+      "order": 30
+    },
+    {
+      "id": "sample-devops",
+      "name": "DevOps（疑似データ）",
+      "summary": "依存環境を伴うコマンド実行と後片付けを確認します。",
+      "order": 40
+    },
+    {
+      "id": "sample-desktop",
+      "name": "デスクトップアプリ（疑似データ）",
+      "summary": "StudyHub外で開くアプリの状態と終了を確認します。",
+      "order": 50
+    }
+  ]
+}

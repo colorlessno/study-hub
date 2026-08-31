@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "demo": "node app/db_check.js successful-connection",
+    "check": "node --check app/db_check.js"
+  },
+  "dependencies": {
+    "pg": "8.13.1"
+  },
+  "devDependencies": {}
+}

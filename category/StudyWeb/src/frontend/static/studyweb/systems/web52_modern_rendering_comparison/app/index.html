@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web表示方式の比較</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="theme-id">web52</p>
+      <h1>Web表示方式の比較</h1>
+      <p>利用場面の条件から表示方式を選び、選定理由を判断メモに残します。</p>
+    </header>
+
+    <section aria-labelledby="scenario-heading">
+      <div class="section-heading">
+        <h2 id="scenario-heading">1. 利用場面を選ぶ</h2>
+        <span id="saved-count" class="saved-count">保存済み 0/4</span>
+      </div>
+      <label for="scenario-select">利用場面</label>
+      <select id="scenario-select"></select>
+      <dl id="scenario-conditions" class="conditions"></dl>
+      <p id="scenario-hint" class="hint"></p>
+    </section>
+
+    <form id="decision-form">
+      <section aria-labelledby="method-heading">
+        <h2 id="method-heading">2. 表示方式を選ぶ</h2>
+        <fieldset>
+          <legend>基本となる方式</legend>
+          <div id="method-options" class="choice-grid"></div>
+        </fieldset>
+        <fieldset>
+          <legend>必要に応じて組み合わせる仕組み</legend>
+          <div id="strategy-options" class="choice-grid"></div>
+        </fieldset>
+      </section>
+
+      <section aria-labelledby="memo-heading">
+        <h2 id="memo-heading">3. 判断メモを書く</h2>
+        <div class="form-grid">
+          <label>選定理由
+            <textarea name="reason" rows="3"></textarea>
+          </label>
+          <label>サーバーとブラウザの役割分担
+            <textarea name="responsibilities" rows="3"></textarea>
+          </label>
+          <label>キャッシュする範囲
+            <textarea name="cacheBoundary" rows="3"></textarea>
+          </label>
+          <label>採用しなかった案と理由
+            <textarea name="rejected" rows="3"></textarea>
+          </label>
+          <label>運用上の注意点
+            <textarea name="risk" rows="3"></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <button type="submit" class="primary">この判断メモを保存</button>
+          <button type="button" id="clear-current">このメモをクリア</button>
+        </div>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+      </section>
+    </form>
+
+    <section aria-labelledby="preview-heading">
+      <h2 id="preview-heading">保存した判断メモ</h2>
+      <pre id="memo-preview">まだ保存されていません。</pre>
+    </section>
+
+    <aside>
+      この画面の入力内容はブラウザ内だけに保存されます。サーバーへの送信は行いません。
+    </aside>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

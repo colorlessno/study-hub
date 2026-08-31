@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/demo.js","check":"node --check app/masker.js && node --check app/demo.js && node --check test/masker.test.js","test":"node --test --test-concurrency=1 test/masker.test.js"},"dependencies":{},"devDependencies":{}}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>arch01 システム構成の分解</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <h1>システム構成の分解</h1>
+    <p>画面から注文を保存し、一連の処理を構成要素ごとに追跡します。</p>
+
+    <section>
+      <h2>処理の流れ</h2>
+      <ol id="system-flow" class="flow"></ol>
+    </section>
+
+    <section>
+      <h2>注文を保存する</h2>
+      <form id="order-form">
+        <label>注文名 <input id="order-title" name="title" value="構成を追跡する注文" required></label>
+        <button type="submit">SQLiteへ保存</button>
+      </form>
+      <p id="operation-result" role="status"></p>
+    </section>
+
+    <section>
+      <h2>障害と復旧を確認する</h2>
+      <button id="failure-on" type="button">障害モードを開始</button>
+      <button id="failure-off" type="button">復旧する</button>
+      <button id="check-ready" type="button">利用可能状態を確認</button>
+      <pre id="ready-result"></pre>
+    </section>
+
+    <section>
+      <h2>SQLiteに保存された注文</h2>
+      <button id="reload-orders" type="button">一覧を更新</button>
+      <table>
+        <thead><tr><th>ID</th><th>注文名</th><th>保存日時</th></tr></thead>
+        <tbody id="orders"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>実行ログ</h2>
+      <button id="reload-logs" type="button">ログを更新</button>
+      <table>
+        <thead><tr><th>Trace ID</th><th>要求</th><th>状態</th><th>処理内容</th></tr></thead>
+        <tbody id="logs"></tbody>
+      </table>
+    </section>
+  </main>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

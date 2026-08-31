@@ -1,0 +1,25 @@
+{
+  "task_id": "task-001",
+  "title": "学習教材の設計案を作る",
+  "goal": "AI組織運用の最小教材について、計画、設計、レビュー、QA、安全確認、最終報告を作る。",
+  "constraints": [
+    "外部AI APIを使わない",
+    "実秘密情報や実顧客データを使わない",
+    "危険操作は実行しない"
+  ],
+  "expected_outputs": [
+    "plan.md",
+    "design_note.md",
+    "execution_proposal.md",
+    "review_report.md",
+    "qa_checklist.md",
+    "safety_report.md",
+    "decision_log.md",
+    "final_report.md"
+  ],
+  "requested_operations": [
+    "要約",
+    "計画案作成",
+    "レビュー観点作成"
+  ]
+}

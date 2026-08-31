@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "revision": 4,
+  "themeId": "system41",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "既定値で実行し、itemが商品マスタ・OCR・センサーと一致し、数量2と推定されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "unknown_boxがマスタ未登録かつセンサーの裏付けなしとして確認待ち一覧に入ることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "image_inputs.shelf_imageのqualityをlowへ変更し、画像品質不足の注意点が表示されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "画像・OCR・センサーの数量を変更し、数量不一致の理由が異常候補へ表示されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "confidence_thresholdを高くし、信頼度がしきい値を下回る候補が確認待ちになることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "human_reviewへ確認者と候補ごとの確認結果を設定し、状態がconfirmedへ変わることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "人間確認結果がStudyAIバックエンドの実行履歴と監査記録へ保存され、画面にJSON保存成功と保持件数が表示されることを確認した"
+    },
+    {
+      "id": "check-08",
+      "label": "バックエンドを再起動し、保存済みの照合結果と人間確認結果が実行履歴へ復元されることを確認した"
+    }
+  ]
+}

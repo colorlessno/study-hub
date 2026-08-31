@@ -1,0 +1,10 @@
+{
+  "task_id": "task-003",
+  "title": "目的が不足した依頼",
+  "goal": "",
+  "constraints": [],
+  "expected_outputs": [],
+  "requested_operations": [
+    "計画案作成"
+  ]
+}

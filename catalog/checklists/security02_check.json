@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security02",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "JWTを発行し、header・payload・signatureの3部分に分かれていることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "正常なJWTから利用者ID・ロール・発行時刻・有効期限を取得できることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "signatureを改ざんしたJWTが401で拒否されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "有効期限を過ぎたJWTが401で拒否されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "JWTのpayloadは読めるため秘密情報を保存できないことを説明した"
+    },
+    {
+      "id": "check-06",
+      "label": "誤った資格情報ではJWTを発行せず401で拒否されることを確認した"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"scripts":{"start":"node app/server.js","demo":"node app/demo.js","check":"node --check app/server.js && node --check app/rate_limiter.js && node --check app/demo.js"},"dependencies":{},"devDependencies":{}}

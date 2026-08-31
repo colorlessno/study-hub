@@ -1,0 +1,1 @@
+{"vulnerabilities":[{"package":"demo-parser","severity":"high","fixAvailable":true,"note":"架空パッケージの更新例"},{"package":"demo-renderer","severity":"moderate","fixAvailable":false,"note":"代替または保留判断が必要"}]}

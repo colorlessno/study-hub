@@ -1,0 +1,85 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 32px 16px;
+  color: #24313d;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.7;
+  background: #f0f5f3;
+}
+
+.page-shell {
+  width: min(100%, 840px);
+  margin: 0 auto;
+}
+
+.sample-label {
+  margin: 0 0 8px;
+  color: #557065;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 2rem;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.resource-panel,
+.check-panel {
+  margin-top: 24px;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #d8e5df;
+  border-radius: 8px;
+}
+
+.resource-panel {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 24px;
+  align-items: center;
+}
+
+img {
+  width: 160px;
+  height: 160px;
+}
+
+button {
+  min-height: 42px;
+  padding: 0 16px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  background: #256b54;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1e5744;
+}
+
+#loadStatus {
+  min-height: 44px;
+  margin-bottom: 0;
+  padding: 12px;
+  background: #f7fbf9;
+  border: 1px solid #cfe2d8;
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  .resource-panel {
+    grid-template-columns: 1fr;
+  }
+}

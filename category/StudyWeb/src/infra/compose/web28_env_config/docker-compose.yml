@@ -1,0 +1,20 @@
+﻿services:
+  # Run with --env-file ../../env/web28_env_config/.env.example for sample required values.
+  frontend:
+    build: ../../../frontend/src/studyweb/systems/web28_env_config/frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:?VITE_API_URL is required}
+    ports:
+      - "${FRONTEND_PORT:?FRONTEND_PORT is required}:5173"
+    depends_on:
+      - backend
+
+  backend:
+    build: ../../../backend/src/studyweb/systems/web28_env_config/backend
+    environment:
+      PORT: ${API_INTERNAL_PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      APP_MESSAGE: ${APP_MESSAGE:-local sample configuration}
+    ports:
+      - "${API_PORT:?API_PORT is required}:${API_INTERNAL_PORT:-3000}"
+

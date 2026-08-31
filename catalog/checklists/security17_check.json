@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security17",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「通常の問い合わせ」を判定し、decisionがanswerになることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「命令上書きの疑い」を判定し、decisionがreviewになることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「秘密情報の要求」を判定し、decisionがrejectになることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "system指示とuser入力が別の値として扱われ、user入力がuntrusted_dataとして表示されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "判定結果がdecisionとreasonの許可された組だけであり、outputValidがtrueになることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "文字列判定だけでは言い換えを網羅できず、権限制限と実行前確認も必要であることを確認した"
+    }
+  ]
+}

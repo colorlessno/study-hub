@@ -1,0 +1,25 @@
+name: Portfolio validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate-documents:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate UTF-8, links, and learning catalog
+        shell: pwsh
+        run: ./scripts/validate_portfolio.ps1
+
+      - name: Validate field contracts
+        run: node scripts/validate-study-catalog.mjs

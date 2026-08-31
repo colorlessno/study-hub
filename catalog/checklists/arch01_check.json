@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "arch01",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "arch01を起動し、画面・HTTP API・業務処理・SQLite・実行ログの構成を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "画面から注文を登録し、SQLiteに保存された注文一覧へ追加されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "注文登録時のTrace IDを実行ログで探し、POST要求・保存処理・HTTP 201を対応づけた"
+    },
+    {
+      "id": "check-04",
+      "label": "障害モードを開始し、readinessが503になり注文を保存できなくなることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "復旧後にreadinessが200へ戻り、注文を再び保存できることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "ソースと実行結果から確認した事実を、設計意図に関する推測と分けて整理した"
+    },
+    {
+      "id": "check-07",
+      "label": "画面・API・SQLite・ログを分けた理由、不利な点、代替案を構成判断メモへ整理した"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+name: studybase-gitea-lab
+
+services:
+  server:
+    image: docker.gitea.com/gitea:1.27.1
+    restart: "no"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=sqlite3
+      - GITEA__server__DOMAIN=localhost
+      - GITEA__server__ROOT_URL=http://127.0.0.1:3418/
+      - GITEA__service__DISABLE_REGISTRATION=true
+    volumes:
+      - gitea_data:/data
+    ports:
+      - "127.0.0.1:3418:3000"
+
+volumes:
+  gitea_data:

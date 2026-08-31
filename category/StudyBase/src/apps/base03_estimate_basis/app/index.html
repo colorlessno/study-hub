@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>base03 見積り根拠</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <p class="theme-id">base03</p>
+    <h1>見積り根拠</h1>
+    <p>作業を分解し、対象範囲、根拠、リスク、再見積り条件を日数と対応付けます。</p>
+    <p class="notice">秘密情報、個人情報、実顧客情報は入力しないでください。入力内容はこのブラウザ内だけに保存されます。</p>
+
+    <nav class="steps" aria-label="見積り根拠の作成手順">
+      <button type="button" data-step-button="1">1. 範囲・前提</button>
+      <button type="button" data-step-button="2">2. 作業分解</button>
+      <button type="button" data-step-button="3">3. リスク</button>
+      <button type="button" data-step-button="4">4. 合計・保存</button>
+    </nav>
+
+    <form id="estimate-form">
+      <section data-step-panel="1">
+        <h2>見積りの範囲と前提を決める</h2>
+        <label>依頼内容<textarea name="request" rows="4"></textarea></label>
+        <label>見積り対象<textarea name="targetScope" rows="4" placeholder="今回の見積りに含める内容"></textarea></label>
+        <div class="field-grid">
+          <label>対象外<textarea name="excludedScope" rows="5" placeholder="1行に1件ずつ記入"></textarea></label>
+          <label>前提<textarea name="assumptions" rows="5" placeholder="1行に1件ずつ記入"></textarea></label>
+        </div>
+        <div class="field-grid">
+          <label>見積り単位<input value="人日" disabled></label>
+          <label>見積り日<input name="estimateDate" type="date"></label>
+        </div>
+        <div class="actions">
+          <button type="button" id="load-scenario">固定シナリオを読み込む</button>
+        </div>
+      </section>
+
+      <section data-step-panel="2" hidden>
+        <h2>作業を分解して根拠を付ける</h2>
+        <p>空欄の作業は出力しません。使う作業は工程、作業内容、成果物、見積り、根拠をすべて記入します。</p>
+        <div id="work-items" class="item-list"></div>
+      </section>
+
+      <section data-step-panel="3" hidden>
+        <h2>変動要因をリスクとして記録する</h2>
+        <p>空欄のリスクは出力しません。使うリスクはすべての項目を記入します。</p>
+        <div id="risk-items" class="item-list"></div>
+      </section>
+
+      <section data-step-panel="4" hidden>
+        <h2>合計と再見積り条件を確認する</h2>
+        <div class="total-box">
+          <span>作業見積りの合計</span>
+          <strong><output id="estimate-total">0.0</output> 人日</strong>
+        </div>
+        <label>再見積り条件<textarea name="reestimateConditions" rows="5" placeholder="1行に1件ずつ記入"></textarea></label>
+        <label>補足<textarea name="notes" rows="4" placeholder="見積りの読み方や注意事項"></textarea></label>
+        <div class="actions">
+          <button type="button" id="save-estimate">ブラウザ内に保存</button>
+          <button type="button" id="download-current">表示中の文書をダウンロード</button>
+          <button type="button" id="clear-estimate" class="secondary">保存内容をクリア</button>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <div class="preview-tabs" aria-label="出力文書の切替">
+          <button type="button" data-preview-kind="basis">見積り根拠表</button>
+          <button type="button" data-preview-kind="work">作業分解表</button>
+          <button type="button" data-preview-kind="risks">リスク一覧</button>
+        </div>
+        <h3 id="preview-title">見積り根拠表のプレビュー</h3>
+        <pre id="preview">まだ保存されていません。</pre>
+      </section>
+    </form>
+
+    <footer class="step-footer">
+      <button type="button" id="previous-step">前の手順</button>
+      <span id="step-position">1 / 4</span>
+      <button type="button" id="next-step">次の手順</button>
+    </footer>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

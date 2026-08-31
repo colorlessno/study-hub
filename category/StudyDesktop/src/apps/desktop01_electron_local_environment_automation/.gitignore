@@ -1,0 +1,5 @@
+node_modules/
+workspace/*
+!workspace/.gitkeep
+npm-debug.log*
+electron-debug.log*

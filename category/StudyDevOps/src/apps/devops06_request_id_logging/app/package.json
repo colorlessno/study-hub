@@ -1,0 +1,10 @@
+{
+  "name": "studydevops-devops06-request-id",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test --test-concurrency=1 ../tests/logging.test.js"
+  }
+}

@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    environment:
+      DATABASE_URL: file:/app/data/web50.db
+      PORT: "3050"
+    ports:
+      - "43350:3050"
+    volumes:
+      - web50-data:/app/data
+
+volumes:
+  web50-data:

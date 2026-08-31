@@ -1,0 +1,21 @@
+{
+  "name": "desktop01-electron-local-environment-automation",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/main/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "setup:electron": "node node_modules/electron/install.js",
+    "start": "electron .",
+    "plan": "node scripts/safe_install_plan.js --plan",
+    "mock:clone": "node scripts/safe_install_plan.js --mock-clone",
+    "mock:venv": "node scripts/safe_install_plan.js --mock-venv",
+    "mock:install": "node scripts/safe_install_plan.js --mock-install",
+    "mock:wait": "node scripts/safe_install_plan.js --mock-wait",
+    "check:allowlist": "node src/main/commandAllowlist.js",
+    "verify": "node --test --test-concurrency=1"
+  },
+  "devDependencies": {
+    "electron": "^42.0.0"
+  }
+}

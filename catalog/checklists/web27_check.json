@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web27",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "Nginxが配信するWebページを表示した"
+    },
+    {
+      "id": "check-02",
+      "label": "「APIの稼働状態を確認」を押し、同じ接続元からAPI応答を取得した"
+    },
+    {
+      "id": "check-03",
+      "label": "`/api/health`への要求が、API側の`/health`へ転送されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "API停止時に画面でHTTP 502または504を確認し、NginxとAPIのログを比較した"
+    }
+  ]
+}

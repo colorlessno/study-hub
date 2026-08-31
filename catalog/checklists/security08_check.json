@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "security08",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "教材画面で<b>sample</b>を表示し、タグではなく文字として表示されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "安全な表示欄と危険な処理の説明欄が、どちらも入力内容を実行しないことを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "JavaScriptを開き、入力値をinnerHTMLではなくtextContentへ設定していることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "引用符・記号・改行を入力し、内容が変更されず文字として表示されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "出力先ごとの安全な処理を開き、HTML本文・属性・URLでは確認方法が異なることを確認した"
+    }
+  ]
+}

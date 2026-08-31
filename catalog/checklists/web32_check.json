@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "web32",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "GETとPOSTを実行し、要求方法・ヘッダー・本文・HTTP状態番号を確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "要求ヘッダーと応答ヘッダーを分け、X-Client・Content-Type・X-Study-Request-Idを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "存在しないURLへの要求で、HTTP 404とnot_foundの応答本文を確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "教材画面とStudyHubの要求操作で表示される内容を比較した"
+    },
+    {
+      "id": "check-05",
+      "label": "観察記録ひな形へ、確認した要求と応答の違いを記録した"
+    }
+  ]
+}

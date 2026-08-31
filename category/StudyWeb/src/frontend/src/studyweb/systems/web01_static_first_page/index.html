@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web01 最初の自己紹介ページ</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <main class="profile-card" aria-labelledby="pageTitle">
+      <p class="sample-label">web01</p>
+      <h1 id="pageTitle">自己紹介ページ</h1>
+
+      <section class="profile-summary" aria-labelledby="profileName">
+        <h2 id="profileName">Web学習者</h2>
+        <p>
+          HTML、CSS、JavaScript の役割を確認しながら、Webページ作りの最初の一歩を学習中です。
+        </p>
+      </section>
+
+      <section class="profile-list" aria-labelledby="profileListTitle">
+        <h2 id="profileListTitle">学習メモ</h2>
+        <ul>
+          <li>好きなもの: 分かりやすい画面と整理されたコード</li>
+          <li>学習中のこと: HTMLの構造、CSSの見た目、JavaScriptの動き</li>
+          <li>目標: 小さなWebサンプルを順番に作れるようになる</li>
+        </ul>
+      </section>
+
+      <section class="interaction-area" aria-labelledby="interactionTitle">
+        <h2 id="interactionTitle">JavaScriptの動き</h2>
+        <button id="messageButton" type="button">あいさつを表示</button>
+        <p id="messageOutput" class="message-output" aria-live="polite">
+          ボタンを押すと、JavaScriptでこの表示が変わります。
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

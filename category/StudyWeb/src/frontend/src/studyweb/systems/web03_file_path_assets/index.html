@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web03 ファイルパス</title>
+    <link rel="stylesheet" href="./styles/style.css">
+    <script src="./scripts/main.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <p class="sample-label">web03</p>
+      <h1>画像・CSS・JavaScriptのファイルパス</h1>
+      <p>HTMLから見た相対パスで、CSS、JavaScript、画像を読み込みます。</p>
+
+      <img class="banner" src="./images/banner.svg" alt="相対パス確認用バナー">
+
+      <section class="card">
+        <img class="avatar" src="./images/avatar.svg" alt="アバター画像">
+        <div>
+          <h2>トップページ</h2>
+          <p><code>styles/style.css</code>、<code>scripts/main.js</code>、<code>images/avatar.svg</code> を参照しています。</p>
+          <button class="path-button" type="button">JavaScriptの読込を確認</button>
+          <p class="path-message" aria-live="polite">ボタンでJavaScriptの読み込みを確認します。</p>
+        </div>
+      </section>
+
+      <p><a href="./about.html">about.html を開く</a></p>
+    </main>
+  </body>
+</html>

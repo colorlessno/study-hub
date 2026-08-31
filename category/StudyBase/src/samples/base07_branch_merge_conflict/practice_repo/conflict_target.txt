@@ -1,0 +1,3 @@
+Title: Conflict Practice
+Decision: edit this line in two branches
+Footer: keep this line

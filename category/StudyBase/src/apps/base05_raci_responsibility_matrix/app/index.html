@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>base05 RACI・責任分担</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <main>
+    <p class="theme-id">base05</p>
+    <h1>RACI・責任分担</h1>
+    <p>作業ごとに実施者、最終承認者、相談先、共有先を分け、判断待ちとエスカレーションを整理します。</p>
+    <p class="notice">実在する個人名や社外秘の組織情報は入力せず、役割名で記録してください。入力内容はこのブラウザ内だけに保存されます。</p>
+
+    <nav class="steps" aria-label="責任分担を整理する手順">
+      <button type="button" data-step-button="1">1. 対象・関係者</button>
+      <button type="button" data-step-button="2">2. 作業別RACI</button>
+      <button type="button" data-step-button="3">3. 判断待ち・依頼</button>
+      <button type="button" data-step-button="4">4. 確認・保存</button>
+    </nav>
+
+    <form id="raci-form">
+      <section data-step-panel="1">
+        <h2>対象と関係者を整理する</h2>
+        <label>対象案件<input name="projectName"></label>
+        <label>整理する範囲<textarea name="scope" rows="4"></textarea></label>
+        <label>関係者の役割<textarea name="stakeholders" rows="9" placeholder="1行に1つの役割名を入力"></textarea></label>
+        <p>個人名ではなく「開発担当」「依頼部門責任者」のような役割名を1行に1件ずつ記録します。</p>
+        <div class="actions">
+          <button type="button" id="load-scenario">固定シナリオを読み込む</button>
+        </div>
+      </section>
+
+      <section data-step-panel="2" hidden>
+        <h2>作業ごとにRACIを決める</h2>
+        <dl class="raci-guide">
+          <div><dt>R</dt><dd>作業を実施する役割</dd></div>
+          <div><dt>A</dt><dd>最終判断と結果に責任を持つ役割。各作業に1つだけ記録</dd></div>
+          <div><dt>C</dt><dd>作業前や判断前に相談する役割</dd></div>
+          <div><dt>I</dt><dd>結果や決定内容を共有する役割</dd></div>
+        </dl>
+        <p>RとAには役割を1つだけ記録します。CとIは複数の役割を読点で区切れます。</p>
+        <div id="work-items" class="item-list"></div>
+      </section>
+
+      <section data-step-panel="3" hidden>
+        <h2>判断待ちとエスカレーションを整理する</h2>
+        <h3>判断待ち事項</h3>
+        <p>決定者と期限を明記し、未決定のまま放置しないための一覧です。</p>
+        <div id="decision-items" class="item-list"></div>
+        <h3>エスカレーション</h3>
+        <p>自分の役割では決められない事項を、理由と影響を添えて依頼します。</p>
+        <div id="escalation-items" class="item-list"></div>
+      </section>
+
+      <section data-step-panel="4" hidden>
+        <h2>整合性を確認して保存する</h2>
+        <div class="summary-box">
+          <strong id="analysis-title">入力内容を確認してください</strong>
+          <span id="analysis-summary">作業分担、判断待ち、エスカレーションの件数を表示します。</span>
+        </div>
+        <div class="actions">
+          <button type="button" id="validate-raci">整合性を確認</button>
+          <button type="button" id="save-raci">ブラウザ内に保存</button>
+          <button type="button" id="download-current">表示中の文書をダウンロード</button>
+          <button type="button" id="clear-raci" class="secondary">保存内容をクリア</button>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <div class="preview-tabs" aria-label="出力文書の切替">
+          <button type="button" data-preview-kind="raci">RACI表</button>
+          <button type="button" data-preview-kind="decisions">判断待ち事項一覧</button>
+          <button type="button" data-preview-kind="escalations">エスカレーションメモ</button>
+        </div>
+        <h3 id="preview-title">RACI表のプレビュー</h3>
+        <pre id="preview">まだ保存されていません。</pre>
+      </section>
+    </form>
+
+    <footer class="step-footer">
+      <button type="button" id="previous-step">前の手順</button>
+      <span id="step-position">1 / 4</span>
+      <button type="button" id="next-step">次の手順</button>
+    </footer>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

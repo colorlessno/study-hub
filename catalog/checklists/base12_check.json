@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "themeId": "base12",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "base12がStudyBase側の案内入口で、学習本体はarch01にあることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「arch01を開く」リンクから正規テーマへ移動できることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "システム構成の記入例とひな形はarch01で確認し、学習進捗もarch01へ記録することを確認した"
+    }
+  ]
+}

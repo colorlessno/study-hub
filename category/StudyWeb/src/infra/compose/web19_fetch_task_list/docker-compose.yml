@@ -1,0 +1,14 @@
+﻿services:
+  backend:
+    build: ../../../backend/src/studyweb/systems/web19_fetch_task_list/backend
+    ports:
+      - "13019:3000"
+  frontend:
+    build: ../../../frontend/src/studyweb/systems/web19_fetch_task_list/frontend
+    ports:
+      - "5179:5173"
+    environment:
+      VITE_API_URL: http://localhost:13019
+    depends_on:
+      - backend
+

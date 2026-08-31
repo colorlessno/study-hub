@@ -1,0 +1,1 @@
+{"scripts":{"demo":"node app/policy_check.js","check":"node --check app/policy_check.js"},"dependencies":{},"devDependencies":{}}

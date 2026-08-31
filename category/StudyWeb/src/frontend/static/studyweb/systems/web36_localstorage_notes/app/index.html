@@ -1,0 +1,28 @@
+<!doctype html><meta charset="utf-8"><title>web36 localStorageの注意点</title>
+<h1>ブラウザ保存領域の比較</h1>
+<p>秘密情報ではない架空の学習メモだけを保存してください。</p>
+
+<section>
+  <h2>localStorage</h2>
+  <p>同じ表示元なら、ページ再読み込みやブラウザ再起動後も残ります。</p>
+  <label for="local-value">学習メモ</label>
+  <input id="local-value" value="localStorageの学習メモ">
+  <button id="local-save">保存</button>
+  <button id="local-load">読込</button>
+  <button id="local-clear">削除</button>
+  <pre id="local-out" aria-live="polite"></pre>
+</section>
+
+<section>
+  <h2>sessionStorage</h2>
+  <p>同じタブの再読み込みでは残りますが、新しいタブには引き継がれません。</p>
+  <label for="session-value">学習メモ</label>
+  <input id="session-value" value="sessionStorageの学習メモ">
+  <button id="session-save">保存</button>
+  <button id="session-load">読込</button>
+  <button id="session-clear">削除</button>
+  <pre id="session-out" aria-live="polite"></pre>
+</section>
+
+<p><strong>注意:</strong> 本物のtoken、password、氏名、メールアドレスは入力しないでください。</p>
+<script src="src/main.js"></script>

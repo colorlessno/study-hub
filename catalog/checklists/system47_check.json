@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "revision": 5,
+  "themeId": "system47",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "PostgreSQLで月別集計SQLを実行し、注文数・販売数・売上額が月ごとに表示されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "PostgreSQLで商品別集計SQLを実行し、商品ごとの売上額と値引率が表示されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "PostgreSQLで顧客区分別集計SQLを実行し、顧客区分と地域ごとの売上額が表示されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "3種類のSQLが実行直前に読み取り専用として検証されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「更新SQLを拒否」を実行し、データを変更するSQLが拒否されることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "SQL集計結果だけがローカルAIへ送られ、傾向・異常値・仮説・次の分析観点・注意点が説明されることを確認した"
+    },
+    {
+      "id": "check-07",
+      "label": "AIの説明結果がoutputs/ai_explanation_latest.jsonとoutputs/ai_explanation_latest.mdに保存されることを確認した"
+    }
+  ]
+}

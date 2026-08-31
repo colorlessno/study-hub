@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "themeId": "security16",
+  "title": "学習項目",
+  "items": [
+    {
+      "id": "check-01",
+      "label": "「監査結果と対応候補」を実行し、件数集計と対応候補が同時に表示されることを確認した"
+    },
+    {
+      "id": "check-02",
+      "label": "「重要度別の件数」を実行し、highとmoderateが1件ずつ集計されることを確認した"
+    },
+    {
+      "id": "check-03",
+      "label": "「重要度順の対応候補」を実行し、highがmoderateより先に表示されることを確認した"
+    },
+    {
+      "id": "check-04",
+      "label": "監査結果の例と変換処理を表示し、fixAvailableが出力へ保持され、updateとreviewへ変換されることを確認した"
+    },
+    {
+      "id": "check-05",
+      "label": "「不正な監査結果を拒否」を実行し、vulnerabilitiesが配列でない入力が拒否されることを確認した"
+    },
+    {
+      "id": "check-06",
+      "label": "重要度だけで更新を決定せず、影響範囲、互換性、テスト結果を確認して対応を決めることを確認した"
+    }
+  ]
+}

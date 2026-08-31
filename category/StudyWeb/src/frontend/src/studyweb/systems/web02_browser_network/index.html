@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web02 ブラウザ通信の観察</title>
+    <link rel="stylesheet" href="./styles/style.css">
+    <script src="./scripts/main.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header>
+        <p class="sample-label">web02</p>
+        <h1>ブラウザ通信の観察</h1>
+        <p>ブラウザ開発者ツールのNetwork（通信）タブで、ページ本体・見た目・動き・画像が読み込まれる流れを確認します。</p>
+      </header>
+
+      <section class="resource-panel" aria-labelledby="resourceTitle">
+        <div>
+          <h2 id="resourceTitle">読み込まれるファイル</h2>
+          <ul>
+            <li><code>index.html</code>: ページ本体</li>
+            <li><code>styles/style.css</code>: 見た目</li>
+            <li><code>scripts/main.js</code>: 動き</li>
+            <li><code>images/profile-placeholder.svg</code>: 画像</li>
+          </ul>
+        </div>
+        <img src="./images/profile-placeholder.svg" alt="Network確認用のプロフィール画像">
+      </section>
+
+      <section class="check-panel" aria-labelledby="checkTitle">
+        <h2 id="checkTitle">JavaScript読み込み確認</h2>
+        <button id="checkButton" type="button">読み込み状態を表示</button>
+        <p id="loadStatus" aria-live="polite">ボタンを押すと、JavaScriptが読み込まれたことを確認できます。</p>
+      </section>
+    </main>
+  </body>
+</html>
