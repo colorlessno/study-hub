@@ -43,7 +43,7 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 - リスク検知の即時通知
 - 大量データ性能検証
 
-残作業は `doc/system14/remaining_tasks.md` に蓄積される。
+MVP外として残る項目は、本節を正として管理する。
 
 ---
 
