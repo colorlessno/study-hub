@@ -66,6 +66,7 @@ async def upload_data(
     data_type: str = Form(...),
     source: str = Form(...),
     metadata: str | None = Form(default=None),
+    analysis_mode: str = Form(default="rules"),
     _: AuthenticatedUser = Depends(require_authenticated),
     session: AsyncSession = Depends(get_db_session),
 ) -> UploadAcceptedResponse:
@@ -76,6 +77,7 @@ async def upload_data(
         data_type=data_type,
         source=source,
         metadata_raw=metadata,
+        analysis_mode=analysis_mode,
     )
 
 

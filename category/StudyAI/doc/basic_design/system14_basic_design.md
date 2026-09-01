@@ -25,6 +25,7 @@ InsightPipelineOrchestrator
     ├─ IngestionJobManager
     ├─ SpeechToTextService
     ├─ UtteranceAnalyzer
+    ├─ LLMAnalysisPipeline
     ├─ GroupingService
     ├─ SalesScoringService
     ├─ InsightGenerator
@@ -43,6 +44,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | JobManager | 1ファイルずつ行う取込処理と状態管理 |
 | SpeechToTextService | faster-whisperで区間単位に文字起こしし、開始秒・終了秒を保存する。話者分離できない区間は`unknown`として扱う |
 | UtteranceAnalyzer | sentiment / topic / utterance_type 判定 |
+| LLMAnalysisPipeline | 明示選択時にマスク済み発話をLM Studioへ一件ずつ送り、LangGraphの要求・検証ノードを順番に実行する |
 | GroupingService | 意味グルーピングとランキング化 |
 | SalesScoringService | 営業トーク評価 |
 | WorkflowDispatcher | workflow 定義保存、配信ペイロード生成、配信結果ログ保存 |
@@ -75,6 +77,9 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 
 ### 2.2 分析設計
 
+- `analysis_mode=rules`ではUtteranceAnalyzerを使い、外部モデルへ送信せず決定的に分類する
+- `analysis_mode=llm`では個人情報マスク後のutteranceを入力順に一件ずつLM Studioへ送り、LangGraphの`request_llm -> validate_output`を順番に実行する
+- LLM応答はsentiment、sentiment_score、utterance_type、1〜3件のtopics、urgencyを検証し、不正応答や接続失敗をルール分析へ自動切替しない
 - utterance 単位で sentiment と type を付与する
 - conversation 単位で要約、営業スコア、勝敗理由を集約する
 - insight_groups は topic / sentiment / type 単位で期間集約する

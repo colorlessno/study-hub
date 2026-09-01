@@ -3,6 +3,9 @@ from __future__ import annotations
 import asyncio
 from types import SimpleNamespace
 
+import pytest
+
+from studyai.common.errors.models import ValidationAppError
 from studyai.systems.system14.services import job_manager as job_manager_module
 from studyai.systems.system14.services.job_manager import JobManager
 
@@ -86,3 +89,20 @@ def test_job_utterances_return_saved_timestamps(monkeypatch) -> None:
             }
         ],
     }
+
+
+def test_upload_rejects_unknown_analysis_mode() -> None:
+    with pytest.raises(ValidationAppError) as exc_info:
+        asyncio.run(
+            JobManager().upload_data(
+                _FakeRequestSession(),
+                file_name="sample.json",
+                file_bytes=b"{}",
+                data_type="chat",
+                source="test",
+                metadata_raw=None,
+                analysis_mode="automatic",
+            )
+        )
+
+    assert exc_info.value.error_code == "invalid_analysis_mode"

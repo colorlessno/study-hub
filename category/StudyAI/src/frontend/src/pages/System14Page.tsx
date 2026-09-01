@@ -394,6 +394,7 @@ export default function System14Page() {
   const [screen, setScreen] = useState<Screen>('upload')
   const [file, setFile] = useState<File | null>(null)
   const [dataType, setDataType] = useState('chat')
+  const [analysisMode, setAnalysisMode] = useState('rules')
   const [source, setSource] = useState('chat_support')
   const [metadata, setMetadata] = useState(
     '{"product":"商品A","staff_id":"staff_001","staff_name":"中村","call_reason":"配送確認"}',
@@ -428,13 +429,20 @@ export default function System14Page() {
   const [crmActivities, setCrmActivities] = useState<DummyCrmActivity[]>([])
   const [crmMessage, setCrmMessage] = useState('')
 
-  async function uploadFile(targetFile: File, targetDataType = dataType, targetSource = source, targetMetadata = metadata) {
+  async function uploadFile(
+    targetFile: File,
+    targetDataType = dataType,
+    targetSource = source,
+    targetMetadata = metadata,
+    targetAnalysisMode = analysisMode,
+  ) {
     setUploading(true)
     setMessage('アップロード中...')
     const form = new FormData()
     form.append('file', targetFile)
     form.append('data_type', targetDataType)
     form.append('source', targetSource)
+    form.append('analysis_mode', targetAnalysisMode)
     if (targetMetadata.trim()) {
       form.append('metadata', targetMetadata)
     }
@@ -478,9 +486,10 @@ export default function System14Page() {
       { type: 'application/json' },
     )
     setDataType('chat')
+    setAnalysisMode('rules')
     setSource('studyhub_sample')
     setMetadata('{}')
-    await uploadFile(sampleFile, 'chat', 'studyhub_sample', '{}')
+    await uploadFile(sampleFile, 'chat', 'studyhub_sample', '{}', 'rules')
   }
 
   async function pollJob() {
@@ -672,7 +681,17 @@ export default function System14Page() {
               <label>取得元</label>
               <input data-testid="source" style={field()} value={source} onChange={e => setSource(e.target.value)} />
             </div>
+            <div>
+              <label>発話分析方法</label>
+              <select data-testid="analysis-mode" style={field()} value={analysisMode} onChange={e => setAnalysisMode(e.target.value)}>
+                <option value="rules">ルール分析</option>
+                <option value="llm">LM Studio・LangGraph分析</option>
+              </select>
+            </div>
           </div>
+          <p style={{ color: COLOR.muted, lineHeight: 1.6 }}>
+            LM Studio・LangGraph分析は、マスク後の発話を一件ずつ順番に送信します。接続失敗や不正なJSON応答をルール分析へ自動切替せず、取込失敗として表示します。
+          </p>
           <div style={{ marginBottom: '1rem' }}>
             <label>取込ファイル</label>
             <input data-testid="file-input" style={field()} type="file" onChange={e => setFile(e.target.files?.[0] ?? null)} />

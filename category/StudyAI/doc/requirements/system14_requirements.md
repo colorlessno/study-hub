@@ -5,7 +5,7 @@
 - 要件定義で扱う「AIの役割範囲・RAG要件（過去対応参照）・ガードレール要件」を説明できる
 - 基本設計で扱う「シングルエージェント設計・LangGraph・埋め込みモデル・pgvector・パイプライン設計」を説明できる
 - 詳細設計で扱う「エージェントループ詳細設計・停止条件・状態管理・メモリ設計（短期）・RAG詳細設計」を説明できる
-- 実装で扱う「faster-whisper区間文字起こし・発話時刻保存・ルール分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ」を説明できる
+- 実装で扱う「faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ」を説明できる
 - 検証で扱う「ガードレール検証（個人情報マスキング・リスク検知）」を説明できる
 - FastAPI・PostgreSQL・SQLAlchemy・Python・順次処理を横断的に使う構成を説明できる
 
@@ -29,6 +29,7 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 - Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` による System14 テーブル作成
 - テスト系データ：CSV / JSON / text 取込、正規化、発話分析、グルーピング、営業スコア、勝敗要因、ダッシュボード集計
 - faster-whisperの区間単位文字起こし、`start_sec` / `end_sec`のPostgreSQL保存、取込ジョブ単位の発話・時刻表示
+- 利用者が明示選択した場合のLM Studio・LangGraph発話分析。マスク済み発話を一件ずつ順番に送信し、感情、スコア、種別、トピック、緊急度をJSONで取得・検証して保存する
 - `POST /api/data/upload`、`GET /api/jobs/{job_id}`、`GET /api/dashboard`
 - `GET /api/insights/voice-ranking`、`GET /api/insights/sales-score`、`GET /api/insights/win-loss`
 - `POST /api/workflows`、`POST /api/agent/chat`、`GET /api/agent/action-proposals`、`GET /api/agent/faq-gaps`
@@ -39,7 +40,6 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 **MVP 外として残るもの**
 
 - 音声・動画の本格的な話者分離。現行の音声・動画取込はfaster-whisperの区間時刻を保存するが、話者を識別できない区間は`unknown`として保存する
-- LLM / LangGraph による本格分析パイプライン
 - RAG / 過去対応履歴 / FAQ 連携
 - Webhook / email の運用設定整備とSalesforce等の実CRM connector
 - リスク検知の即時通知
@@ -785,7 +785,7 @@ CREATE TABLE system14_dummy_crm_activities (
 | 工程1：要件定義 | AIの役割範囲・RAG要件（過去対応参照）・ガードレール要件 |
 | 工程2：基本設計 | シングルエージェント設計・LangGraph・埋め込みモデル・pgvector・パイプライン設計 |
 | 工程3：詳細設計 | エージェントループ詳細設計・停止条件・状態管理・メモリ設計（短期）・RAG詳細設計 |
-| 工程4：実装 | faster-whisper区間文字起こし・発話時刻保存・ルール分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ |
+| 工程4：実装 | faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ |
 | 工程5：検証 | ガードレール検証（個人情報マスキング・リスク検知） |
 | 横断 | FastAPI・PostgreSQL・SQLAlchemy・Python・順次処理 |
 
@@ -804,6 +804,6 @@ CREATE TABLE system14_dummy_crm_activities (
 - [ ] 工程1：要件定義：AIの役割範囲・RAG要件（過去対応参照）・ガードレール要件
 - [ ] 工程2：基本設計：シングルエージェント設計・LangGraph・埋め込みモデル・pgvector・パイプライン設計
 - [ ] 工程3：詳細設計：エージェントループ詳細設計・停止条件・状態管理・メモリ設計（短期）・RAG詳細設計
-- [ ] 工程4：実装：faster-whisper区間文字起こし・発話時刻保存・ルール分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ
+- [ ] 工程4：実装：faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ
 - [ ] 工程5：検証：ガードレール検証（個人情報マスキング・リスク検知）
 - [ ] 横断：FastAPI・PostgreSQL・SQLAlchemy・Python・順次処理

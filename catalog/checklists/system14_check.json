@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "revision": 5,
+  "revision": 6,
   "themeId": "system14",
   "title": "学習項目",
   "items": [
@@ -39,6 +39,10 @@
     {
       "id": "check-09",
       "label": "音声・動画の文字起こし区間について、開始秒・終了秒がDBに保存され、画面へ表示されることを確認した"
+    },
+    {
+      "id": "check-10",
+      "label": "LM Studio・LangGraph分析を選び、マスク済み発話が一件ずつ順番に分析され、結果がDBに保存されることを確認した"
     }
   ]
 }

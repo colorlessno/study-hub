@@ -17,6 +17,7 @@ backend/src/studyai/
     ├── services/job_manager.py
     ├── services/speech_to_text_service.py
     ├── services/utterance_analyzer.py
+    ├── services/llm_analysis_pipeline.py
     ├── services/grouping_service.py
     ├── services/sales_scoring_service.py
     ├── services/insight_query_service.py
@@ -42,6 +43,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | IngestionNormalizer | CSV / JSON / text 正規化 | `normalize_text_file()`, `normalize_transcript()` |
 | SpeechToTextService | 音声/動画書き起こし | `transcribe_with_speakers()` |
 | UtteranceAnalyzer | 発話分析 | `analyze_utterance()` |
+| LLMAnalysisPipeline | LM Studio・LangGraph発話分析 | `analyze_utterance()` |
 | GroupingService | 意味グルーピング | `build_groups()` |
 | SalesScoringService | 営業会話評価 | `score_sales_conversation()` |
 | InsightQueryService | dashboard / insight API 提供 | `get_dashboard()`, `get_voice_ranking()`, `get_sales_score()` |
@@ -92,6 +94,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | `data_type` | string | ○ | audio / video / chat / email / call_log |
 | `source` | string | ○ | データ出所 |
 | `metadata` | object |  | 担当者・商品・日付など |
+| `analysis_mode` | string |  | `rules`（既定）または`llm` |
 
 **レスポンス項目**
 
@@ -248,6 +251,9 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 ## 9. AI 処理詳細
 
 - 区間時刻付き書き起こしを前提にし、話者を識別できない場合は`unknown`のまま保存する
+- `rules`は既存のキーワード規則を使い、`llm`は個人情報マスク後の発話を入力順に一件ずつLM Studioへ送る
+- `llm`はLangGraphの`request_llm`ノード完了後に`validate_output`ノードを実行し、複数発話を同時送信しない
+- LLM応答のsentiment、sentiment_score、utterance_type、topics、urgencyが契約に違反した場合は取込ジョブをfailedにし、ルール分析へ自動切替しない
 - 発話ごとに `sentiment`, `type`, `topics` を付与する
 - 改善案は「課題」「根拠件数」「推奨アクション」「配信先部門」を必須にする
 

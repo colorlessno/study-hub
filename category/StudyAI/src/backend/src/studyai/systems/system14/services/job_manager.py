@@ -20,6 +20,7 @@ from studyai.systems.system14.schemas.insight import (
 )
 from studyai.systems.system14.services.grouping_service import GroupingService
 from studyai.systems.system14.services.ingestion_normalizer import IngestionNormalizer
+from studyai.systems.system14.services.llm_analysis_pipeline import LLMAnalysisPipeline
 from studyai.systems.system14.services.pii_masker import PIIMasker
 from studyai.systems.system14.services.sales_scoring_service import SalesScoringService
 from studyai.systems.system14.services.speech_to_text_service import SpeechToTextService
@@ -28,6 +29,7 @@ from studyai.systems.system14.services.utterance_analyzer import UtteranceAnalyz
 
 class JobManager:
     ALLOWED_DATA_TYPES = {"audio", "video", "chat", "email", "call_log"}
+    ALLOWED_ANALYSIS_MODES = {"rules", "llm"}
     _ingestion_lock = asyncio.Lock()
 
     def __init__(self) -> None:
@@ -38,6 +40,7 @@ class JobManager:
         self.analyzer = UtteranceAnalyzer()
         self.grouping_service = GroupingService()
         self.sales_scoring = SalesScoringService()
+        self.llm_analysis_pipeline: LLMAnalysisPipeline | None = None
 
     async def upload_data(
         self,
@@ -48,6 +51,7 @@ class JobManager:
         data_type: str,
         source: str,
         metadata_raw: str | None,
+        analysis_mode: str = "rules",
     ) -> UploadAcceptedResponse:
         if data_type not in self.ALLOWED_DATA_TYPES:
             raise ValidationAppError("unsupported_source_data", "Unsupported data_type.")
@@ -55,11 +59,17 @@ class JobManager:
             raise ValidationAppError("empty_source", "source is required.")
         if not file_bytes:
             raise ValidationAppError("empty_upload_file", "file is empty.")
+        if analysis_mode not in self.ALLOWED_ANALYSIS_MODES:
+            raise ValidationAppError(
+                "invalid_analysis_mode",
+                "analysis_mode must be rules or llm.",
+            )
         max_bytes = self.settings.max_upload_size_mb * 1024 * 1024
         if len(file_bytes) > max_bytes:
             raise ValidationAppError("upload_file_too_large", "upload file is too large.")
 
         metadata = self._parse_metadata(metadata_raw)
+        metadata["analysis_mode"] = analysis_mode
         job_id = f"job_{uuid.uuid4().hex[:12]}"
         repo = InsightRepository(session)
         await repo.create_job(
@@ -169,13 +179,22 @@ class JobManager:
                 grouped_items: list[dict] = []
                 for conversation in conversations:
                     safe_metadata = self.pii_masker.mask_metadata(conversation.get("metadata", {}))
+                    analysis_mode = str(safe_metadata.get("analysis_mode") or "rules")
                     analyzed_utterances: list[dict] = []
                     for utterance in conversation["utterances"]:
                         masked_text = self.pii_masker.mask(str(utterance.get("text") or ""))
-                        analyzed = self.analyzer.analyze_utterance(
-                            speaker=utterance.get("speaker"),
-                            text=masked_text,
-                        )
+                        if analysis_mode == "llm":
+                            if self.llm_analysis_pipeline is None:
+                                self.llm_analysis_pipeline = LLMAnalysisPipeline()
+                            analyzed = await self.llm_analysis_pipeline.analyze_utterance(
+                                speaker=utterance.get("speaker"),
+                                text=masked_text,
+                            )
+                        else:
+                            analyzed = self.analyzer.analyze_utterance(
+                                speaker=utterance.get("speaker"),
+                                text=masked_text,
+                            )
                         analyzed["start_sec"] = utterance.get("start_sec")
                         analyzed["end_sec"] = utterance.get("end_sec")
                         analyzed_utterances.append(analyzed)
