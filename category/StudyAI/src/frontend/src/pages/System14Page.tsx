@@ -22,6 +22,26 @@ interface UploadAcceptedResponse {
   file_count: number
 }
 
+interface PerformanceRun {
+  id: number
+  job_id?: string | null
+  requested_conversations: number
+  processed_conversations: number
+  processed_utterances: number
+  target_seconds: number
+  elapsed_seconds: number
+  conversations_per_second: number
+  status: string
+  target_met: boolean
+  error_message?: string | null
+  created_at: string
+  completed_at: string
+}
+
+interface PerformanceRunListResponse {
+  runs: PerformanceRun[]
+}
+
 interface RiskAlertPayload {
   output?: {
     type?: string
@@ -475,6 +495,11 @@ export default function System14Page() {
   const [jobUtterances, setJobUtterances] = useState<JobUtterance[]>([])
   const [message, setMessage] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [performanceCount, setPerformanceCount] = useState('1000')
+  const [performanceTargetSeconds, setPerformanceTargetSeconds] = useState('30')
+  const [performanceRunning, setPerformanceRunning] = useState(false)
+  const [performanceRuns, setPerformanceRuns] = useState<PerformanceRun[]>([])
+  const [performanceMessage, setPerformanceMessage] = useState('')
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [dashboardMessage, setDashboardMessage] = useState('')
   const [voiceRanking, setVoiceRanking] = useState<VoiceRankingResponse | null>(null)
@@ -586,6 +611,48 @@ export default function System14Page() {
       setMessage(res.data.status === 'completed' ? '取込処理が完了しました。' : '取込状態を更新しました。')
     } catch (error) {
       setMessage(getErrorMessage(error, '取込状態を取得できませんでした'))
+    }
+  }
+
+  async function runPerformanceValidation() {
+    const conversationCount = Number(performanceCount)
+    const targetSeconds = Number(performanceTargetSeconds)
+    if (!Number.isInteger(conversationCount) || conversationCount < 100 || conversationCount > 5000) {
+      setPerformanceMessage('会話件数は100～5000の整数で指定してください。')
+      return
+    }
+    if (!Number.isFinite(targetSeconds) || targetSeconds < 1 || targetSeconds > 600) {
+      setPerformanceMessage('目標秒数は1～600秒で指定してください。')
+      return
+    }
+    setPerformanceRunning(true)
+    setPerformanceMessage('既存の取込・分析・PostgreSQL保存経路で一件ずつ性能検証中...')
+    try {
+      const res = await client.post<PerformanceRun>('/performance/runs', {
+        conversation_count: conversationCount,
+        target_seconds: targetSeconds,
+      })
+      setPerformanceRuns(current => [res.data, ...current.filter(item => item.id !== res.data.id)])
+      setPerformanceMessage(
+        `性能検証が完了しました。${res.data.processed_conversations}件 / ${res.data.elapsed_seconds.toFixed(3)}秒 / ${res.data.conversations_per_second.toFixed(3)}件/秒`,
+      )
+    } catch (error) {
+      setPerformanceMessage(getErrorMessage(error, '性能検証に失敗しました'))
+    } finally {
+      setPerformanceRunning(false)
+    }
+  }
+
+  async function loadPerformanceRuns() {
+    setPerformanceMessage('保存済みの性能検証結果を取得中...')
+    try {
+      const res = await client.get<PerformanceRunListResponse>('/performance/runs', {
+        params: { limit: 20 },
+      })
+      setPerformanceRuns(res.data.runs)
+      setPerformanceMessage(`保存済みの性能検証結果を${res.data.runs.length}件取得しました。`)
+    } catch (error) {
+      setPerformanceMessage(getErrorMessage(error, '性能検証結果を取得できませんでした'))
     }
   }
 
@@ -880,6 +947,46 @@ export default function System14Page() {
               </table>
             </div>
           )}
+          <div style={{ borderTop: `1px solid ${COLOR.border}`, marginTop: '1.2rem', paddingTop: '1.2rem' }}>
+            <h3>大量データ性能検証</h3>
+            <p style={{ color: COLOR.muted, lineHeight: 1.6 }}>
+              個人情報と緊急語を含まない合成データを生成し、既存のルール分析・会話保存・発話保存・営業スコア・グルーピングを順番に実行します。LM Studioと外部通知先には送信しません。結果はPostgreSQLへ保存します。
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label>会話件数（100～5000）</label>
+                <input data-testid="performance-count" style={field()} type="number" min="100" max="5000" value={performanceCount} onChange={e => setPerformanceCount(e.target.value)} />
+              </div>
+              <div>
+                <label>目標秒数（1～600秒）</label>
+                <input data-testid="performance-target" style={field()} type="number" min="1" max="600" step="0.1" value={performanceTargetSeconds} onChange={e => setPerformanceTargetSeconds(e.target.value)} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button data-testid="run-performance" style={button(!performanceRunning)} disabled={performanceRunning} onClick={runPerformanceValidation}>
+                性能検証を実行
+              </button>
+              <button data-testid="load-performance" style={button(!performanceRunning)} disabled={performanceRunning} onClick={loadPerformanceRuns}>
+                保存結果を更新
+              </button>
+            </div>
+            {performanceMessage && <p data-testid="performance-message" style={{ color: COLOR.muted }}>{performanceMessage}</p>}
+            {performanceRuns.slice(0, 10).map(item => (
+              <div key={item.id} data-testid="performance-run" style={{ ...card(), background: COLOR.band, marginBottom: '0.7rem' }}>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                  <strong>{item.requested_conversations}会話の検証</strong>
+                  <span style={{ color: item.target_met ? COLOR.ok : COLOR.danger, fontWeight: 'bold' }}>
+                    {item.target_met ? '目標達成' : '目標未達'}
+                  </span>
+                </div>
+                <div style={{ color: COLOR.muted, fontSize: '0.84rem', lineHeight: 1.7, marginTop: 6 }}>
+                  処理済み {item.processed_conversations}会話・{item.processed_utterances}発話 / {item.elapsed_seconds.toFixed(3)}秒 / {item.conversations_per_second.toFixed(3)}会話/秒 / 目標 {item.target_seconds.toFixed(3)}秒以下<br />
+                  ジョブID {item.job_id ?? '-'} / 実行日時 {formatDateTime(item.completed_at)}
+                </div>
+                {item.error_message && <p style={{ color: COLOR.danger, marginBottom: 0 }}>{item.error_message}</p>}
+              </div>
+            ))}
+          </div>
         </section>
       )}
 

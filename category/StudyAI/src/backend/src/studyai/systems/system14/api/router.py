@@ -29,6 +29,9 @@ from studyai.systems.system14.schemas.insight import (
     KnowledgeEntryResponse,
     KnowledgeFaqCreateRequest,
     KnowledgeIndexResponse,
+    PerformanceRunListResponse,
+    PerformanceRunRequest,
+    PerformanceRunResponse,
     SalesScoreResponse,
     UploadAcceptedResponse,
     VoiceRankingResponse,
@@ -41,6 +44,7 @@ from studyai.systems.system14.services.agent_chat_service import AgentChatServic
 from studyai.systems.system14.services.dummy_crm_service import DummyCrmService
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
 from studyai.systems.system14.services.job_manager import JobManager
+from studyai.systems.system14.services.performance_service import PerformanceService
 from studyai.systems.system14.services.rag_knowledge_service import RagKnowledgeService
 from studyai.systems.system14.services.workflow_dispatcher import WorkflowDispatcher
 
@@ -103,6 +107,24 @@ async def get_job_utterances(
     session: AsyncSession = Depends(get_db_session),
 ) -> JobUtteranceListResponse:
     return await JobManager().get_job_utterances(session, job_id=job_id)
+
+
+@router.post("/performance/runs", response_model=PerformanceRunResponse)
+async def run_performance_validation(
+    body: PerformanceRunRequest,
+    _: AuthenticatedUser = Depends(require_roles("admin", "manager")),
+    session: AsyncSession = Depends(get_db_session),
+) -> PerformanceRunResponse:
+    return await PerformanceService().run(session, body=body)
+
+
+@router.get("/performance/runs", response_model=PerformanceRunListResponse)
+async def list_performance_runs(
+    limit: int = Query(default=20, ge=1, le=100),
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> PerformanceRunListResponse:
+    return await PerformanceService().list_runs(session, limit=limit)
 
 
 @router.get("/insights/voice-ranking", response_model=VoiceRankingResponse)

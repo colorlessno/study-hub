@@ -53,12 +53,13 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | AgentChatService | 自然語 Q&A | `answer_agent_query()` |
 | PIIMasker | DB 保存前の簡易マスキング | `mask()`, `mask_metadata()` |
 | DummyCrmService | 顧客対応履歴の登録・一覧・個別取得・更新 | `upsert_activity()`, `list_activities()`, `get_activity()`, `update_activity()` |
+| PerformanceService | 合成会話の既存取込経路による性能計測・履歴取得 | `run()`, `list_runs()` |
 
 ## 2.1 実装状況（2026-09-01）
 
 - MVP は実装済み。
 - Docker サービス `system14` は `18014:8014` で起動する。
-- Alembic revision は `20260901_0020`。
+- Alembic revision は `20260901_0021`。
 - Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRMの6タブ構成。
 - workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。`realtime` workflowは取込元が一致する緊急度`high`の発話をconversation保存直後に通知し、同じテーブルへ結果を保存する。
 - `crm_dummy`は同一バックエンド内のダミーCRM APIへBearer認証付きHTTP POSTを行い、`system14_dummy_crm_activities`へ永続化する。
@@ -73,6 +74,8 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
   - `file`, `data_type`, `source`, `metadata`
 - `GET /jobs/{job_id}`
 - `GET /jobs/{job_id}/utterances`
+- `POST /performance/runs`
+- `GET /performance/runs`
 - `GET /insights/voice-ranking`
 - `GET /insights/sales-score`
 - `GET /insights/win-loss`
@@ -115,6 +118,17 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 ### 4.1.1 GET `/jobs/{job_id}/utterances`
 
 取込ジョブに保存された発話を、conversation IDとutterance IDの昇順で返す。各発話は`id`、`conversation_id`、`speaker`、`text`、`start_sec`、`end_sec`を持つ。存在しないジョブは404を返す。
+
+### 4.1.2 性能検証API
+
+**対象API**: `POST /performance/runs`, `GET /performance/runs`
+
+- `conversation_count`は100～5000、`target_seconds`は1～600とする。
+- `PerformanceService`は番号付きの合成会話を入力順に生成し、`analysis_mode=rules`、`source=performance_validation`として既存の`JobManager.upload_data()`へ一度渡す。
+- 合成文には個人情報と緊急語を含めない。LM Studio、Webhook、SMTP、CRMには送信しない。
+- `JobManager`の共通ロック、正規化、マスク、ルール分析、conversation・utterance・sales score・insight group保存を通常取込と共有する。
+- 取込完了後に対象jobの会話数と発話数をDBから数え、経過秒、会話/秒、目標達成、job ID、失敗理由を`system14_performance_runs`へ保存する。
+- 実行APIはadminまたはmanagerロール、履歴APIは認証済み利用者を許可する。
 
 ### 4.2 GET `/jobs/{job_id}` / GET `/dashboard`
 
@@ -197,6 +211,8 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | `POST /dummy-crm/activities` | `Authorization` | Bearer Token必須 |
 | `POST /dummy-crm/activities` | `external_id`,`summary` | 必須 |
 | `PATCH /dummy-crm/activities/{activity_id}` | 更新項目 | 1項目以上必須 |
+| `POST /performance/runs` | `conversation_count` | 100～5000の整数 |
+| `POST /performance/runs` | `target_seconds` | 1～600の数値 |
 
 ## 6. エラー応答仕様
 
@@ -274,6 +290,11 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - `source_key`はunique制約を持つ。`source_type`は`faq`、`utterance`、`sales_score`、`crm_history`だけを許可する
 - `embedding`は768次元で、cosine distance検索用のpgvector ivfflat indexを持つ
 
+### 8.11 `system14_performance_runs`
+
+- `job_id`, `requested_conversations`, `processed_conversations`, `processed_utterances`, `target_seconds`, `elapsed_seconds`, `conversations_per_second`, `status`, `target_met`, `error_message`, `created_at`, `completed_at`
+- `job_id`は`system14_data_jobs`を参照し、取込ジョブ削除時はNULLにする。`status`は`completed`または`failed`だけを許可する
+
 ## 9. AI 処理詳細
 
 - 区間時刻付き書き起こし後に、ローカルpyannote話者分離を一度実行し、区間の最大重なりで匿名話者ラベルを割り当てる。重なりがない場合だけ`unknown`のまま保存する
@@ -298,7 +319,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 ## 11. DDL
 
-DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`、`src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py`、`src/backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py`、`src/backend/alembic/versions/20260901_0020_add_system14_rag_knowledge.py` とする。概要は以下。
+DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`から`src/backend/alembic/versions/20260901_0021_add_system14_performance_runs.py`までのAlembic migrationとする。概要は以下。
 
 | テーブル | 主な制約・index |
 |---|---|
@@ -312,6 +333,7 @@ DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`�
 | `system14_agent_answers` | `session_id`, `created_at` index |
 | `system14_dummy_crm_activities` | `external_id` unique, status/urgency/sentiment check, `status`, `updated_at` index |
 | `system14_knowledge_entries` | `source_key` unique, source_type check, `source_type`, `product`, pgvector ivfflat index |
+| `system14_performance_runs` | `job_id` FK、status・要求件数check、`created_at` index |
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -327,4 +349,5 @@ CREATE TABLE system14_workflow_delivery_logs (...);
 CREATE TABLE system14_agent_answers (...);
 CREATE TABLE system14_dummy_crm_activities (...);
 CREATE TABLE system14_knowledge_entries (... embedding vector(768) ...);
+CREATE TABLE system14_performance_runs (...);
 ```

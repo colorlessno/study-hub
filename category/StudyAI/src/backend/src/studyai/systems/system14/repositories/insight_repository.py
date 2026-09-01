@@ -14,6 +14,7 @@ from studyai.systems.system14.models.insight import (
     System14DummyCrmActivity,
     System14InsightGroup,
     System14KnowledgeEntry,
+    System14PerformanceRun,
     System14SalesScore,
     System14Utterance,
     System14Workflow,
@@ -89,6 +90,45 @@ class InsightRepository:
             )
             .where(System14Conversation.job_id == job_id)
             .order_by(System14Conversation.id, System14Utterance.id)
+        )
+        return list(result.scalars().all())
+
+    async def count_job_records(self, *, job_id: str) -> tuple[int, int]:
+        conversation_count = (
+            await self.session.execute(
+                select(func.count())
+                .select_from(System14Conversation)
+                .where(System14Conversation.job_id == job_id)
+            )
+        ).scalar_one()
+        utterance_count = (
+            await self.session.execute(
+                select(func.count())
+                .select_from(System14Utterance)
+                .join(
+                    System14Conversation,
+                    System14Utterance.conversation_id == System14Conversation.id,
+                )
+                .where(System14Conversation.job_id == job_id)
+            )
+        ).scalar_one()
+        return conversation_count, utterance_count
+
+    async def create_performance_run(self, **values) -> System14PerformanceRun:
+        row = System14PerformanceRun(**values)
+        self.session.add(row)
+        await self.session.flush()
+        await self.session.refresh(row)
+        return row
+
+    async def list_performance_runs(self, *, limit: int = 20) -> list[System14PerformanceRun]:
+        result = await self.session.execute(
+            select(System14PerformanceRun)
+            .order_by(
+                System14PerformanceRun.created_at.desc(),
+                System14PerformanceRun.id.desc(),
+            )
+            .limit(limit)
         )
         return list(result.scalars().all())
 

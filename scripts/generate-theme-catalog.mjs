@@ -103,6 +103,8 @@ const themeResources = {
     { id: 'trust-boundary', label: '検索文書の信頼境界', kind: 'material', format: 'markdown', path: 'category/StudySecurity/doc/learning_notes/security18_rag_safety/rag_trust_boundary.md' }
   ],
   system14: [
+    { id: 'performance-service', label: '大量データ順次取込と性能結果保存', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/performance_service.py' },
+    { id: 'performance-test', label: '性能検証経路と処理順のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_performance_service.py' },
     { id: 'risk-alert-dispatcher', label: 'リスク即時通知と配信履歴', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/workflow_dispatcher.py' },
     { id: 'risk-alert-test', label: '緊急度判定と順次配信のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_workflow_dispatcher.py' },
     { id: 'speaker-diarization', label: 'ローカル話者分離と時刻重なり割当', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/speaker_diarization_service.py' },

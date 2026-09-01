@@ -53,6 +53,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | WorkflowDispatcher | workflow 定義保存、リスク即時通知、配信ペイロード生成、配信結果ログ保存 |
 | AgentChatService | 分析済みデータへの自然言語Q&A |
 | DummyCrmService | Bearer認証済みの顧客対応履歴を外部IDで重複防止し、ローカルDBへ保存・一覧・更新する |
+| PerformanceService | 合成会話を既存取込経路へ一件ずつ渡し、処理件数・時間・処理率・目標達成をDBへ保存する |
 
 ### 1.3 現行実装状況（2026-09-01）
 | 項目 | 現状 |
@@ -60,11 +61,11 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | Backend | `src/backend/src/studyai/systems/system14/` に実装済み |
 | Entrypoint | `src/backend/src/studyai/system14_main.py` |
 | API router | `src/backend/src/studyai/systems/system14/api/router.py` |
-| DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`, `src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py`, `src/backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py` |
-| DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities` |
+| DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`～`src/backend/alembic/versions/20260901_0021_add_system14_performance_runs.py` |
+| DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities`, `system14_knowledge_entries`, `system14_performance_runs` |
 | Docker | system14専用のCPU版話者分離依存を持つ`system14`サービス、ホストポート`18014`、モデル永続volume |
 | Frontend | `src/frontend/src/pages/System14Page.tsx`、route `/system14` |
-| 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、リスク即時通知・workflow 配信ログ・ダミーCRM永続化を確認対象 |
+| 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、リスク即時通知、100～5000会話の性能検証、各結果のDB永続化を確認対象 |
 
 ---
 
@@ -109,6 +110,8 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 |---|---|---|---|
 | POST | `/data/upload` | データ取込・分析・保存 | 同期・順次 |
 | GET | `/jobs/{job_id}` | ジョブ状態確認 | 同期 |
+| POST | `/performance/runs` | 既存取込経路を使う大量データ性能検証・結果保存 | 同期・順次 |
+| GET | `/performance/runs` | 保存済み性能検証結果 | 同期 |
 | GET | `/insights/voice-ranking` | 顧客の声ランキング | 同期 |
 | GET | `/insights/sales-score` | 営業トークスコア | 同期 |
 | GET | `/insights/win-loss` | 受注失注分析 | 同期 |
@@ -198,6 +201,7 @@ external_idで既存レコードを確認
 | `workflows` | 配信条件と配信先 |
 | `workflow_delivery_logs` | 配信方法、宛先、payload、response、成功/失敗/skip 状態 |
 | `dummy_crm_activities` | 顧客、対応要約、緊急度、担当、次アクション、対応状態、元の分析payload |
+| `performance_runs` | 要求・実処理会話数、発話数、目標秒、経過秒、処理率、目標達成、ジョブID、エラー |
 
 ---
 
@@ -235,6 +239,7 @@ external_idで既存レコードを確認
 ## 8. 非機能・運用設計
 
 - ファイルは一つずつ取り込み、各会話と各発言を順番に分析・保存する
+- 性能検証も既存の取込ロックを共有し、合成会話を一件ずつ処理する。LM Studioや外部通知先は使用しない
 - 集約系 API は保存済み分析結果だけを参照する
 - workflow は配信失敗を再送キューへ積む
 
@@ -259,7 +264,7 @@ external_idで既存レコードを確認
 
 | 画面名 | 目的 | 備考 |
 |---|---|---|
-| データ取込タブ | ファイル投入、metadata 入力、ジョブ受付・状態確認を行う | 実装済み |
+| データ取込タブ | ファイル投入、metadata入力、ジョブ状態確認、大量データ性能検証、保存済み性能結果の確認を行う | 実装済み |
 | ダッシュボードタブ | 集約カード、顧客の声ランキング、直近ジョブを表示する | 実装済み |
 | 分析タブ | 顧客の声ランキング、営業スコア、勝敗要因を表示する | 実装済み |
 | エージェントタブ | 分析AIチャットとワークフロー定義保存・配信実行を行う | 実装済み |
@@ -310,6 +315,10 @@ flowchart TD
 | `metadata` | 付加情報 | テキストエリア |  | JSON 直接入力 |
 | `submit_upload` | 取込開始 | ボタン | ◯ | 1ファイルの順次処理を実行 |
 | `job_status` | ジョブ状態 | ステータス表示 |  | GET `/jobs/{job_id}` |
+| `performance_count` | 性能検証会話件数 | 数値入力 |  | 100～5000 |
+| `performance_target` | 性能目標秒 | 数値入力 |  | 1～600秒 |
+| `run_performance` | 性能検証実行 | ボタン |  | POST `/performance/runs`。管理者またはmanagerのみ |
+| `performance_runs` | 保存済み性能結果 | カード一覧 |  | GET `/performance/runs` |
 
 ### 14.2 ダッシュボードタブ
 | 項目ID | 項目名 | UI種別 | 備考 |

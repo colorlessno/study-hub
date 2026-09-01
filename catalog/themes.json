@@ -2028,6 +2028,20 @@
           "kind": "source",
           "format": "source",
           "path": "category/StudyAI/src/backend/tests/systems/system14/test_workflow_dispatcher.py"
+        },
+        {
+          "id": "performance-service",
+          "label": "大量データ順次取込と性能結果保存",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/src/studyai/systems/system14/services/performance_service.py"
+        },
+        {
+          "id": "performance-test",
+          "label": "性能検証経路と処理順のテスト",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/tests/systems/system14/test_performance_service.py"
         }
       ],
       "connection": {

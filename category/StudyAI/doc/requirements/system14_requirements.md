@@ -26,7 +26,7 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 **実装済み**
 
 - `system14` Docker サービス（ポート `18014`）
-- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` / `20260901_0020` による System14 テーブル作成
+- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` / `20260901_0020` / `20260901_0021` による System14 テーブル作成
 - テスト系データ：CSV / JSON / text 取込、正規化、発話分析、グルーピング、営業スコア、勝敗要因、ダッシュボード集計
 - faster-whisperの区間単位文字起こし、ローカル`pyannote/speaker-diarization-community-1`による話者区間抽出、時刻重なりによる匿名話者ラベル割当、`start_sec` / `end_sec`のPostgreSQL保存、取込ジョブ単位の発話・時刻表示
 - 話者分離モデルをCPU版依存関係とともに専用Docker volumeへ1ワーカーで取得し、ローカルパスから読込み検証する保守スクリプト。通常のsystem14実行環境へHugging Face tokenは渡さない
@@ -36,16 +36,16 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 - `POST /api/workflows`、`GET /api/workflows/delivery-logs`、`POST /api/agent/chat`、`GET /api/agent/action-proposals`、`GET /api/agent/faq-gaps`
 - workflow 完了時の配信ペイロード生成と配信ログ保存（dashboard / webhook / email / ローカル・ダミーCRM）
 - 取込元を指定したリアルタイムworkflow。緊急度`high`の発話をconversation保存直後に検知し、登録順に一件ずつ配信して成功・失敗を配信ログへ永続保存する
+- 100～5000会話の合成データを既存のルール分析・PostgreSQL保存経路へ一件ずつ通し、処理件数、経過秒、処理率、目標達成を`system14_performance_runs`へ永続保存する大量データ性能検証
 - Bearer認証付きHTTP POST、外部IDによる重複防止、PostgreSQL永続化を行うローカル・ダミーCRM API
 - FAQ、過去の発話、営業スコア、完了済みCRM対応をPostgreSQLへ永続化してpgvector検索するRAG。EmbeddingとLLMの要求は一件ずつ順番に実行し、失敗時に画面内処理やキーワード検索へ自動切替しない
 - `POST /api/knowledge/faqs`、`GET /api/knowledge/faqs`、`POST /api/knowledge/index`によるFAQ管理とRAG索引更新
 - 不足FAQ検出時に、保存済みFAQの商品と本文を照合し、既に対応済みのトピックを不足候補から除外する
-- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRM、分析フィルタ、workflow 配信設定、リスク即時アラート履歴）
+- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRM、分析フィルタ、workflow 配信設定、リスク即時アラート履歴、大量データ性能検証・保存履歴）
 
 **MVP 外として残るもの**
 
 - Webhook / email の運用設定整備とSalesforce等の実CRM connector
-- 大量データ性能検証
 
 MVP外として残る項目は、本節を正として管理する。
 
@@ -343,6 +343,12 @@ metadata:    追加情報（JSON：担当者ID・商品名・日付等）
 
 ### GET /jobs/{job_id}
 分析ジョブの進捗を確認する。
+
+### POST /performance/runs
+100～5000会話の合成データを生成し、外部LLMと外部通知を使わず、既存のルール分析・会話保存・発話保存・営業スコア・グルーピングを受付要求内で一件ずつ実行する。会話件数と1～600秒の目標値を受け取り、実処理件数、経過秒、1秒当たりの処理件数、目標達成、取込ジョブIDをPostgreSQLへ保存して返す。管理者またはmanagerロールだけが実行できる。
+
+### GET /performance/runs
+保存済みの大量データ性能検証結果を新しい順に返す。
 
 ### GET /insights/voice-ranking
 顧客の声ランキングを取得する。

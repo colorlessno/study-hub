@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "revision": 9,
+  "revision": 10,
   "themeId": "system14",
   "title": "学習項目",
   "items": [
@@ -63,6 +63,10 @@
     {
       "id": "check-15",
       "label": "取込元を指定したリアルタイムworkflowを登録し、緊急度が高い発話の即時配信結果とエラーがDB保存・画面表示されることを確認した"
+    },
+    {
+      "id": "check-16",
+      "label": "大量データ性能検証を実行し、既存の順次取込・PostgreSQL保存を通った処理件数、経過秒、処理率、目標達成がDB保存・画面表示されることを確認した"
     }
   ]
 }

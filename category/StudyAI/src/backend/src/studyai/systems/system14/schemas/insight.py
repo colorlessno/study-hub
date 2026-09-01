@@ -46,6 +46,33 @@ class JobUtteranceListResponse(BaseModel):
     utterances: list[JobUtteranceItem] = Field(default_factory=list)
 
 
+class PerformanceRunRequest(BaseModel):
+    conversation_count: int = Field(default=1000, ge=100, le=5000)
+    target_seconds: float = Field(default=30.0, ge=1.0, le=600.0)
+
+
+class PerformanceRunResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    job_id: str | None = None
+    requested_conversations: int
+    processed_conversations: int
+    processed_utterances: int
+    target_seconds: float
+    elapsed_seconds: float
+    conversations_per_second: float
+    status: str
+    target_met: bool
+    error_message: str | None = None
+    created_at: datetime
+    completed_at: datetime
+
+
+class PerformanceRunListResponse(BaseModel):
+    runs: list[PerformanceRunResponse] = Field(default_factory=list)
+
+
 class VoiceRankingItem(BaseModel):
     rank: int
     group_label: str

@@ -225,3 +225,23 @@ class System14KnowledgeEntry(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+
+class System14PerformanceRun(Base):
+    __tablename__ = "system14_performance_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    job_id: Mapped[str | None] = mapped_column(
+        ForeignKey("system14_data_jobs.id", ondelete="SET NULL"),
+    )
+    requested_conversations: Mapped[int] = mapped_column(Integer, nullable=False)
+    processed_conversations: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    processed_utterances: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    target_seconds: Mapped[float] = mapped_column(Numeric(10, 3, asdecimal=False), nullable=False)
+    elapsed_seconds: Mapped[float] = mapped_column(Numeric(10, 3, asdecimal=False), nullable=False)
+    conversations_per_second: Mapped[float] = mapped_column(Numeric(12, 3, asdecimal=False), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
+    target_met: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    error_message: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
