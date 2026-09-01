@@ -2983,7 +2983,7 @@ describe('実テーマカタログ', () => {
     expect(devops05?.resources?.filter((resource) => !formalDocumentResourceIds.has(resource.id)).map((resource) => resource.id))
       .toEqual(['database-tests', 'schema-source', 'seed-source', 'compose-source', 'workflow-source']);
 
-    const workflow = readThemeResource(devops01!, 'workflow-source', 'actual').content;
+    const workflow = readThemeResource(devops01!, 'workflow-source', 'actual').content.replace(/\r\n/g, '\n');
     expect(workflow).not.toContain('\nconcurrency:');
     expect(workflow).toContain('api-integration:\n    name: API integration test\n    needs: node-quality');
     expect(workflow).toContain('browser-e2e:\n    name: Playwright E2E test\n    needs: api-integration');
