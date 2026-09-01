@@ -16,6 +16,7 @@ backend/src/studyai/
     ├── repositories/insight_repository.py
     ├── services/job_manager.py
     ├── services/speech_to_text_service.py
+    ├── services/speaker_diarization_service.py
     ├── services/utterance_analyzer.py
     ├── services/llm_analysis_pipeline.py
     ├── services/grouping_service.py
@@ -42,6 +43,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | JobManager | ジョブ進捗管理 | `upload_data()`, `process_job()`, `get_job()` |
 | IngestionNormalizer | CSV / JSON / text 正規化 | `normalize_text_file()`, `normalize_transcript()` |
 | SpeechToTextService | 音声/動画書き起こし | `transcribe_with_speakers()` |
+| SpeakerDiarizationService | ローカル話者分離と匿名話者区間抽出 | `diarize()`, `assign_speakers()` |
 | UtteranceAnalyzer | 発話分析 | `analyze_utterance()` |
 | LLMAnalysisPipeline | LM Studio・LangGraph発話分析 | `analyze_utterance()` |
 | GroupingService | 意味グルーピング | `build_groups()` |
@@ -60,7 +62,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRMの6タブ構成。
 - workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。
 - `crm_dummy`は同一バックエンド内のダミーCRM APIへBearer認証付きHTTP POSTを行い、`system14_dummy_crm_activities`へ永続化する。
-- 音声・動画はfaster-whisperの各区間から開始秒・終了秒を取得し、DBへ保存して取込画面へ表示する。本格話者分離とSalesforce等の実CRM connectorは未実装で、識別できない話者は`unknown`、実CRMは接続環境未提供を明示する。
+- 音声・動画はfaster-whisperの各区間から開始秒・終了秒を取得後、永続volume上の`pyannote/speaker-diarization-community-1`をローカル実行する。文字起こし区間と話者区間の重なりが最大の匿名ラベルをDBへ保存して取込画面へ表示する。重なりがない区間だけを`unknown`とし、匿名ラベルから顧客・担当者を推測しない。Salesforce等の実CRM connectorは接続環境未提供を明示する。
 
 ## 3. API 詳細
 
@@ -108,7 +110,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | `estimated_minutes` | integer | 完了応答のため0 |
 | `file_count` | integer | 対象件数 |
 
-音声・動画ではfaster-whisperの区間を一件ずつ`system14_utterances`へ保存する。`start_sec`と`end_sec`には実区間の秒数を入れ、話者分離していない区間は`speaker=unknown`とする。
+音声・動画ではfaster-whisperの文字起こし後にpyannote話者分離を順番に実行する。各文字起こし区間を話者区間と一件ずつ比較し、時刻の重なりが最大の匿名ラベルを`speaker`、文字起こしの実区間秒を`start_sec`と`end_sec`へ入れて`system14_utterances`へ保存する。重なりがない区間は`speaker=unknown`とする。モデル未配置・読込み失敗・推論失敗はジョブを`failed`にし、全区間`unknown`への自動切替は行わない。
 
 ### 4.1.1 GET `/jobs/{job_id}/utterances`
 
@@ -273,7 +275,8 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 ## 9. AI 処理詳細
 
-- 区間時刻付き書き起こしを前提にし、話者を識別できない場合は`unknown`のまま保存する
+- 区間時刻付き書き起こし後に、ローカルpyannote話者分離を一度実行し、区間の最大重なりで匿名話者ラベルを割り当てる。重なりがない場合だけ`unknown`のまま保存する
+- 匿名話者ラベルを顧客・担当者へ推測で変換しない。モデル未配置・読込み失敗・推論失敗を成功扱いや`unknown`へ自動切替しない
 - `rules`は既存のキーワード規則を使い、`llm`は個人情報マスク後の発話を入力順に一件ずつLM Studioへ送る
 - `llm`はLangGraphの`request_llm`ノード完了後に`validate_output`ノードを実行し、複数発話を同時送信しない
 - LLM応答のsentiment、sentiment_score、utterance_type、topics、urgencyが契約に違反した場合は取込ジョブをfailedにし、ルール分析へ自動切替しない

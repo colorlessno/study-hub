@@ -18,7 +18,6 @@
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 import tempfile
 from pathlib import Path
@@ -158,12 +157,7 @@ class VoiceTranscriber:
         """音声を区間単位で文字起こしし、各区間の開始・終了秒を返す。"""
 
         suffix = self._validate_input(file_name=file_name, file_bytes=file_bytes)
-        segments = await asyncio.to_thread(
-            _transcribe_segments_sync,
-            file_bytes,
-            suffix,
-            self._language,
-        )
+        segments = _transcribe_segments_sync(file_bytes, suffix, self._language)
         if not segments:
             raise ExternalServiceError(
                 "transcription_empty",

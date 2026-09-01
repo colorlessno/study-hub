@@ -1960,6 +1960,20 @@
           "path": "category/StudyAI/src/backend/src/studyai/systems/system14/services/ingestion_normalizer.py"
         },
         {
+          "id": "speaker-diarization",
+          "label": "ローカル話者分離と時刻重なり割当",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/src/studyai/systems/system14/services/speaker_diarization_service.py"
+        },
+        {
+          "id": "speaker-diarization-test",
+          "label": "話者分離の失敗境界と割当テスト",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/tests/systems/system14/test_speaker_diarization_service.py"
+        },
+        {
           "id": "representative-test",
           "label": "取込データ正規化のテスト",
           "kind": "source",

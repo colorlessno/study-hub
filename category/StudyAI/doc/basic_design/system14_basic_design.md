@@ -24,6 +24,7 @@ FastAPI
 InsightPipelineOrchestrator
     ├─ IngestionJobManager
     ├─ SpeechToTextService
+    ├─ SpeakerDiarizationService
     ├─ UtteranceAnalyzer
     ├─ LLMAnalysisPipeline
     ├─ GroupingService
@@ -42,7 +43,8 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 |---|---|
 | IngestionRouter | データ取込 API |
 | JobManager | 1ファイルずつ行う取込処理と状態管理 |
-| SpeechToTextService | faster-whisperで区間単位に文字起こしし、開始秒・終了秒を保存する。話者分離できない区間は`unknown`として扱う |
+| SpeechToTextService | faster-whisperの区間と話者分離区間を順番に取得し、時刻重なりで発話へ話者を割り当てる |
+| SpeakerDiarizationService | ローカルpyannoteモデルから匿名話者区間を抽出する。モデル未配置・失敗は明示し、推測や自動切替を行わない |
 | UtteranceAnalyzer | sentiment / topic / utterance_type 判定 |
 | LLMAnalysisPipeline | 明示選択時にマスク済み発話をLM Studioへ一件ずつ送り、LangGraphの要求・検証ノードを順番に実行する |
 | GroupingService | 意味グルーピングとランキング化 |
@@ -59,7 +61,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | API router | `src/backend/src/studyai/systems/system14/api/router.py` |
 | DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`, `src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py`, `src/backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py` |
 | DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities` |
-| Docker | `system14` サービス、ホストポート `18014` |
+| Docker | system14専用のCPU版話者分離依存を持つ`system14`サービス、ホストポート`18014`、モデル永続volume |
 | Frontend | `src/frontend/src/pages/System14Page.tsx`、route `/system14` |
 | 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、workflow 配信ログ・ダミーCRM永続化を確認対象 |
 
@@ -72,7 +74,8 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 - `POST /data/upload` は受付けた1ファイルの取込と分析を順番に完了し、DB保存後に応答する
 - 複数のAPI要求は`JobManager`のサーバープロセス共通キューへ受付順に入れ、常に1件ずつ取込処理を完了させる
 - API応答の`status`はジョブへ保存した最終状態を使用し、処理失敗を完了として応答しない
-- 音声・動画はfaster-whisperの区間ごとに conversation / utterance へ分割し、開始秒・終了秒を保存する
+- 音声・動画はfaster-whisperの区間取得後にローカルpyannote話者分離を実行し、時刻の重なりが最大の匿名話者ラベル、開始秒、終了秒をconversation / utteranceへ保存する
+- 話者区間が重ならない発話だけを`unknown`とし、匿名ラベルを顧客・担当者へ推測で割り当てない。モデル未配置・読込み失敗・推論失敗を`unknown`へ自動切替しない
 - テキスト系データは source ごとに正規化して conversation 形式へ統一する
 
 ### 2.2 分析設計
@@ -200,7 +203,8 @@ external_idで既存レコードを確認
 
 | 処理 | 用途 |
 |---|---|
-| 文字起こし補助 | 区間時刻付き transcript 生成。話者を識別できない場合は`unknown`を保持する |
+| 文字起こし補助 | faster-whisperで区間時刻付きtranscriptを生成する |
+| 話者分離 | ローカルpyannoteモデルで匿名話者区間を抽出し、時刻の最大重なりでtranscriptへ割り当てる。重なりがない場合は`unknown`を保持する |
 | utterance 分析 | sentiment / topic / type 判定 |
 | grouping | 類似発話の統合 |
 | sales scoring | 営業品質評価 |
@@ -240,6 +244,7 @@ external_idで既存レコードを確認
 | エージェント | LangGraph |
 | LLM | LM Studioで選択したモデル（分析AIを使う場合） |
 | 音声文字起こし | faster-whisper |
+| 話者分離 | pyannote speaker-diarization-community-1（CPU、ローカルvolume） |
 | 埋め込み | nomic-embed-text |
 | ベクトルDB | PostgreSQL + pgvector |
 | 通知 | httpx, Webhook, SMTP |
