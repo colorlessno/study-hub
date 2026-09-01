@@ -23,6 +23,7 @@ backend/src/studyai/
     ├── services/sales_scoring_service.py
     ├── services/insight_query_service.py
     ├── services/dummy_crm_service.py
+    ├── services/delivery_sandbox_service.py
     ├── services/workflow_dispatcher.py
     ├── services/agent_chat_service.py
     ├── services/ingestion_normalizer.py
@@ -33,6 +34,7 @@ frontend/src/pages/System14Page.tsx
 backend/alembic/versions/20260421_0016_init_system14.py
 backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py
 backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
+backend/alembic/versions/20260901_0022_add_system14_webhook_receipts.py
 ```
 
 ## 2. モジュール詳細
@@ -50,6 +52,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | SalesScoringService | 営業会話評価 | `score_sales_conversation()` |
 | InsightQueryService | dashboard / insight API 提供 | `get_dashboard()`, `get_voice_ranking()`, `get_sales_score()` |
 | WorkflowDispatcher | workflow 定義保存・リスク即時通知・配信ペイロード生成・配信ログ保存 | `create_workflow()`, `dispatch_risk_alerts()`, `list_delivery_logs()` |
+| DeliverySandboxService | 配信設定状態、Webhook受信・履歴、Mailpitメール一覧 | `get_configuration()`, `receive_webhook()`, `list_webhook_receipts()`, `list_email_messages()` |
 | AgentChatService | 自然語 Q&A | `answer_agent_query()` |
 | PIIMasker | DB 保存前の簡易マスキング | `mask()`, `mask_metadata()` |
 | DummyCrmService | 顧客対応履歴の登録・一覧・個別取得・更新 | `upsert_activity()`, `list_activities()`, `get_activity()`, `update_activity()` |
@@ -59,7 +62,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 - MVP は実装済み。
 - Docker サービス `system14` は `18014:8014` で起動する。
-- Alembic revision は `20260901_0021`。
+- Alembic revision は `20260901_0022`。
 - Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRMの6タブ構成。
 - workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。`realtime` workflowは取込元が一致する緊急度`high`の発話をconversation保存直後に通知し、同じテーブルへ結果を保存する。
 - `crm_dummy`は同一バックエンド内のダミーCRM APIへBearer認証付きHTTP POSTを行い、`system14_dummy_crm_activities`へ永続化する。
@@ -80,6 +83,10 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - `GET /insights/sales-score`
 - `GET /insights/win-loss`
 - `POST /workflows`
+- `GET /delivery/configuration`
+- `POST /delivery-sandbox/webhook`
+- `GET /delivery-sandbox/webhook-receipts`
+- `GET /delivery-sandbox/email-messages`
 - `GET /dashboard`
 - `POST /agent/chat`
 - `GET /agent/action-proposals`
@@ -188,6 +195,15 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 `POST`だけは`SYSTEM14_DUMMY_CRM_TOKEN`と一致するBearer Tokenを必須とする。画面からの`GET`と`PATCH`はStudyAIの既存ユーザー認証・権限を使用する。
 
+### 4.5.1 ローカル配信確認API
+
+**対象API**: `GET /delivery/configuration`, `POST /delivery-sandbox/webhook`, `GET /delivery-sandbox/webhook-receipts`, `GET /delivery-sandbox/email-messages`
+
+- 設定APIは利用可否、Webhook URL、SMTP接続先、Mailpit画面URLだけを返し、Tokenとパスワードを応答に含めない。
+- Webhook受信APIは`SYSTEM14_WEBHOOK_BEARER_TOKEN`のBearer認証を行い、JSONを`system14_webhook_receipts`へ保存してから応答する。
+- WorkflowDispatcherは送信先が`SYSTEM14_WEBHOOK_SINK_ENDPOINT`と完全一致する場合だけ専用Bearer Tokenを付ける。別のWebhook URLへTokenを送信しない。
+- Email配信は`SYSTEM14_SMTP_HOST`へSMTPで実送信する。メール一覧APIは`SYSTEM14_MAILPIT_API_URL`を一度呼び出し、受信メールを画面用形式へ変換する。
+
 ### 4.6 RAG・FAQ API
 
 **対象API**: `POST /knowledge/faqs`, `GET /knowledge/faqs`, `POST /knowledge/index`
@@ -295,6 +311,11 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - `job_id`, `requested_conversations`, `processed_conversations`, `processed_utterances`, `target_seconds`, `elapsed_seconds`, `conversations_per_second`, `status`, `target_met`, `error_message`, `created_at`, `completed_at`
 - `job_id`は`system14_data_jobs`を参照し、取込ジョブ削除時はNULLにする。`status`は`completed`または`failed`だけを許可する
 
+### 8.12 `system14_webhook_receipts`
+
+- `id`, `payload`, `received_at`
+- ローカルWebhookへ実際に到達したJSONをそのまま保存し、`received_at`の降順で表示する
+
 ## 9. AI 処理詳細
 
 - 区間時刻付き書き起こし後に、ローカルpyannote話者分離を一度実行し、区間の最大重なりで匿名話者ラベルを割り当てる。重なりがない場合だけ`unknown`のまま保存する
@@ -310,6 +331,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - 取込ジョブは要求内で `queued -> running -> completed / failed` の順に進め、完了後に応答する
 - workflow は topic、sentiment、source、score 条件で配信を制御する
 - workflow 作成時に `output_type` に応じた分析データを生成し、`dashboard` はログ保存、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信、`crm` は未対応として failed log を残す
+- ローカルWebhookとMailpitを一件ずつ順番に操作し、WebhookはPostgreSQL、メールはMailpit volumeへ受信結果を保存する
 - `crm_dummy`は`SYSTEM14_DUMMY_CRM_ENDPOINT`へBearer認証付きHTTP POSTを1件ずつ送り、成功・失敗と応答本文を配信ログへ保存する
 - 取込処理はconversationと発話を保存後、緊急度`high`の発話だけを抽出する。対象がある場合は有効な`realtime` workflowをID順に読み、取込元が`data_sources`に一致する設定だけを一件ずつ配信する
 - リスク通知ペイロードはjob ID、conversation ID、取込元、マスク済みmetadata、発話ID、話者、本文、感情、種別、トピック、緊急度、開始秒、終了秒を保持し、`output.type=risk_alert`で通常配信と区別する
@@ -319,7 +341,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 ## 11. DDL
 
-DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`から`src/backend/alembic/versions/20260901_0021_add_system14_performance_runs.py`までのAlembic migrationとする。概要は以下。
+DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`から`src/backend/alembic/versions/20260901_0022_add_system14_webhook_receipts.py`までのAlembic migrationとする。概要は以下。
 
 | テーブル | 主な制約・index |
 |---|---|
@@ -334,6 +356,7 @@ DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`�
 | `system14_dummy_crm_activities` | `external_id` unique, status/urgency/sentiment check, `status`, `updated_at` index |
 | `system14_knowledge_entries` | `source_key` unique, source_type check, `source_type`, `product`, pgvector ivfflat index |
 | `system14_performance_runs` | `job_id` FK、status・要求件数check、`created_at` index |
+| `system14_webhook_receipts` | `received_at` index |
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -350,4 +373,5 @@ CREATE TABLE system14_agent_answers (...);
 CREATE TABLE system14_dummy_crm_activities (...);
 CREATE TABLE system14_knowledge_entries (... embedding vector(768) ...);
 CREATE TABLE system14_performance_runs (...);
+CREATE TABLE system14_webhook_receipts (...);
 ```

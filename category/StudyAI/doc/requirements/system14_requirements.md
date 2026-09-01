@@ -26,7 +26,7 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 **実装済み**
 
 - `system14` Docker サービス（ポート `18014`）
-- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` / `20260901_0020` / `20260901_0021` による System14 テーブル作成
+- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` / `20260901_0020` / `20260901_0021` / `20260901_0022` による System14 テーブル作成
 - テスト系データ：CSV / JSON / text 取込、正規化、発話分析、グルーピング、営業スコア、勝敗要因、ダッシュボード集計
 - faster-whisperの区間単位文字起こし、ローカル`pyannote/speaker-diarization-community-1`による話者区間抽出、時刻重なりによる匿名話者ラベル割当、`start_sec` / `end_sec`のPostgreSQL保存、取込ジョブ単位の発話・時刻表示
 - 話者分離モデルをCPU版依存関係とともに専用Docker volumeへ1ワーカーで取得し、ローカルパスから読込み検証する保守スクリプト。通常のsystem14実行環境へHugging Face tokenは渡さない
@@ -37,6 +37,8 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 - workflow 完了時の配信ペイロード生成と配信ログ保存（dashboard / webhook / email / ローカル・ダミーCRM）
 - 取込元を指定したリアルタイムworkflow。緊急度`high`の発話をconversation保存直後に検知し、登録順に一件ずつ配信して成功・失敗を配信ログへ永続保存する
 - 100～5000会話の合成データを既存のルール分析・PostgreSQL保存経路へ一件ずつ通し、処理件数、経過秒、処理率、目標達成を`system14_performance_runs`へ永続保存する大量データ性能検証
+- Bearer認証付きローカルWebhook受信APIとPostgreSQL受信履歴、MailpitのSMTP・メールボックスを使うローカル配信確認環境
+- `GET /api/delivery/configuration`、`GET /api/delivery-sandbox/webhook-receipts`、`GET /api/delivery-sandbox/email-messages`による設定状態と実受信結果の画面確認
 - Bearer認証付きHTTP POST、外部IDによる重複防止、PostgreSQL永続化を行うローカル・ダミーCRM API
 - FAQ、過去の発話、営業スコア、完了済みCRM対応をPostgreSQLへ永続化してpgvector検索するRAG。EmbeddingとLLMの要求は一件ずつ順番に実行し、失敗時に画面内処理やキーワード検索へ自動切替しない
 - `POST /api/knowledge/faqs`、`GET /api/knowledge/faqs`、`POST /api/knowledge/index`によるFAQ管理とRAG索引更新
@@ -45,7 +47,7 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 
 **MVP 外として残るもの**
 
-- Webhook / email の運用設定整備とSalesforce等の実CRM connector
+- Salesforce等の実CRM connector（接続先SaaS環境が提供された場合だけ実装対象とする）
 
 MVP外として残る項目は、本節を正として管理する。
 
@@ -447,6 +449,22 @@ staff_id:    担当者ID（省略時は全員）
 ### GET /workflows/delivery-logs
 
 ワークフローの配信履歴を新しい順に取得する。`trigger=realtime`を指定すると、リアルタイムworkflowの初回実行と取込時のリスク即時通知を取得できる。リスク通知は`payload.output.type=risk_alert`で識別する。
+
+### GET /delivery/configuration
+
+ローカルWebhook、SMTP・Mailpit、ダミーCRM、実CRMの設定状態を返す。Bearer Tokenやパスワードは返さない。
+
+### POST /delivery-sandbox/webhook
+
+`SYSTEM14_WEBHOOK_BEARER_TOKEN`と一致するBearer Tokenを要求し、受信したJSONを`system14_webhook_receipts`へ保存する。ローカル確認先として`SYSTEM14_WEBHOOK_SINK_ENDPOINT`を指定する。
+
+### GET /delivery-sandbox/webhook-receipts
+
+PostgreSQLへ保存済みのWebhook受信履歴を新しい順に返す。
+
+### GET /delivery-sandbox/email-messages
+
+Mailpit APIへHTTP接続し、SMTPで実受信したメールの件名、送信元、宛先、受信日時、抜粋を返す。
 
 ### GET /dashboard
 ダッシュボードデータを取得する。

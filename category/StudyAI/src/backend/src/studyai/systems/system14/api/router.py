@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import secrets
 from datetime import date
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, Header, Query, Request, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,12 +17,14 @@ from studyai.systems.system14.schemas.insight import (
     AgentChatRequest,
     AgentChatResponse,
     DashboardResponse,
+    DeliveryConfigurationResponse,
     DummyCrmActivityCreate,
     DummyCrmActivityListResponse,
     DummyCrmActivityResponse,
     DummyCrmActivityStatus,
     DummyCrmActivityUpdate,
     DummyCrmUpsertResponse,
+    EmailSandboxMessageListResponse,
     FAQGapResponse,
     JobStatusResponse,
     JobUtteranceListResponse,
@@ -39,9 +42,12 @@ from studyai.systems.system14.schemas.insight import (
     WorkflowCreateRequest,
     WorkflowCreateResponse,
     WorkflowDeliveryLogListResponse,
+    WebhookReceiptListResponse,
+    WebhookReceiptResponse,
 )
 from studyai.systems.system14.services.agent_chat_service import AgentChatService
 from studyai.systems.system14.services.dummy_crm_service import DummyCrmService
+from studyai.systems.system14.services.delivery_sandbox_service import DeliverySandboxService
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
 from studyai.systems.system14.services.job_manager import JobManager
 from studyai.systems.system14.services.performance_service import PerformanceService
@@ -66,6 +72,25 @@ def _require_dummy_crm_token(
         raise AppError(
             "dummy_crm_authentication_failed",
             "A valid dummy CRM bearer token is required.",
+            401,
+        )
+
+
+def _require_webhook_sink_token(
+    authorization: str | None = Header(default=None, alias="Authorization"),
+) -> None:
+    expected = os.environ.get("SYSTEM14_WEBHOOK_BEARER_TOKEN", "").strip()
+    if not expected:
+        raise AppError(
+            "webhook_sink_not_configured",
+            "SYSTEM14_WEBHOOK_BEARER_TOKEN is not configured.",
+            503,
+        )
+    scheme, separator, token = (authorization or "").partition(" ")
+    if separator != " " or scheme.lower() != "bearer" or not secrets.compare_digest(token, expected):
+        raise AppError(
+            "webhook_sink_authentication_failed",
+            "A valid webhook sink bearer token is required.",
             401,
         )
 
@@ -207,6 +232,39 @@ async def list_workflow_delivery_logs(
         trigger=trigger,
         limit=limit,
     )
+
+
+@router.get("/delivery/configuration", response_model=DeliveryConfigurationResponse)
+async def get_delivery_configuration(
+    _: AuthenticatedUser = Depends(require_authenticated),
+) -> DeliveryConfigurationResponse:
+    return DeliverySandboxService().get_configuration()
+
+
+@router.post("/delivery-sandbox/webhook", response_model=WebhookReceiptResponse)
+async def receive_delivery_sandbox_webhook(
+    payload: dict[str, Any],
+    _: None = Depends(_require_webhook_sink_token),
+    session: AsyncSession = Depends(get_db_session),
+) -> WebhookReceiptResponse:
+    return await DeliverySandboxService().receive_webhook(session, payload=payload)
+
+
+@router.get("/delivery-sandbox/webhook-receipts", response_model=WebhookReceiptListResponse)
+async def list_delivery_sandbox_webhook_receipts(
+    limit: int = Query(default=20, ge=1, le=100),
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> WebhookReceiptListResponse:
+    return await DeliverySandboxService().list_webhook_receipts(session, limit=limit)
+
+
+@router.get("/delivery-sandbox/email-messages", response_model=EmailSandboxMessageListResponse)
+async def list_delivery_sandbox_email_messages(
+    limit: int = Query(default=20, ge=1, le=100),
+    _: AuthenticatedUser = Depends(require_authenticated),
+) -> EmailSandboxMessageListResponse:
+    return await DeliverySandboxService().list_email_messages(limit=limit)
 
 
 @router.get("/dashboard", response_model=DashboardResponse)

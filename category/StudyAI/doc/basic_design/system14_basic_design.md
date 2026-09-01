@@ -16,6 +16,9 @@ FastAPI
     ├─ GET /insights/*
     ├─ POST /workflows
     ├─ GET /workflows/delivery-logs
+    ├─ GET /delivery/configuration
+    ├─ POST /delivery-sandbox/webhook、GET /delivery-sandbox/webhook-receipts
+    ├─ GET /delivery-sandbox/email-messages
     ├─ GET /dashboard
     ├─ POST /agent/chat
     ├─ GET /agent/action-proposals
@@ -33,6 +36,7 @@ InsightPipelineOrchestrator
     ├─ InsightGenerator
     ├─ WorkflowDispatcher
     ├─ AgentChatService
+    ├─ DeliverySandboxService
     └─ DummyCrmService
     ↓
 PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores, workflows, workflow_delivery_logs, dummy_crm_activities）
@@ -51,6 +55,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | GroupingService | 意味グルーピングとランキング化 |
 | SalesScoringService | 営業トーク評価 |
 | WorkflowDispatcher | workflow 定義保存、リスク即時通知、配信ペイロード生成、配信結果ログ保存 |
+| DeliverySandboxService | 配信設定状態の安全な表示、Webhook受信履歴のDB保存・取得、Mailpit受信メールの取得 |
 | AgentChatService | 分析済みデータへの自然言語Q&A |
 | DummyCrmService | Bearer認証済みの顧客対応履歴を外部IDで重複防止し、ローカルDBへ保存・一覧・更新する |
 | PerformanceService | 合成会話を既存取込経路へ一件ずつ渡し、処理件数・時間・処理率・目標達成をDBへ保存する |
@@ -61,9 +66,9 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | Backend | `src/backend/src/studyai/systems/system14/` に実装済み |
 | Entrypoint | `src/backend/src/studyai/system14_main.py` |
 | API router | `src/backend/src/studyai/systems/system14/api/router.py` |
-| DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`～`src/backend/alembic/versions/20260901_0021_add_system14_performance_runs.py` |
-| DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities`, `system14_knowledge_entries`, `system14_performance_runs` |
-| Docker | system14専用のCPU版話者分離依存を持つ`system14`サービス、ホストポート`18014`、モデル永続volume |
+| DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`～`src/backend/alembic/versions/20260901_0022_add_system14_webhook_receipts.py` |
+| DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities`, `system14_knowledge_entries`, `system14_performance_runs`, `system14_webhook_receipts` |
+| Docker | system14専用のCPU版話者分離依存を持つ`system14`サービス、ホストポート`18014`、モデル永続volume、SMTP`11025`・受信画面`18025`の`system14-mailpit` |
 | Frontend | `src/frontend/src/pages/System14Page.tsx`、route `/system14` |
 | 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、リスク即時通知、100～5000会話の性能検証、各結果のDB永続化を確認対象 |
 
@@ -95,6 +100,8 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 - 配信前に部門別の出力粒度へ整形する
 - workflow 作成時に指定された `output_type` の分析ペイロードを生成し、配信結果を `system14_workflow_delivery_logs` に保存する
 - `dashboard` はログ保存で成功扱い、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信する
+- ローカルWebhook確認先だけに専用Bearer Tokenを付与し、受信JSONをPostgreSQLへ保存する。任意の外部Webhook URLへローカルTokenを送らない
+- メールは`system14-mailpit`へSMTP送信し、受信結果をMailpit API経由で画面へ表示する。Mailpitのデータは専用Docker volumeへ保存する
 - `crm_dummy` はBearer認証付きHTTP POSTで同一バックエンド内のダミーCRM APIへ順次送信し、外部IDで重複を防止してDBへ保存する
 - `crm` は実CRM接続環境が提供されていないため、明示的に接続未設定の失敗ログとして扱う
 - `trigger=realtime`の有効なworkflowは、`data_sources`と取込元が一致し、保存した発話に緊急度`high`が含まれる場合だけ発火する
@@ -117,6 +124,10 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | GET | `/insights/win-loss` | 受注失注分析 | 同期 |
 | POST | `/workflows` | 配信ワークフロー定義・即時配信実行 | 同期 |
 | GET | `/workflows/delivery-logs` | 配信履歴・リスク即時アラート履歴 | 同期 |
+| GET | `/delivery/configuration` | 秘密値を含まない配信設定状態 | 同期 |
+| POST | `/delivery-sandbox/webhook` | Bearer認証付きWebhook受信・DB保存 | 同期 |
+| GET | `/delivery-sandbox/webhook-receipts` | 保存済みWebhook受信履歴 | 同期 |
+| GET | `/delivery-sandbox/email-messages` | Mailpitの受信メール一覧 | 同期 |
 | GET | `/dashboard` | 集約ダッシュボード | 同期 |
 | POST | `/agent/chat` | 分析AIチャット | 同期 |
 | GET | `/agent/action-proposals` | 改善提案 | 同期 |
@@ -267,7 +278,7 @@ external_idで既存レコードを確認
 | データ取込タブ | ファイル投入、metadata入力、ジョブ状態確認、大量データ性能検証、保存済み性能結果の確認を行う | 実装済み |
 | ダッシュボードタブ | 集約カード、顧客の声ランキング、直近ジョブを表示する | 実装済み |
 | 分析タブ | 顧客の声ランキング、営業スコア、勝敗要因を表示する | 実装済み |
-| エージェントタブ | 分析AIチャットとワークフロー定義保存・配信実行を行う | 実装済み |
+| エージェントタブ | 分析AIチャット、ワークフロー定義保存・配信実行、ローカルWebhook・メールの実受信結果確認を行う | 実装済み |
 | ダミーCRMタブ | HTTP送信された顧客対応履歴の一覧と対応状態更新を行う | 実装済み |
 | RAG・FAQタブ | FAQ保存、FAQ一覧、発話・完了済みCRM対応の索引更新を行う | 実装済み |
 
@@ -343,6 +354,9 @@ flowchart TD
 |---|---|---|---|
 | `workflow_editor` | 配信条件設定 | フォーム | POST `/workflows` |
 | `delivery_targets` | 配信先 | 複数入力 | dashboard / Webhook / メール / ローカル・ダミーCRM / 実CRMを指定可能。実CRMは接続先未提供を明示する |
+| `delivery_configuration` | ローカル配信設定 | 状態表示 | GET `/delivery/configuration`。秘密値は表示しない |
+| `webhook_receipts` | Webhook受信履歴 | 更新ボタン・一覧 | GET `/delivery-sandbox/webhook-receipts` |
+| `email_messages` | Mailpit受信履歴 | 更新ボタン・一覧 | GET `/delivery-sandbox/email-messages` |
 | `risk_alert_logs` | リスク即時アラート履歴 | 更新ボタン・カード一覧 | GET `/workflows/delivery-logs?trigger=realtime`のうち`risk_alert`を表示 |
 | `agent_question` | 分析AI質問 | テキストエリア | POST `/agent/chat` |
 | `agent_answer` | 分析AI回答 | テキスト表示 | 根拠付き回答 |

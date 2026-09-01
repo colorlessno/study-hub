@@ -327,8 +327,15 @@ class WorkflowDispatcher:
         endpoint = str(delivery.get("endpoint") or "").strip()
         if not endpoint:
             return ("failed", {}, "Webhook delivery requires endpoint.")
+        sink_endpoint = os.environ.get("SYSTEM14_WEBHOOK_SINK_ENDPOINT", "").strip()
+        token = os.environ.get("SYSTEM14_WEBHOOK_BEARER_TOKEN", "").strip()
+        headers = (
+            {"Authorization": f"Bearer {token}"}
+            if token and sink_endpoint and endpoint == sink_endpoint
+            else None
+        )
         async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.post(endpoint, json=payload)
+            response = await client.post(endpoint, json=payload, headers=headers)
         response_payload = {
             "status_code": response.status_code,
             "body": response.text[:1000],

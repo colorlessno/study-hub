@@ -4,7 +4,10 @@ import pytest
 from pydantic import ValidationError
 
 from studyai.common.errors.models import AppError
-from studyai.systems.system14.api.router import _require_dummy_crm_token
+from studyai.systems.system14.api.router import (
+    _require_dummy_crm_token,
+    _require_webhook_sink_token,
+)
 from studyai.systems.system14.schemas.insight import (
     DummyCrmActivityCreate,
     DummyCrmActivityUpdate,
@@ -45,3 +48,14 @@ def test_dummy_crm_requires_matching_bearer_token(monkeypatch) -> None:
         _require_dummy_crm_token("Bearer wrong-token")
     assert error.value.status_code == 401
     assert error.value.error_code == "dummy_crm_authentication_failed"
+
+
+def test_webhook_sink_requires_matching_bearer_token(monkeypatch) -> None:
+    monkeypatch.setenv("SYSTEM14_WEBHOOK_BEARER_TOKEN", "local-webhook-token")
+
+    _require_webhook_sink_token("Bearer local-webhook-token")
+
+    with pytest.raises(AppError) as error:
+        _require_webhook_sink_token("Bearer wrong-token")
+    assert error.value.status_code == 401
+    assert error.value.error_code == "webhook_sink_authentication_failed"

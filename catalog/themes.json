@@ -2042,6 +2042,20 @@
           "kind": "source",
           "format": "source",
           "path": "category/StudyAI/src/backend/tests/systems/system14/test_performance_service.py"
+        },
+        {
+          "id": "delivery-sandbox-service",
+          "label": "ローカルWebhook・メール配信確認",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/src/studyai/systems/system14/services/delivery_sandbox_service.py"
+        },
+        {
+          "id": "delivery-sandbox-test",
+          "label": "配信設定・保存・メール読取のテスト",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/tests/systems/system14/test_delivery_sandbox_service.py"
         }
       ],
       "connection": {

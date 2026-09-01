@@ -74,6 +74,39 @@ interface WorkflowDeliveryLogListResponse {
   logs: WorkflowDeliveryLog[]
 }
 
+interface DeliveryConfiguration {
+  webhook_configured: boolean
+  webhook_endpoint?: string | null
+  email_configured: boolean
+  smtp_destination?: string | null
+  mail_inbox_url?: string | null
+  dummy_crm_configured: boolean
+  actual_crm_configured: boolean
+}
+
+interface WebhookReceipt {
+  id: number
+  payload: Record<string, unknown>
+  received_at: string
+}
+
+interface WebhookReceiptListResponse {
+  receipts: WebhookReceipt[]
+}
+
+interface EmailSandboxMessage {
+  id: string
+  subject: string
+  sender: string
+  recipients: string[]
+  created_at: string
+  snippet: string
+}
+
+interface EmailSandboxMessageListResponse {
+  messages: EmailSandboxMessage[]
+}
+
 interface JobUtterance {
   id: number
   conversation_id: number
@@ -520,6 +553,10 @@ export default function System14Page() {
   const [workflowEndpoint, setWorkflowEndpoint] = useState('')
   const [workflowRecipients, setWorkflowRecipients] = useState('')
   const [workflowResult, setWorkflowResult] = useState('')
+  const [deliveryConfiguration, setDeliveryConfiguration] = useState<DeliveryConfiguration | null>(null)
+  const [deliveryEnvironmentMessage, setDeliveryEnvironmentMessage] = useState('')
+  const [webhookReceipts, setWebhookReceipts] = useState<WebhookReceipt[]>([])
+  const [emailMessages, setEmailMessages] = useState<EmailSandboxMessage[]>([])
   const [riskAlerts, setRiskAlerts] = useState<WorkflowDeliveryLog[]>([])
   const [riskAlertMessage, setRiskAlertMessage] = useState('')
   const [crmCustomerId, setCrmCustomerId] = useState('customer-001')
@@ -757,11 +794,55 @@ export default function System14Page() {
       if (workflowDeliveryMethod === 'crm_dummy' && delivery?.status === 'success') {
         await loadDummyCrm()
       }
+      if (workflowDeliveryMethod === 'webhook' && delivery?.status === 'success') {
+        await loadWebhookReceipts()
+      }
+      if (workflowDeliveryMethod === 'email' && delivery?.status === 'success') {
+        await loadEmailMessages()
+      }
       if (workflowTrigger === 'realtime') {
         await loadRiskAlerts()
       }
     } catch (error) {
       setWorkflowResult(getErrorMessage(error, 'ワークフロー保存に失敗しました'))
+    }
+  }
+
+  async function loadDeliveryEnvironment() {
+    setDeliveryEnvironmentMessage('ローカル配信環境を確認中...')
+    try {
+      const res = await client.get<DeliveryConfiguration>('/delivery/configuration')
+      setDeliveryConfiguration(res.data)
+      setWorkflowEndpoint(current => current.trim() ? current : res.data.webhook_endpoint ?? '')
+      setDeliveryEnvironmentMessage('ローカル配信環境の設定を取得しました。')
+    } catch (error) {
+      setDeliveryEnvironmentMessage(getErrorMessage(error, 'ローカル配信環境を取得できませんでした'))
+    }
+  }
+
+  async function loadWebhookReceipts() {
+    setDeliveryEnvironmentMessage('Webhook受信履歴を取得中...')
+    try {
+      const res = await client.get<WebhookReceiptListResponse>('/delivery-sandbox/webhook-receipts', {
+        params: { limit: 20 },
+      })
+      setWebhookReceipts(res.data.receipts)
+      setDeliveryEnvironmentMessage(`保存済みWebhook受信履歴を${res.data.receipts.length}件取得しました。`)
+    } catch (error) {
+      setDeliveryEnvironmentMessage(getErrorMessage(error, 'Webhook受信履歴を取得できませんでした'))
+    }
+  }
+
+  async function loadEmailMessages() {
+    setDeliveryEnvironmentMessage('メール受信履歴を取得中...')
+    try {
+      const res = await client.get<EmailSandboxMessageListResponse>('/delivery-sandbox/email-messages', {
+        params: { limit: 20 },
+      })
+      setEmailMessages(res.data.messages)
+      setDeliveryEnvironmentMessage(`Mailpitのメール受信履歴を${res.data.messages.length}件取得しました。`)
+    } catch (error) {
+      setDeliveryEnvironmentMessage(getErrorMessage(error, 'メール受信履歴を取得できませんでした'))
     }
   }
 
@@ -1226,6 +1307,36 @@ export default function System14Page() {
           </div>
           <div style={card()}>
             <h3 style={{ marginTop: 0 }}>ワークフロー設定</h3>
+            <div style={{ ...card(), background: COLOR.band, marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                <strong>ローカル配信確認環境</strong>
+                <button data-testid="load-delivery-configuration" style={button(true)} onClick={loadDeliveryEnvironment}>設定を確認</button>
+              </div>
+              {deliveryConfiguration && (
+                <div style={{ marginTop: '0.8rem', color: COLOR.text, fontSize: '0.84rem', lineHeight: 1.7 }}>
+                  <div>Webhook: {deliveryConfiguration.webhook_configured ? '利用可能' : '未設定'}{deliveryConfiguration.webhook_endpoint ? ` / ${deliveryConfiguration.webhook_endpoint}` : ''}</div>
+                  <div>SMTP・メールボックス: {deliveryConfiguration.email_configured ? '利用可能' : '未設定'}{deliveryConfiguration.smtp_destination ? ` / ${deliveryConfiguration.smtp_destination}` : ''}</div>
+                  <div>ダミーCRM: {deliveryConfiguration.dummy_crm_configured ? '利用可能' : '未設定'}</div>
+                  <div>実CRM: {deliveryConfiguration.actual_crm_configured ? '利用可能' : '接続先未提供'}</div>
+                  {deliveryConfiguration.mail_inbox_url && <a href={deliveryConfiguration.mail_inbox_url} target="_blank" rel="noreferrer">Mailpitの受信画面を開く</a>}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: '0.8rem' }}>
+                <button data-testid="load-webhook-receipts" style={{ ...button(true), background: '#475569' }} onClick={loadWebhookReceipts}>Webhook受信履歴</button>
+                <button data-testid="load-email-messages" style={{ ...button(true), background: '#475569' }} onClick={loadEmailMessages}>メール受信履歴</button>
+              </div>
+              {deliveryEnvironmentMessage && <p data-testid="delivery-environment-message" style={{ color: COLOR.muted, marginBottom: 0 }}>{deliveryEnvironmentMessage}</p>}
+              {webhookReceipts.slice(0, 5).map(receipt => (
+                <div key={receipt.id} data-testid="webhook-receipt" style={{ marginTop: 8, borderTop: `1px solid ${COLOR.border}`, paddingTop: 8 }}>
+                  Webhook #{receipt.id} / {formatDateTime(receipt.received_at)} / {JSON.stringify(receipt.payload).slice(0, 240)}
+                </div>
+              ))}
+              {emailMessages.slice(0, 5).map(mail => (
+                <div key={mail.id} data-testid="email-sandbox-message" style={{ marginTop: 8, borderTop: `1px solid ${COLOR.border}`, paddingTop: 8 }}>
+                  {mail.subject || '件名なし'} / {mail.sender || '-'} → {mail.recipients.join(', ') || '-'} / {formatDateTime(mail.created_at)}
+                </div>
+              ))}
+            </div>
             <input data-testid="workflow-name" style={field()} value={workflowName} onChange={e => setWorkflowName(e.target.value)} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.8rem', marginTop: '0.8rem' }}>
               <div>

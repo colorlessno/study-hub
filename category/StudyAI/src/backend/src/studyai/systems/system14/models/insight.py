@@ -245,3 +245,15 @@ class System14PerformanceRun(Base):
     error_message: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class System14WebhookReceipt(Base):
+    __tablename__ = "system14_webhook_receipts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )

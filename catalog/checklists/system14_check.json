@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "revision": 10,
+  "revision": 11,
   "themeId": "system14",
   "title": "学習項目",
   "items": [
@@ -67,6 +67,10 @@
     {
       "id": "check-16",
       "label": "大量データ性能検証を実行し、既存の順次取込・PostgreSQL保存を通った処理件数、経過秒、処理率、目標達成がDB保存・画面表示されることを確認した"
+    },
+    {
+      "id": "check-17",
+      "label": "ローカルWebhookとMailpitへ一件ずつ実配信し、PostgreSQLのWebhook受信履歴とMailpitのメール受信履歴を画面で確認した"
     }
   ]
 }

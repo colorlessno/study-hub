@@ -119,6 +119,7 @@ def test_workflow_dispatcher_posts_payload_to_webhook(monkeypatch) -> None:
     _FakeAsyncClient.received.clear()
     _FakeAsyncClient.received_headers.clear()
     monkeypatch.setattr(workflow_module.httpx, "AsyncClient", _FakeAsyncClient)
+    monkeypatch.delenv("SYSTEM14_WEBHOOK_BEARER_TOKEN", raising=False)
     payload = {"workflow": {"name": "顧客の声を配信"}, "output": {"type": "voice_ranking"}}
 
     status, response, error_message = asyncio.run(
@@ -133,6 +134,30 @@ def test_workflow_dispatcher_posts_payload_to_webhook(monkeypatch) -> None:
     assert response == {"status_code": 202, "body": "accepted"}
     assert error_message is None
     assert _FakeAsyncClient.received == [payload]
+    assert _FakeAsyncClient.received_headers == [None]
+
+
+def test_workflow_dispatcher_adds_configured_webhook_bearer_token(monkeypatch) -> None:
+    _FakeAsyncClient.received.clear()
+    _FakeAsyncClient.received_headers.clear()
+    monkeypatch.setattr(workflow_module.httpx, "AsyncClient", _FakeAsyncClient)
+    monkeypatch.setenv("SYSTEM14_WEBHOOK_BEARER_TOKEN", "local-webhook-token")
+    monkeypatch.setenv("SYSTEM14_WEBHOOK_SINK_ENDPOINT", "http://webhook.example.test/insights")
+    payload = {"workflow": {"name": "顧客の声を配信"}, "output": {"type": "voice_ranking"}}
+
+    status, _, error_message = asyncio.run(
+        WorkflowDispatcher()._deliver(
+            "webhook",
+            {"method": "webhook", "endpoint": "http://webhook.example.test/insights"},
+            payload,
+        )
+    )
+
+    assert status == "success"
+    assert error_message is None
+    assert _FakeAsyncClient.received_headers == [
+        {"Authorization": "Bearer local-webhook-token"}
+    ]
 
 
 def test_workflow_dispatcher_posts_activity_to_dummy_crm(monkeypatch) -> None:

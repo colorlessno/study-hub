@@ -210,6 +210,41 @@ class WorkflowDeliveryLogListResponse(BaseModel):
     logs: list[WorkflowDeliveryLogItem] = Field(default_factory=list)
 
 
+class DeliveryConfigurationResponse(BaseModel):
+    webhook_configured: bool
+    webhook_endpoint: str | None = None
+    email_configured: bool
+    smtp_destination: str | None = None
+    mail_inbox_url: str | None = None
+    dummy_crm_configured: bool
+    actual_crm_configured: bool = False
+
+
+class WebhookReceiptResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    payload: dict[str, Any]
+    received_at: datetime
+
+
+class WebhookReceiptListResponse(BaseModel):
+    receipts: list[WebhookReceiptResponse] = Field(default_factory=list)
+
+
+class EmailSandboxMessage(BaseModel):
+    id: str
+    subject: str
+    sender: str
+    recipients: list[str] = Field(default_factory=list)
+    created_at: str
+    snippet: str
+
+
+class EmailSandboxMessageListResponse(BaseModel):
+    messages: list[EmailSandboxMessage] = Field(default_factory=list)
+
+
 class DummyCrmActivityCreate(BaseModel):
     external_id: str = Field(min_length=1, max_length=120)
     customer_id: str | None = Field(default=None, max_length=100)

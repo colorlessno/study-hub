@@ -17,6 +17,7 @@ from studyai.systems.system14.models.insight import (
     System14PerformanceRun,
     System14SalesScore,
     System14Utterance,
+    System14WebhookReceipt,
     System14Workflow,
     System14WorkflowDeliveryLog,
 )
@@ -127,6 +128,24 @@ class InsightRepository:
             .order_by(
                 System14PerformanceRun.created_at.desc(),
                 System14PerformanceRun.id.desc(),
+            )
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def create_webhook_receipt(self, *, payload: dict) -> System14WebhookReceipt:
+        row = System14WebhookReceipt(payload=payload)
+        self.session.add(row)
+        await self.session.flush()
+        await self.session.refresh(row)
+        return row
+
+    async def list_webhook_receipts(self, *, limit: int = 20) -> list[System14WebhookReceipt]:
+        result = await self.session.execute(
+            select(System14WebhookReceipt)
+            .order_by(
+                System14WebhookReceipt.received_at.desc(),
+                System14WebhookReceipt.id.desc(),
             )
             .limit(limit)
         )

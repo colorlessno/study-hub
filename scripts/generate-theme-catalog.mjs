@@ -110,7 +110,9 @@ const themeResources = {
     { id: 'speaker-diarization', label: 'ローカル話者分離と時刻重なり割当', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/speaker_diarization_service.py' },
     { id: 'speaker-diarization-test', label: '話者分離の失敗境界と割当テスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_speaker_diarization_service.py' },
     { id: 'rag-service', label: 'RAG・FAQ・過去対応履歴の処理', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/rag_knowledge_service.py' },
-    { id: 'rag-test', label: 'RAG逐次処理と失敗境界のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_rag_knowledge_service.py' }
+    { id: 'rag-test', label: 'RAG逐次処理と失敗境界のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_rag_knowledge_service.py' },
+    { id: 'delivery-sandbox-service', label: 'ローカルWebhook・メール配信確認', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/delivery_sandbox_service.py' },
+    { id: 'delivery-sandbox-test', label: '配信設定・保存・メール読取のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_delivery_sandbox_service.py' }
   ],
   system45: [
     { id: 'skill-definition', label: '技能定義', kind: 'source', format: 'markdown', path: 'category/StudyAI/src/apps/system45_agent_skill_packaging/sample_skill/SKILL.md' },
@@ -3714,6 +3716,9 @@ function studyAiSharedConnection(themeId) {
     startup: [
       dockerCommand('database', [
         ...prefix, 'up', '-d', '--build', '--wait', '--wait-timeout', '60', 'db'
+      ], { execution: 'task' }),
+      dockerCommand('delivery-sandbox', [
+        ...prefix, 'up', '-d', 'system14-mailpit'
       ], { execution: 'task' }),
       dockerCommand('migration', [
         ...prefix, 'run', '--rm', '--build', 'migrate'

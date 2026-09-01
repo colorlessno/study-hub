@@ -1285,7 +1285,7 @@ describe('実テーマカタログ', () => {
     const catalog = loadActualCatalog();
     const expectedChecklistItemCounts: Record<string, number> = {
       system11: 6,
-      system14: 16,
+      system14: 17,
       system16: 8
     };
 
@@ -1321,7 +1321,7 @@ describe('実テーマカタログ', () => {
           })]
         });
       } else {
-        expect(themeSpecificResources(theme?.resources)).toHaveLength(themeId === 'system14' ? 12 : 4);
+        expect(themeSpecificResources(theme?.resources)).toHaveLength(themeId === 'system14' ? 14 : 4);
         expect(theme?.resources?.filter((resource) => !formalDocumentResourceIds.has(resource.id)).map((resource) => resource.id)).toEqual(expect.arrayContaining([
           'screen-source',
           'api-routes',
@@ -1334,7 +1334,9 @@ describe('実テーマカタログ', () => {
             'risk-alert-dispatcher',
             'risk-alert-test',
             'rag-service',
-            'rag-test'
+            'rag-test',
+            'delivery-sandbox-service',
+            'delivery-sandbox-test'
           ]));
         }
       }
