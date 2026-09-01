@@ -32,6 +32,20 @@ class JobStatusResponse(BaseModel):
     completed_at: datetime | None = None
 
 
+class JobUtteranceItem(BaseModel):
+    id: int
+    conversation_id: int
+    speaker: str | None = None
+    text: str
+    start_sec: float | None = None
+    end_sec: float | None = None
+
+
+class JobUtteranceListResponse(BaseModel):
+    job_id: str
+    utterances: list[JobUtteranceItem] = Field(default_factory=list)
+
+
 class VoiceRankingItem(BaseModel):
     rank: int
     group_label: str

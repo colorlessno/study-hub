@@ -24,6 +24,7 @@ from studyai.systems.system14.schemas.insight import (
     DummyCrmUpsertResponse,
     FAQGapResponse,
     JobStatusResponse,
+    JobUtteranceListResponse,
     SalesScoreResponse,
     UploadAcceptedResponse,
     VoiceRankingResponse,
@@ -85,6 +86,15 @@ async def get_job(
     session: AsyncSession = Depends(get_db_session),
 ) -> JobStatusResponse:
     return await JobManager().get_job(session, job_id=job_id)
+
+
+@router.get("/jobs/{job_id}/utterances", response_model=JobUtteranceListResponse)
+async def get_job_utterances(
+    job_id: str,
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> JobUtteranceListResponse:
+    return await JobManager().get_job_utterances(session, job_id=job_id)
 
 
 @router.get("/insights/voice-ranking", response_model=VoiceRankingResponse)

@@ -79,6 +79,18 @@ class InsightRepository:
         )
         return list(result.scalars().all())
 
+    async def list_job_utterances(self, *, job_id: str) -> list[System14Utterance]:
+        result = await self.session.execute(
+            select(System14Utterance)
+            .join(
+                System14Conversation,
+                System14Utterance.conversation_id == System14Conversation.id,
+            )
+            .where(System14Conversation.job_id == job_id)
+            .order_by(System14Conversation.id, System14Utterance.id)
+        )
+        return list(result.scalars().all())
+
     async def create_conversation(
         self,
         *,

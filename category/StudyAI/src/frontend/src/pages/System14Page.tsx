@@ -22,6 +22,20 @@ interface UploadAcceptedResponse {
   file_count: number
 }
 
+interface JobUtterance {
+  id: number
+  conversation_id: number
+  speaker?: string | null
+  text: string
+  start_sec?: number | null
+  end_sec?: number | null
+}
+
+interface JobUtteranceListResponse {
+  job_id: string
+  utterances: JobUtterance[]
+}
+
 interface VoiceRankingItem {
   rank: number
   group_label: string
@@ -301,6 +315,10 @@ function formatDateTime(value?: string | null) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('ja-JP')
 }
 
+function formatSeconds(value?: number | null) {
+  return value == null ? '-' : `${value.toFixed(2)}秒`
+}
+
 const emptyFilters: AnalysisFilters = {
   fromDate: '',
   toDate: '',
@@ -381,6 +399,7 @@ export default function System14Page() {
     '{"product":"商品A","staff_id":"staff_001","staff_name":"中村","call_reason":"配送確認"}',
   )
   const [job, setJob] = useState<JobStatus | null>(null)
+  const [jobUtterances, setJobUtterances] = useState<JobUtterance[]>([])
   const [message, setMessage] = useState('')
   const [uploading, setUploading] = useState(false)
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
@@ -431,6 +450,10 @@ export default function System14Page() {
         data_type: data.data_type,
         source: targetSource,
       })
+      setJobUtterances([])
+      if (data.status === 'completed') {
+        await loadJobUtterances(data.job_id)
+      }
       setMessage(
         data.status === 'failed'
           ? `取込処理に失敗しました。状態を更新して詳細を確認してください: ${data.job_id}`
@@ -466,10 +489,18 @@ export default function System14Page() {
     try {
       const res = await client.get<JobStatus>(`/jobs/${job.job_id}`)
       setJob(res.data)
+      if (res.data.status === 'completed') {
+        await loadJobUtterances(res.data.job_id)
+      }
       setMessage(res.data.status === 'completed' ? '取込処理が完了しました。' : '取込状態を更新しました。')
     } catch (error) {
       setMessage(getErrorMessage(error, '取込状態を取得できませんでした'))
     }
+  }
+
+  async function loadJobUtterances(jobId: string) {
+    const response = await client.get<JobUtteranceListResponse>(`/jobs/${jobId}/utterances`)
+    setJobUtterances(response.data.utterances)
   }
 
   async function loadDashboard() {
@@ -667,6 +698,26 @@ export default function System14Page() {
               <div>取込種別: {labelOf(DATA_TYPE_LABELS, job.data_type)} / 取得元: {job.source}</div>
               {job.error_message && <div style={{ color: COLOR.danger }}>{job.error_message}</div>}
               <button data-testid="poll-job" style={{ ...button(true), marginTop: 8 }} onClick={pollJob}>状態更新</button>
+            </div>
+          )}
+          {jobUtterances.length > 0 && (
+            <div data-testid="job-utterances" style={{ marginTop: '1rem', overflowX: 'auto' }}>
+              <h4>保存した発話と時刻情報</h4>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem' }}>
+                <thead>
+                  <tr>{['話者', '開始', '終了', '発話'].map(label => <th key={label} style={{ ...tableCell(), textAlign: 'left' }}>{label}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {jobUtterances.map(item => (
+                    <tr key={item.id}>
+                      <td style={tableCell()}>{item.speaker === 'unknown' ? '未識別' : item.speaker ?? '-'}</td>
+                      <td style={tableCell()}>{formatSeconds(item.start_sec)}</td>
+                      <td style={tableCell()}>{formatSeconds(item.end_sec)}</td>
+                      <td style={tableCell()}>{item.text}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </section>

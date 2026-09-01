@@ -58,7 +58,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、ダミーCRMの5タブ構成。
 - workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。
 - `crm_dummy`は同一バックエンド内のダミーCRM APIへBearer認証付きHTTP POSTを行い、`system14_dummy_crm_activities`へ永続化する。
-- 音声・動画の本格話者分離とSalesforce等の実CRM connectorは未実装で、現行画面は接続環境未提供を明示する。
+- 音声・動画はfaster-whisperの各区間から開始秒・終了秒を取得し、DBへ保存して取込画面へ表示する。本格話者分離とSalesforce等の実CRM connectorは未実装で、識別できない話者は`unknown`、実CRMは接続環境未提供を明示する。
 
 ## 3. API 詳細
 
@@ -68,6 +68,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
   - 処理後にDBへ保存した`completed`または`failed`をそのまま応答の`status`へ設定
   - `file`, `data_type`, `source`, `metadata`
 - `GET /jobs/{job_id}`
+- `GET /jobs/{job_id}/utterances`
 - `GET /insights/voice-ranking`
 - `GET /insights/sales-score`
 - `GET /insights/win-loss`
@@ -100,6 +101,12 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | `status` | string | completed / failed |
 | `estimated_minutes` | integer | 完了応答のため0 |
 | `file_count` | integer | 対象件数 |
+
+音声・動画ではfaster-whisperの区間を一件ずつ`system14_utterances`へ保存する。`start_sec`と`end_sec`には実区間の秒数を入れ、話者分離していない区間は`speaker=unknown`とする。
+
+### 4.1.1 GET `/jobs/{job_id}/utterances`
+
+取込ジョブに保存された発話を、conversation IDとutterance IDの昇順で返す。各発話は`id`、`conversation_id`、`speaker`、`text`、`start_sec`、`end_sec`を持つ。存在しないジョブは404を返す。
 
 ### 4.2 GET `/jobs/{job_id}` / GET `/dashboard`
 
@@ -240,7 +247,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 ## 9. AI 処理詳細
 
-- 話者分離付き書き起こしを前提にする
+- 区間時刻付き書き起こしを前提にし、話者を識別できない場合は`unknown`のまま保存する
 - 発話ごとに `sentiment`, `type`, `topics` を付与する
 - 改善案は「課題」「根拠件数」「推奨アクション」「配信先部門」を必須にする
 

@@ -73,8 +73,8 @@ def _load_model():
     return model
 
 
-def _transcribe_sync(file_bytes: bytes, suffix: str, language: str) -> str:
-    """同期処理ブロック（asyncio.to_thread 経由で呼び出す）。
+def _transcribe_segments_sync(file_bytes: bytes, suffix: str, language: str) -> list[dict]:
+    """同期処理ブロックとして区間テキストと開始・終了秒を返す。
 
     一時ファイルに音声を書き出し → transcribe → テキストを結合して返す。
     一時ファイルは関数終了時に必ず削除される。
@@ -98,8 +98,19 @@ def _transcribe_sync(file_bytes: bytes, suffix: str, language: str) -> str:
             info.language,
             info.language_probability,
         )
-        text = " ".join(seg.text.strip() for seg in segments if seg.text.strip())
-        return text
+        result: list[dict] = []
+        for segment in segments:
+            text = segment.text.strip()
+            if not text:
+                continue
+            result.append(
+                {
+                    "text": text,
+                    "start_sec": float(segment.start),
+                    "end_sec": float(segment.end),
+                }
+            )
+        return result
     except Exception as exc:
         logger.exception("Transcription failed: %s", exc)
         raise ExternalServiceError(
@@ -112,6 +123,13 @@ def _transcribe_sync(file_bytes: bytes, suffix: str, language: str) -> str:
         Path(tmp_path).unlink(missing_ok=True)
 
 
+def _transcribe_sync(file_bytes: bytes, suffix: str, language: str) -> str:
+    """既存利用箇所向けに区間テキストを全文へ結合して返す。"""
+
+    segments = _transcribe_segments_sync(file_bytes, suffix, language)
+    return " ".join(str(segment["text"]) for segment in segments)
+
+
 class VoiceTranscriber:
     """音声ファイルをテキストに変換するサービス。
 
@@ -121,6 +139,44 @@ class VoiceTranscriber:
 
     def __init__(self, language: str = "ja") -> None:
         self._language = language
+
+    @staticmethod
+    def _validate_input(*, file_name: str, file_bytes: bytes) -> str:
+        lowered = file_name.lower()
+        if not lowered.endswith(_SUPPORTED_SUFFIXES):
+            raise ValidationAppError(
+                "invalid_audio_format",
+                f"Unsupported audio format. Supported: {', '.join(_SUPPORTED_SUFFIXES)}",
+            )
+
+        if not file_bytes:
+            raise ValidationAppError("empty_audio_file", "Audio file is empty.")
+
+        return Path(lowered).suffix
+
+    async def transcribe_segments(self, *, file_name: str, file_bytes: bytes) -> list[dict]:
+        """音声を区間単位で文字起こしし、各区間の開始・終了秒を返す。"""
+
+        suffix = self._validate_input(file_name=file_name, file_bytes=file_bytes)
+        segments = await asyncio.to_thread(
+            _transcribe_segments_sync,
+            file_bytes,
+            suffix,
+            self._language,
+        )
+        if not segments:
+            raise ExternalServiceError(
+                "transcription_empty",
+                "Transcription returned empty result. Please check the audio quality.",
+                422,
+            )
+
+        logger.info(
+            "Segment transcription complete: file=%s segments=%d",
+            file_name,
+            len(segments),
+        )
+        return segments
 
     async def transcribe_audio(self, *, file_name: str, file_bytes: bytes) -> str:
         """音声バイトを受け取り、日本語テキストを返す。
@@ -136,29 +192,8 @@ class VoiceTranscriber:
             ValidationAppError: 非対応フォーマットの場合。
             ExternalServiceError: 文字起こし処理失敗・ライブラリ未インストールの場合。
         """
-        lowered = file_name.lower()
-        if not lowered.endswith(_SUPPORTED_SUFFIXES):
-            raise ValidationAppError(
-                "invalid_audio_format",
-                f"Unsupported audio format. Supported: {', '.join(_SUPPORTED_SUFFIXES)}",
-            )
-
-        if not file_bytes:
-            raise ValidationAppError("empty_audio_file", "Audio file is empty.")
-
-        suffix = Path(lowered).suffix  # ".wav" / ".mp3" など
-
-        # faster-whisper の transcribe は同期 I/O なので to_thread で非同期化
-        text = await asyncio.to_thread(
-            _transcribe_sync, file_bytes, suffix, self._language
-        )
-
-        if not text:
-            raise ExternalServiceError(
-                "transcription_empty",
-                "Transcription returned empty result. Please check the audio quality.",
-                422,
-            )
+        segments = await self.transcribe_segments(file_name=file_name, file_bytes=file_bytes)
+        text = " ".join(str(segment["text"]) for segment in segments)
 
         logger.info(
             "Transcription complete: file=%s chars=%d",

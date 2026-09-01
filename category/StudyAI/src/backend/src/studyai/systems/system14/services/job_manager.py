@@ -11,7 +11,13 @@ from studyai.common.config.settings import get_settings
 from studyai.common.db.session import SessionLocal
 from studyai.common.errors.models import ValidationAppError
 from studyai.systems.system14.repositories.insight_repository import InsightRepository
-from studyai.systems.system14.schemas.insight import JobStatus, JobStatusResponse, UploadAcceptedResponse
+from studyai.systems.system14.schemas.insight import (
+    JobStatus,
+    JobStatusResponse,
+    JobUtteranceItem,
+    JobUtteranceListResponse,
+    UploadAcceptedResponse,
+)
 from studyai.systems.system14.services.grouping_service import GroupingService
 from studyai.systems.system14.services.ingestion_normalizer import IngestionNormalizer
 from studyai.systems.system14.services.pii_masker import PIIMasker
@@ -90,6 +96,30 @@ class JobManager:
             error_message=job.error_message,
             created_at=job.created_at,
             completed_at=job.completed_at,
+        )
+
+    async def get_job_utterances(
+        self,
+        session: AsyncSession,
+        *,
+        job_id: str,
+    ) -> JobUtteranceListResponse:
+        repo = InsightRepository(session)
+        await repo.get_job(job_id)
+        rows = await repo.list_job_utterances(job_id=job_id)
+        return JobUtteranceListResponse(
+            job_id=job_id,
+            utterances=[
+                JobUtteranceItem(
+                    id=row.id,
+                    conversation_id=row.conversation_id,
+                    speaker=row.speaker,
+                    text=row.text,
+                    start_sec=float(row.start_sec) if row.start_sec is not None else None,
+                    end_sec=float(row.end_sec) if row.end_sec is not None else None,
+                )
+                for row in rows
+            ],
         )
 
     async def process_job(

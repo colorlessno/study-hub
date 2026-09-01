@@ -41,7 +41,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 |---|---|
 | IngestionRouter | データ取込 API |
 | JobManager | 1ファイルずつ行う取込処理と状態管理 |
-| SpeechToTextService | faster-whisper で話者分離付き文字起こし |
+| SpeechToTextService | faster-whisperで区間単位に文字起こしし、開始秒・終了秒を保存する。話者分離できない区間は`unknown`として扱う |
 | UtteranceAnalyzer | sentiment / topic / utterance_type 判定 |
 | GroupingService | 意味グルーピングとランキング化 |
 | SalesScoringService | 営業トーク評価 |
@@ -70,7 +70,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 - `POST /data/upload` は受付けた1ファイルの取込と分析を順番に完了し、DB保存後に応答する
 - 複数のAPI要求は`JobManager`のサーバープロセス共通キューへ受付順に入れ、常に1件ずつ取込処理を完了させる
 - API応答の`status`はジョブへ保存した最終状態を使用し、処理失敗を完了として応答しない
-- 音声・動画は文字起こし後に conversation / utterance 単位へ分割する
+- 音声・動画はfaster-whisperの区間ごとに conversation / utterance へ分割し、開始秒・終了秒を保存する
 - テキスト系データは source ごとに正規化して conversation 形式へ統一する
 
 ### 2.2 分析設計
@@ -188,7 +188,7 @@ external_idで既存レコードを確認
 
 | 処理 | 用途 |
 |---|---|
-| 文字起こし補助 | 話者分離付き transcript 生成 |
+| 文字起こし補助 | 区間時刻付き transcript 生成。話者を識別できない場合は`unknown`を保持する |
 | utterance 分析 | sentiment / topic / type 判定 |
 | grouping | 類似発話の統合 |
 | sales scoring | 営業品質評価 |
