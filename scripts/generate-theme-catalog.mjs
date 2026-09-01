@@ -102,6 +102,10 @@ const themeResources = {
     { id: 'document-cases', label: '検索に使う文書例', kind: 'source', format: 'text', path: 'category/StudySecurity/src/backend/src/studysecurity/systems/security18_rag_safety/samples/documents.json' },
     { id: 'trust-boundary', label: '検索文書の信頼境界', kind: 'material', format: 'markdown', path: 'category/StudySecurity/doc/learning_notes/security18_rag_safety/rag_trust_boundary.md' }
   ],
+  system14: [
+    { id: 'rag-service', label: 'RAG・FAQ・過去対応履歴の処理', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/rag_knowledge_service.py' },
+    { id: 'rag-test', label: 'RAG逐次処理と失敗境界のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_rag_knowledge_service.py' }
+  ],
   system45: [
     { id: 'skill-definition', label: '技能定義', kind: 'source', format: 'markdown', path: 'category/StudyAI/src/apps/system45_agent_skill_packaging/sample_skill/SKILL.md' },
     { id: 'input-validator', label: '入力検証の処理', kind: 'source', format: 'source', path: 'category/StudyAI/src/apps/system45_agent_skill_packaging/sample_skill/scripts/validate_input.js' },

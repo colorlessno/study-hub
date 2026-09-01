@@ -251,20 +251,52 @@ class InsightQueryService:
             utterance_type="質問",
             limit=limit,
         )
-        gaps = [
-            FAQGapItem(
-                rank=item.rank,
-                call_reason=item.group_label,
-                inquiry_count=item.count,
-                existing_faq=None,
-                suggested_faq=SuggestedFAQ(
-                    question=f"{item.group_label}についてどう確認すればよいですか？",
-                    answer=f"{item.representative_text or item.group_label} という問い合わせが多いため、確認手順・条件・次の連絡先をFAQに追加してください。",
-                ),
+        faqs = await InsightRepository(session).list_knowledge_entries(
+            source_type="faq",
+            limit=500,
+        )
+        gaps: list[FAQGapItem] = []
+        for item in ranking.ranking:
+            covered = any(
+                self._faq_covers_topic(
+                    topic=item.group_label,
+                    product=product,
+                    faq_title=faq.title,
+                    faq_content=faq.content,
+                    faq_product=faq.product,
+                )
+                for faq in faqs
             )
-            for item in ranking.ranking
-        ]
+            if covered:
+                continue
+            gaps.append(
+                FAQGapItem(
+                    rank=len(gaps) + 1,
+                    call_reason=item.group_label,
+                    inquiry_count=item.count,
+                    existing_faq=None,
+                    suggested_faq=SuggestedFAQ(
+                        question=f"{item.group_label}についてどう確認すればよいですか？",
+                        answer=f"{item.representative_text or item.group_label} という問い合わせが多いため、確認手順・条件・次の連絡先をFAQに追加してください。",
+                    ),
+                )
+            )
         return FAQGapResponse(product=product, faq_gaps=gaps)
+
+    @staticmethod
+    def _faq_covers_topic(
+        *,
+        topic: str,
+        product: str | None,
+        faq_title: str,
+        faq_content: str,
+        faq_product: str | None,
+    ) -> bool:
+        if product and faq_product and product.strip().casefold() != faq_product.strip().casefold():
+            return False
+        normalized_topic = "".join(topic.split()).casefold()
+        normalized_faq = "".join(f"{faq_title}{faq_content}".split()).casefold()
+        return bool(normalized_topic and normalized_topic in normalized_faq)
 
     @staticmethod
     def _period_label(from_date: date | None, to_date: date | None) -> str:

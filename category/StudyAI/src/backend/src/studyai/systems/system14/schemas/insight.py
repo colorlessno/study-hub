@@ -230,6 +230,8 @@ class AgentChatRequest(BaseModel):
     session_id: str | None = None
     question: str = Field(min_length=1)
     filters: dict[str, Any] = Field(default_factory=dict)
+    use_rag: bool = False
+    rag_limit: int = Field(default=5, ge=1, le=10)
 
 
 class RelatedLink(BaseModel):
@@ -244,6 +246,38 @@ class AgentChatResponse(BaseModel):
     recommended_actions: list[str] = Field(default_factory=list)
     evidence: dict[str, Any] = Field(default_factory=dict)
     related_links: list[RelatedLink] = Field(default_factory=list)
+
+
+class KnowledgeFaqCreateRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=1000)
+    answer: str = Field(min_length=1, max_length=5000)
+    product: str | None = Field(default=None, max_length=100)
+
+
+class KnowledgeEntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    source_type: str
+    source_key: str
+    title: str
+    content: str
+    product: str | None = None
+    metadata_json: dict[str, Any] = Field(default_factory=dict)
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class KnowledgeEntryListResponse(BaseModel):
+    entries: list[KnowledgeEntryResponse] = Field(default_factory=list)
+
+
+class KnowledgeIndexResponse(BaseModel):
+    utterances_indexed: int
+    sales_scores_indexed: int
+    crm_histories_indexed: int
+    unchanged_skipped: int
 
 
 class ActionProposalItem(BaseModel):

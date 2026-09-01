@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "revision": 6,
+  "revision": 7,
   "themeId": "system14",
   "title": "学習項目",
   "items": [
@@ -43,6 +43,18 @@
     {
       "id": "check-10",
       "label": "LM Studio・LangGraph分析を選び、マスク済み発話が一件ずつ順番に分析され、結果がDBに保存されることを確認した"
+    },
+    {
+      "id": "check-11",
+      "label": "RAG・FAQ画面でFAQを保存し、PostgreSQLへ本文とEmbeddingが永続化されることを確認した"
+    },
+    {
+      "id": "check-12",
+      "label": "発話、営業スコア、完了済みCRM対応を一件ずつ索引化し、RAG回答に参照元と類似度が表示されることを確認した"
+    },
+    {
+      "id": "check-13",
+      "label": "LM Studio接続失敗時にキーワード検索や画面内回答へ自動切替せず、失敗として表示されることを確認した"
     }
   ]
 }

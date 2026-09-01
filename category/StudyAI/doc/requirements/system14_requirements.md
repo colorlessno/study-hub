@@ -26,7 +26,7 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 **実装済み**
 
 - `system14` Docker サービス（ポート `18014`）
-- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` による System14 テーブル作成
+- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` / `20260901_0020` による System14 テーブル作成
 - テスト系データ：CSV / JSON / text 取込、正規化、発話分析、グルーピング、営業スコア、勝敗要因、ダッシュボード集計
 - faster-whisperの区間単位文字起こし、`start_sec` / `end_sec`のPostgreSQL保存、取込ジョブ単位の発話・時刻表示
 - 利用者が明示選択した場合のLM Studio・LangGraph発話分析。マスク済み発話を一件ずつ順番に送信し、感情、スコア、種別、トピック、緊急度をJSONで取得・検証して保存する
@@ -35,12 +35,14 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 - `POST /api/workflows`、`POST /api/agent/chat`、`GET /api/agent/action-proposals`、`GET /api/agent/faq-gaps`
 - workflow 完了時の配信ペイロード生成と配信ログ保存（dashboard / webhook / email / ローカル・ダミーCRM）
 - Bearer認証付きHTTP POST、外部IDによる重複防止、PostgreSQL永続化を行うローカル・ダミーCRM API
-- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、ダミーCRM、分析フィルタ、workflow 配信設定）
+- FAQ、過去の発話、営業スコア、完了済みCRM対応をPostgreSQLへ永続化してpgvector検索するRAG。EmbeddingとLLMの要求は一件ずつ順番に実行し、失敗時に画面内処理やキーワード検索へ自動切替しない
+- `POST /api/knowledge/faqs`、`GET /api/knowledge/faqs`、`POST /api/knowledge/index`によるFAQ管理とRAG索引更新
+- 不足FAQ検出時に、保存済みFAQの商品と本文を照合し、既に対応済みのトピックを不足候補から除外する
+- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRM、分析フィルタ、workflow 配信設定）
 
 **MVP 外として残るもの**
 
 - 音声・動画の本格的な話者分離。現行の音声・動画取込はfaster-whisperの区間時刻を保存するが、話者を識別できない区間は`unknown`として保存する
-- RAG / 過去対応履歴 / FAQ 連携
 - Webhook / email の運用設定整備とSalesforce等の実CRM connector
 - リスク検知の即時通知
 - 大量データ性能検証
@@ -231,6 +233,8 @@ MVP外として残る項目は、本節を正として管理する。
 - 自然文で質問を投げると、システム内に蓄積された構造化データを参照して回答を生成
 - 過去の対応履歴・分析結果・スコアデータをRAGで検索して根拠付きで回答
 - ダッシュボードでは気づきにくい個別の改善ポイントを掘り下げられる
+- RAGを明示的に選択した場合、質問をEmbedding化し、FAQ、過去の発話、営業スコア、完了済みCRM対応をpgvectorで検索して、その根拠と同一セッションの直近質問応答だけをLLMへ渡す
+- RAG未選択時は既存の構造化集計回答を使用し、RAGの外部通信失敗を別方式の回答へ自動切替しない
 
 **質問例と回答例**
 
@@ -785,7 +789,7 @@ CREATE TABLE system14_dummy_crm_activities (
 | 工程1：要件定義 | AIの役割範囲・RAG要件（過去対応参照）・ガードレール要件 |
 | 工程2：基本設計 | シングルエージェント設計・LangGraph・埋め込みモデル・pgvector・パイプライン設計 |
 | 工程3：詳細設計 | エージェントループ詳細設計・停止条件・状態管理・メモリ設計（短期）・RAG詳細設計 |
-| 工程4：実装 | faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ |
+| 工程4：実装 | faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・FAQ／発話／営業スコア／CRM履歴のRAG・Webhook・SMTP・ダッシュボード配信・DB配信ログ |
 | 工程5：検証 | ガードレール検証（個人情報マスキング・リスク検知） |
 | 横断 | FastAPI・PostgreSQL・SQLAlchemy・Python・順次処理 |
 
@@ -804,6 +808,6 @@ CREATE TABLE system14_dummy_crm_activities (
 - [ ] 工程1：要件定義：AIの役割範囲・RAG要件（過去対応参照）・ガードレール要件
 - [ ] 工程2：基本設計：シングルエージェント設計・LangGraph・埋め込みモデル・pgvector・パイプライン設計
 - [ ] 工程3：詳細設計：エージェントループ詳細設計・停止条件・状態管理・メモリ設計（短期）・RAG詳細設計
-- [ ] 工程4：実装：faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ
+- [ ] 工程4：実装：faster-whisper区間文字起こし・発話時刻保存・ルール分析・LLM／LangGraph分析・FAQ／発話／営業スコア／CRM履歴のRAG・Webhook・SMTP・ダッシュボード配信・DB配信ログ
 - [ ] 工程5：検証：ガードレール検証（個人情報マスキング・リスク検知）
 - [ ] 横断：FastAPI・PostgreSQL・SQLAlchemy・Python・順次処理

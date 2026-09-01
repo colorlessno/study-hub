@@ -111,6 +111,9 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | POST | `/agent/chat` | 分析AIチャット | 同期 |
 | GET | `/agent/action-proposals` | 改善提案 | 同期 |
 | GET | `/agent/faq-gaps` | 不足FAQ検出 | 同期 |
+| POST | `/knowledge/faqs` | FAQのDB保存・Embedding索引化 | 同期・順次 |
+| GET | `/knowledge/faqs` | 保存済みFAQ一覧 | 同期 |
+| POST | `/knowledge/index` | 発話・営業スコア・完了済みCRM対応のEmbedding索引更新 | 同期・順次 |
 | POST | `/dummy-crm/activities` | Bearer認証、顧客対応履歴の登録・外部IDによる更新 | 同期 |
 | GET | `/dummy-crm/activities` | 顧客対応履歴一覧 | 同期 |
 | GET | `/dummy-crm/activities/{activity_id}` | 顧客対応履歴詳細 | 同期 |
@@ -145,12 +148,16 @@ workflow 条件に応じて通知
 ```
 質問受付
   ↓
-分析済みデータ検索
+RAG利用有無を判定
+  ├─ 未使用: 分析済み構造化データを検索
+  └─ 使用: 質問をLM StudioでEmbedding化
   ↓
-過去対応 / スコア / グループ情報を集約
+RAG使用時はFAQ / 発話 / 営業スコア / 完了済みCRM対応をpgvector検索
   ↓
-根拠付き回答生成
+取得した根拠と同一セッションの直近質問応答だけをLM Studioへ送り回答生成
 ```
+
+RAGの索引更新は、発話、営業スコア、完了済みCRM対応を一件ずつ順番に処理する。未変更かつEmbedding保存済みの行は再送しない。LM Studio接続失敗時にキーワード検索や画面内の固定回答へ自動切替しない。
 
 ### 4.3 ローカル・ダミーCRM配信
 
@@ -248,6 +255,7 @@ external_idで既存レコードを確認
 | 分析タブ | 顧客の声ランキング、営業スコア、勝敗要因を表示する | 実装済み |
 | エージェントタブ | 分析AIチャットとワークフロー定義保存・配信実行を行う | 実装済み |
 | ダミーCRMタブ | HTTP送信された顧客対応履歴の一覧と対応状態更新を行う | 実装済み |
+| RAG・FAQタブ | FAQ保存、FAQ一覧、発話・完了済みCRM対応の索引更新を行う | 実装済み |
 
 ## 11. 権限制御
 

@@ -5,11 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from studyai.systems.system14.repositories.insight_repository import InsightRepository
 from studyai.systems.system14.schemas.insight import AgentChatRequest, AgentChatResponse, RelatedLink
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
+from studyai.systems.system14.services.rag_knowledge_service import RagKnowledgeService
 
 
 class AgentChatService:
-    def __init__(self) -> None:
+    def __init__(self, *, rag_service: RagKnowledgeService | None = None) -> None:
         self.query_service = InsightQueryService()
+        self.rag_service = rag_service or RagKnowledgeService()
 
     async def answer_agent_query(
         self,
@@ -21,6 +23,38 @@ class AgentChatService:
         product = filters.get("product")
         call_reason = filters.get("call_reason")
         staff_id = filters.get("staff_id")
+
+        if body.use_rag:
+            rag_result = await self.rag_service.answer_with_rag(
+                session,
+                question=body.question,
+                product=str(product).strip() if product else None,
+                limit=body.rag_limit,
+                session_id=body.session_id,
+            )
+            related_links = [
+                {"label": "RAG・FAQ管理", "endpoint": "/knowledge/faqs"},
+                {"label": "顧客対応履歴", "endpoint": "/dummy-crm/activities"},
+            ]
+            evidence = {"rag_sources": rag_result["sources"]}
+            saved = await InsightRepository(session).create_agent_answer(
+                session_id=body.session_id,
+                question=body.question,
+                answer=rag_result["answer"],
+                filters={**filters, "use_rag": True, "rag_limit": body.rag_limit},
+                recommended_actions=rag_result["recommended_actions"],
+                evidence=evidence,
+                related_links=related_links,
+            )
+            await session.commit()
+            return AgentChatResponse(
+                answer_id=saved.id,
+                question=body.question,
+                answer=saved.answer,
+                recommended_actions=rag_result["recommended_actions"],
+                evidence=evidence,
+                related_links=[RelatedLink(**item) for item in related_links],
+            )
 
         ranking = await self.query_service.get_voice_ranking(
             session,

@@ -3,7 +3,7 @@ import { createSystemClient } from '../api/client'
 
 const client = createSystemClient('system14')
 
-type Screen = 'upload' | 'dashboard' | 'analysis' | 'agent' | 'crm'
+type Screen = 'upload' | 'dashboard' | 'analysis' | 'agent' | 'knowledge' | 'crm'
 
 interface JobStatus {
   job_id: string
@@ -131,6 +131,7 @@ interface AgentAnswer {
     total_utterances?: number
     top_group?: VoiceRankingItem | null
     top_sales_score?: SalesScoreItem | null
+    rag_sources?: KnowledgeSource[]
   }
   related_links: { label: string; endpoint: string }[]
 }
@@ -154,6 +155,38 @@ interface DummyCrmActivity {
 
 interface DummyCrmActivityListResponse {
   activities: DummyCrmActivity[]
+}
+
+interface KnowledgeSource {
+  id: number
+  source_type: string
+  source_key: string
+  title: string
+  product?: string | null
+  similarity: number
+}
+
+interface KnowledgeEntry {
+  id: number
+  source_type: string
+  source_key: string
+  title: string
+  content: string
+  product?: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+interface KnowledgeEntryListResponse {
+  entries: KnowledgeEntry[]
+}
+
+interface KnowledgeIndexResponse {
+  utterances_indexed: number
+  sales_scores_indexed: number
+  crm_histories_indexed: number
+  unchanged_skipped: number
 }
 
 interface AnalysisFilters {
@@ -280,6 +313,13 @@ const CRM_URGENCY_LABELS: Record<string, string> = {
   low: '低',
   normal: '通常',
   high: '高',
+}
+
+const KNOWLEDGE_SOURCE_LABELS: Record<string, string> = {
+  faq: 'FAQ',
+  utterance: '過去の発話',
+  sales_score: '営業スコア',
+  crm_history: '完了済みCRM対応',
 }
 
 const SAMPLE_ROWS = [
@@ -413,6 +453,7 @@ export default function System14Page() {
   const [analysisMessage, setAnalysisMessage] = useState('')
   const [filters, setFilters] = useState<AnalysisFilters>(emptyFilters)
   const [question, setQuestion] = useState('ネガティブな声が多いトピックと次のアクションを教えて')
+  const [useRag, setUseRag] = useState(false)
   const [answer, setAnswer] = useState<AgentAnswer | null>(null)
   const [answerMessage, setAnswerMessage] = useState('')
   const [workflowName, setWorkflowName] = useState('製品改善向け週次レポート')
@@ -428,6 +469,11 @@ export default function System14Page() {
   const [crmUrgency, setCrmUrgency] = useState('normal')
   const [crmActivities, setCrmActivities] = useState<DummyCrmActivity[]>([])
   const [crmMessage, setCrmMessage] = useState('')
+  const [faqQuestion, setFaqQuestion] = useState('配送が遅れている場合はどう対応しますか？')
+  const [faqAnswer, setFaqAnswer] = useState('配送状況を確認し、予定日と遅延理由を案内したうえで必要に応じて再配送を手配します。')
+  const [faqProduct, setFaqProduct] = useState('商品A')
+  const [knowledgeEntries, setKnowledgeEntries] = useState<KnowledgeEntry[]>([])
+  const [knowledgeMessage, setKnowledgeMessage] = useState('')
 
   async function uploadFile(
     targetFile: File,
@@ -558,6 +604,8 @@ export default function System14Page() {
         session_id: 'frontend',
         question,
         filters: buildFilterPayload(filters),
+        use_rag: useRag,
+        rag_limit: 5,
       })
       setAnswer(res.data)
       setAnswerMessage('')
@@ -632,6 +680,44 @@ export default function System14Page() {
     }
   }
 
+  async function createKnowledgeFaq() {
+    setKnowledgeMessage('FAQをEmbedding化して保存中...')
+    try {
+      await client.post<KnowledgeEntry>('/knowledge/faqs', {
+        question: faqQuestion,
+        answer: faqAnswer,
+        product: cleanValue(faqProduct),
+      })
+      setKnowledgeMessage('FAQをDBへ保存し、LM StudioのEmbeddingで索引化しました。')
+      await loadKnowledgeFaqs()
+    } catch (error) {
+      setKnowledgeMessage(getErrorMessage(error, 'FAQの保存と索引化に失敗しました'))
+    }
+  }
+
+  async function loadKnowledgeFaqs() {
+    setKnowledgeMessage('FAQを取得中...')
+    try {
+      const res = await client.get<KnowledgeEntryListResponse>('/knowledge/faqs')
+      setKnowledgeEntries(res.data.entries)
+      setKnowledgeMessage(`登録済みFAQを${res.data.entries.length}件取得しました。`)
+    } catch (error) {
+      setKnowledgeMessage(getErrorMessage(error, 'FAQの取得に失敗しました'))
+    }
+  }
+
+  async function updateKnowledgeIndex() {
+    setKnowledgeMessage('発話、営業スコア、完了済みCRM履歴を一件ずつ索引化中...')
+    try {
+      const res = await client.post<KnowledgeIndexResponse>('/knowledge/index')
+      setKnowledgeMessage(
+        `索引更新完了: 発話${res.data.utterances_indexed}件、営業スコア${res.data.sales_scores_indexed}件、完了済みCRM履歴${res.data.crm_histories_indexed}件、変更なし${res.data.unchanged_skipped}件`,
+      )
+    } catch (error) {
+      setKnowledgeMessage(getErrorMessage(error, 'RAG索引の更新に失敗しました'))
+    }
+  }
+
   return (
     <div style={{ maxWidth: 1120 }}>
       <h2 style={{ color: COLOR.text, marginBottom: 4 }}>System14</h2>
@@ -645,6 +731,7 @@ export default function System14Page() {
           ['dashboard', 'ダッシュボード'],
           ['analysis', '分析'],
           ['agent', 'エージェント'],
+          ['knowledge', 'RAG・FAQ'],
           ['crm', 'ダミーCRM'],
         ].map(([key, label]) => (
           <button
@@ -928,6 +1015,20 @@ export default function System14Page() {
               value={question}
               onChange={e => setQuestion(e.target.value)}
             />
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: '0.8rem', color: COLOR.text }}>
+              <input
+                data-testid="agent-use-rag"
+                type="checkbox"
+                checked={useRag}
+                onChange={e => setUseRag(e.target.checked)}
+              />
+              FAQ・過去の発話・営業スコア・完了済みCRM対応をRAG検索して回答する
+            </label>
+            {useRag && (
+              <p style={{ color: COLOR.muted, fontSize: '0.82rem', lineHeight: 1.6 }}>
+                質問をLM StudioでEmbedding化してpgvector検索し、得られた根拠だけをLM Studioへ送って回答します。接続失敗時に画面内回答へ切り替えません。
+              </p>
+            )}
             <button data-testid="ask-agent" style={{ ...button(Boolean(question.trim())), marginTop: 8 }} disabled={!question.trim()} onClick={askAgent}>
               質問する
             </button>
@@ -942,9 +1043,14 @@ export default function System14Page() {
                 )}
                 <div style={{ marginTop: '0.8rem', color: COLOR.muted, fontSize: '0.84rem' }}>
                   <strong>回答の根拠</strong>
-                  <div>対象発言数: {answer.evidence.total_utterances ?? 0}件</div>
+                  {answer.evidence.total_utterances !== undefined && <div>対象発言数: {answer.evidence.total_utterances}件</div>}
                   {answer.evidence.top_group && <div>最多の話題: {answer.evidence.top_group.group_label}（{answer.evidence.top_group.count}件）</div>}
                   {answer.evidence.top_sales_score && <div>最高営業スコア: {answer.evidence.top_sales_score.overall_score}点</div>}
+                  {answer.evidence.rag_sources?.map(source => (
+                    <div key={source.source_key}>
+                      {labelOf(KNOWLEDGE_SOURCE_LABELS, source.source_type)}: {source.title} / 類似度 {source.similarity.toFixed(4)}
+                    </div>
+                  ))}
                 </div>
                 {answer.related_links.length > 0 && (
                   <div style={{ marginTop: '0.8rem', fontSize: '0.84rem' }}>
@@ -1028,6 +1134,58 @@ export default function System14Page() {
               {workflowDeliveryMethod === 'crm' && '実CRMの接続先は提供されていません。送信せず、接続未設定エラーを配信結果としてDBに記録します。'}
             </p>
             {workflowResult && <p data-testid="workflow-result" style={{ color: COLOR.muted }}>{workflowResult}</p>}
+          </div>
+        </section>
+      )}
+
+      {screen === 'knowledge' && (
+        <section>
+          <div style={card()}>
+            <h3 style={{ marginTop: 0 }}>RAG・FAQ管理</h3>
+            <p style={{ color: COLOR.muted, lineHeight: 1.6 }}>
+              FAQをDBへ永続保存し、LM StudioのEmbeddingをpgvector索引へ保存します。発話、営業スコア、「完了」にしたCRM対応履歴も、索引更新ボタンで一件ずつ順番に登録します。
+            </p>
+            <label>FAQの質問</label>
+            <input data-testid="faq-question" style={field()} value={faqQuestion} onChange={e => setFaqQuestion(e.target.value)} />
+            <label style={{ display: 'block', marginTop: '0.8rem' }}>FAQの回答</label>
+            <textarea data-testid="faq-answer" style={{ ...field(), minHeight: 100 }} value={faqAnswer} onChange={e => setFaqAnswer(e.target.value)} />
+            <label style={{ display: 'block', marginTop: '0.8rem' }}>商品（任意）</label>
+            <input data-testid="faq-product" style={field()} value={faqProduct} onChange={e => setFaqProduct(e.target.value)} />
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: '0.8rem' }}>
+              <button
+                data-testid="create-knowledge-faq"
+                style={button(Boolean(faqQuestion.trim() && faqAnswer.trim()))}
+                disabled={!faqQuestion.trim() || !faqAnswer.trim()}
+                onClick={createKnowledgeFaq}
+              >
+                FAQを保存して索引化
+              </button>
+              <button data-testid="update-knowledge-index" style={button(true)} onClick={updateKnowledgeIndex}>
+                発話・スコア・完了済み対応の索引を更新
+              </button>
+              <button data-testid="load-knowledge-faqs" style={{ ...button(true), background: '#475569' }} onClick={loadKnowledgeFaqs}>
+                登録FAQを更新
+              </button>
+            </div>
+            {knowledgeMessage && <p data-testid="knowledge-message" style={{ color: COLOR.muted }}>{knowledgeMessage}</p>}
+          </div>
+          <div style={card()}>
+            <h3 style={{ marginTop: 0 }}>登録済みFAQ</h3>
+            {knowledgeEntries.length === 0 ? (
+              <EmptyText>登録済みFAQはありません。</EmptyText>
+            ) : (
+              <div style={{ display: 'grid', gap: '0.8rem' }}>
+                {knowledgeEntries.map(entry => (
+                  <article key={entry.id} data-testid="knowledge-faq" style={{ background: COLOR.bg, borderRadius: 8, padding: '1rem' }}>
+                    <strong>{entry.title}</strong>
+                    <p style={{ color: COLOR.text, lineHeight: 1.7 }}>{entry.content}</p>
+                    <div style={{ color: COLOR.muted, fontSize: '0.82rem' }}>
+                      商品: {entry.product || '共通'} / 更新: {formatDateTime(entry.updated_at)}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}

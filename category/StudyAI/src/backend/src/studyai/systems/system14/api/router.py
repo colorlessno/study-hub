@@ -25,6 +25,10 @@ from studyai.systems.system14.schemas.insight import (
     FAQGapResponse,
     JobStatusResponse,
     JobUtteranceListResponse,
+    KnowledgeEntryListResponse,
+    KnowledgeEntryResponse,
+    KnowledgeFaqCreateRequest,
+    KnowledgeIndexResponse,
     SalesScoreResponse,
     UploadAcceptedResponse,
     VoiceRankingResponse,
@@ -36,6 +40,7 @@ from studyai.systems.system14.services.agent_chat_service import AgentChatServic
 from studyai.systems.system14.services.dummy_crm_service import DummyCrmService
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
 from studyai.systems.system14.services.job_manager import JobManager
+from studyai.systems.system14.services.rag_knowledge_service import RagKnowledgeService
 from studyai.systems.system14.services.workflow_dispatcher import WorkflowDispatcher
 
 router = APIRouter()
@@ -212,6 +217,32 @@ async def get_faq_gaps(
     session: AsyncSession = Depends(get_db_session),
 ) -> FAQGapResponse:
     return await InsightQueryService().get_faq_gaps(session, product=product, limit=limit)
+
+
+@router.post("/knowledge/faqs", response_model=KnowledgeEntryResponse)
+async def create_knowledge_faq(
+    body: KnowledgeFaqCreateRequest,
+    _: AuthenticatedUser = Depends(require_roles("admin", "manager")),
+    session: AsyncSession = Depends(get_db_session),
+) -> KnowledgeEntryResponse:
+    return await RagKnowledgeService().create_faq(session, body=body)
+
+
+@router.get("/knowledge/faqs", response_model=KnowledgeEntryListResponse)
+async def list_knowledge_faqs(
+    limit: int = Query(default=100, ge=1, le=500),
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> KnowledgeEntryListResponse:
+    return await RagKnowledgeService().list_faqs(session, limit=limit)
+
+
+@router.post("/knowledge/index", response_model=KnowledgeIndexResponse)
+async def update_knowledge_index(
+    _: AuthenticatedUser = Depends(require_roles("admin", "manager")),
+    session: AsyncSession = Depends(get_db_session),
+) -> KnowledgeIndexResponse:
+    return await RagKnowledgeService().update_index(session)
 
 
 @router.post("/dummy-crm/activities", response_model=DummyCrmUpsertResponse)

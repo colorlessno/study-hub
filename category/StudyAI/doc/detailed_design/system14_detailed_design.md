@@ -56,8 +56,8 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 - MVP は実装済み。
 - Docker サービス `system14` は `18014:8014` で起動する。
-- Alembic revision は `20260901_0019`。
-- Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、ダミーCRMの5タブ構成。
+- Alembic revision は `20260901_0020`。
+- Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRMの6タブ構成。
 - workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。
 - `crm_dummy`は同一バックエンド内のダミーCRM APIへBearer認証付きHTTP POSTを行い、`system14_dummy_crm_activities`へ永続化する。
 - 音声・動画はfaster-whisperの各区間から開始秒・終了秒を取得し、DBへ保存して取込画面へ表示する。本格話者分離とSalesforce等の実CRM connectorは未実装で、識別できない話者は`unknown`、実CRMは接続環境未提供を明示する。
@@ -83,6 +83,9 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - `GET /dummy-crm/activities`
 - `GET /dummy-crm/activities/{activity_id}`
 - `PATCH /dummy-crm/activities/{activity_id}`
+- `POST /knowledge/faqs`
+- `GET /knowledge/faqs`
+- `POST /knowledge/index`
 
 ## 4. 詳細API I/O 定義
 
@@ -145,6 +148,9 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | `answer` | string | 根拠付き回答 |
 | `recommended_actions[]` | object[] | 改善施策 |
 | `faq_gaps[]` | object[] | 不足FAQ候補 |
+| `use_rag` | boolean | trueの場合だけLM Studio・pgvectorを使う |
+| `rag_limit` | integer | RAG根拠数。1から10 |
+| `evidence.rag_sources[]` | object[] | source_type、source_key、title、product、similarity |
 
 ### 4.5 ローカル・ダミーCRM API
 
@@ -164,6 +170,17 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | `source_payload` | object | 変換前のworkflow分析ペイロード |
 
 `POST`だけは`SYSTEM14_DUMMY_CRM_TOKEN`と一致するBearer Tokenを必須とする。画面からの`GET`と`PATCH`はStudyAIの既存ユーザー認証・権限を使用する。
+
+### 4.6 RAG・FAQ API
+
+**対象API**: `POST /knowledge/faqs`, `GET /knowledge/faqs`, `POST /knowledge/index`
+
+- FAQ登録時は質問と回答を1件の文書としてLM Studioへ送信し、768次元Embeddingと本文を`system14_knowledge_entries`へ保存する。
+- 索引更新時は`system14_utterances`、`system14_sales_scores`、`completed`の`system14_dummy_crm_activities`をそれぞれID順に処理する。複数件を同時送信しない。
+- 同一`source_key`で本文・商品・metadataが変わらずEmbeddingが存在する場合だけ再索引を省略する。
+- RAG回答時は質問をEmbedding化し、pgvectorのcosine distanceでFAQ、発話、営業スコア、完了済みCRM対応を検索する。取得した本文と同一`session_id`の直近5件の質問応答だけをLLMへ渡し、回答と推奨行動をJSONで検証する。
+- FAQ不足検出は保存済みFAQの商品が対象商品と矛盾しないことを確認し、正規化した問い合わせトピックがFAQの質問または回答に含まれる場合、そのトピックを不足候補から除外する。
+- Embedding、DB検索、LLM応答のいずれかが失敗した場合はエラーを返す。キーワード検索、固定文、構造化集計回答へ自動切替しない。
 
 ## 5. 入力チェック仕様
 
@@ -248,6 +265,12 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - `external_id`, `customer_id`, `customer_name`, `contact_type`, `summary`, `sentiment`, `urgency`, `assigned_to`, `next_action`, `follow_up_at`, `status`, `source_payload`, `created_at`, `updated_at`
 - `external_id`はunique制約を持ち、同じworkflowの再送で重複行を作らない
 
+### 8.10 `system14_knowledge_entries`
+
+- `source_type`, `source_key`, `title`, `content`, `product`, `metadata`, `embedding`, `is_active`, `created_at`, `updated_at`
+- `source_key`はunique制約を持つ。`source_type`は`faq`、`utterance`、`sales_score`、`crm_history`だけを許可する
+- `embedding`は768次元で、cosine distance検索用のpgvector ivfflat indexを持つ
+
 ## 9. AI 処理詳細
 
 - 区間時刻付き書き起こしを前提にし、話者を識別できない場合は`unknown`のまま保存する
@@ -264,11 +287,11 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - workflow 作成時に `output_type` に応じた分析データを生成し、`dashboard` はログ保存、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信、`crm` は未対応として failed log を残す
 - `crm_dummy`は`SYSTEM14_DUMMY_CRM_ENDPOINT`へBearer認証付きHTTP POSTを1件ずつ送り、成功・失敗と応答本文を配信ログへ保存する
 - ダミーCRM APIは`external_id`で登録済みデータを確認し、新規登録または更新を行ってから応答する
-- `agent/chat` は分析済みデータのみ参照し、元データの再走査はしない
+- `agent/chat` は分析済みデータと`system14_knowledge_entries`だけを参照し、取込元ファイルを再走査しない
 
 ## 11. DDL
 
-DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py` と `src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py` とする。概要は以下。
+DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py`、`src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py`、`src/backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py`、`src/backend/alembic/versions/20260901_0020_add_system14_rag_knowledge.py` とする。概要は以下。
 
 | テーブル | 主な制約・index |
 |---|---|
@@ -281,6 +304,7 @@ DDL の正本は `src/backend/alembic/versions/20260421_0016_init_system14.py` �
 | `system14_workflow_delivery_logs` | `workflow_id` FK, status check, `workflow_id`, `status`, `created_at` index |
 | `system14_agent_answers` | `session_id`, `created_at` index |
 | `system14_dummy_crm_activities` | `external_id` unique, status/urgency/sentiment check, `status`, `updated_at` index |
+| `system14_knowledge_entries` | `source_key` unique, source_type check, `source_type`, `product`, pgvector ivfflat index |
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -295,4 +319,5 @@ CREATE TABLE system14_workflows (...);
 CREATE TABLE system14_workflow_delivery_logs (...);
 CREATE TABLE system14_agent_answers (...);
 CREATE TABLE system14_dummy_crm_activities (...);
+CREATE TABLE system14_knowledge_entries (... embedding vector(768) ...);
 ```

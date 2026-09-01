@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, time, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -13,6 +13,7 @@ from studyai.systems.system14.models.insight import (
     System14DataJob,
     System14DummyCrmActivity,
     System14InsightGroup,
+    System14KnowledgeEntry,
     System14SalesScore,
     System14Utterance,
     System14Workflow,
@@ -345,6 +346,122 @@ class InsightRepository:
         await self.session.flush()
         await self.session.refresh(row)
         return row
+
+    async def list_utterances_for_knowledge(self) -> list[System14Utterance]:
+        result = await self.session.execute(
+            select(System14Utterance)
+            .options(selectinload(System14Utterance.conversation))
+            .order_by(System14Utterance.id.asc())
+        )
+        return list(result.scalars().all())
+
+    async def list_completed_crm_for_knowledge(self) -> list[System14DummyCrmActivity]:
+        result = await self.session.execute(
+            select(System14DummyCrmActivity)
+            .where(System14DummyCrmActivity.status == "completed")
+            .order_by(System14DummyCrmActivity.id.asc())
+        )
+        return list(result.scalars().all())
+
+    async def list_sales_scores_for_knowledge(self) -> list[System14SalesScore]:
+        result = await self.session.execute(
+            select(System14SalesScore)
+            .options(selectinload(System14SalesScore.conversation))
+            .order_by(System14SalesScore.id.asc())
+        )
+        return list(result.scalars().all())
+
+    async def list_recent_agent_answers(
+        self,
+        *,
+        session_id: str,
+        limit: int = 5,
+    ) -> list[System14AgentAnswer]:
+        result = await self.session.execute(
+            select(System14AgentAnswer)
+            .where(System14AgentAnswer.session_id == session_id)
+            .order_by(System14AgentAnswer.created_at.desc(), System14AgentAnswer.id.desc())
+            .limit(limit)
+        )
+        return list(reversed(result.scalars().all()))
+
+    async def get_knowledge_entry_by_key(self, source_key: str) -> System14KnowledgeEntry | None:
+        result = await self.session.execute(
+            select(System14KnowledgeEntry).where(System14KnowledgeEntry.source_key == source_key)
+        )
+        return result.scalar_one_or_none()
+
+    async def upsert_knowledge_entry(
+        self,
+        *,
+        source_type: str,
+        source_key: str,
+        title: str,
+        content: str,
+        product: str | None,
+        metadata: dict,
+        embedding: list[float],
+    ) -> tuple[System14KnowledgeEntry, bool]:
+        row = await self.get_knowledge_entry_by_key(source_key)
+        created = row is None
+        if row is None:
+            row = System14KnowledgeEntry(
+                source_type=source_type,
+                source_key=source_key,
+                title=title,
+                content=content,
+                product=product,
+                metadata_json=metadata,
+                embedding=embedding,
+                is_active=True,
+            )
+            self.session.add(row)
+        else:
+            row.source_type = source_type
+            row.title = title
+            row.content = content
+            row.product = product
+            row.metadata_json = metadata
+            row.embedding = embedding
+            row.is_active = True
+        await self.session.flush()
+        await self.session.refresh(row)
+        return row, created
+
+    async def list_knowledge_entries(
+        self,
+        *,
+        source_type: str | None = None,
+        limit: int = 100,
+    ) -> list[System14KnowledgeEntry]:
+        stmt = select(System14KnowledgeEntry).where(System14KnowledgeEntry.is_active.is_(True))
+        if source_type:
+            stmt = stmt.where(System14KnowledgeEntry.source_type == source_type)
+        result = await self.session.execute(
+            stmt.order_by(System14KnowledgeEntry.updated_at.desc(), System14KnowledgeEntry.id.desc()).limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def search_knowledge_entries(
+        self,
+        *,
+        embedding: list[float],
+        product: str | None,
+        limit: int,
+    ) -> list[dict]:
+        vector_literal = "[" + ",".join(f"{float(value):.12f}" for value in embedding) + "]"
+        result = await self.session.execute(
+            text(
+                "SELECT id, source_type, source_key, title, content, product, metadata, "
+                "1 - (embedding <=> CAST(:embedding AS vector)) AS similarity "
+                "FROM system14_knowledge_entries "
+                "WHERE is_active = TRUE AND embedding IS NOT NULL "
+                "AND (:product IS NULL OR product IS NULL OR LOWER(product) = LOWER(:product)) "
+                "ORDER BY embedding <=> CAST(:embedding AS vector), id ASC LIMIT :limit"
+            ),
+            {"embedding": vector_literal, "product": product, "limit": limit},
+        )
+        return [dict(row) for row in result.mappings().all()]
 
     async def count_conversations(self) -> int:
         return (await self.session.execute(select(func.count()).select_from(System14Conversation))).scalar_one()

@@ -1967,6 +1967,20 @@
           "path": "category/StudyAI/src/backend/tests/systems/system14/test_ingestion_normalizer.py"
         },
         {
+          "id": "rag-service",
+          "label": "RAG・FAQ・過去対応履歴の処理",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/src/studyai/systems/system14/services/rag_knowledge_service.py"
+        },
+        {
+          "id": "rag-test",
+          "label": "RAG逐次処理と失敗境界のテスト",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/tests/systems/system14/test_rag_knowledge_service.py"
+        },
+        {
           "id": "requirements",
           "label": "要件定義",
           "kind": "requirements",

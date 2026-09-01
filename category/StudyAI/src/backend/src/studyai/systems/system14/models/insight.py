@@ -204,3 +204,24 @@ class System14DummyCrmActivity(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+
+class System14KnowledgeEntry(Base):
+    __tablename__ = "system14_knowledge_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    source_key: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    product: Mapped[str | None] = mapped_column(String(100))
+    metadata_json: Mapped[dict] = mapped_column("metadata", JSONB, nullable=False, default=dict)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(EMBEDDING_DIMENSIONS))
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
