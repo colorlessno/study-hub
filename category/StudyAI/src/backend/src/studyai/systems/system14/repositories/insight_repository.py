@@ -456,7 +456,8 @@ class InsightRepository:
                 "1 - (embedding <=> CAST(:embedding AS vector)) AS similarity "
                 "FROM system14_knowledge_entries "
                 "WHERE is_active = TRUE AND embedding IS NOT NULL "
-                "AND (:product IS NULL OR product IS NULL OR LOWER(product) = LOWER(:product)) "
+                "AND (CAST(:product AS TEXT) IS NULL OR product IS NULL "
+                "OR LOWER(product) = LOWER(CAST(:product AS TEXT))) "
                 "ORDER BY embedding <=> CAST(:embedding AS vector), id ASC LIMIT :limit"
             ),
             {"embedding": vector_literal, "product": product, "limit": limit},

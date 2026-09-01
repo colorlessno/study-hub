@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from studyai.common.errors.models import ExternalServiceError
+from studyai.systems.system14.repositories.insight_repository import InsightRepository
 from studyai.systems.system14.services import rag_knowledge_service as rag_module
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
 from studyai.systems.system14.services.rag_knowledge_service import RagKnowledgeService
@@ -123,6 +124,23 @@ class _FakeSession:
         self.commit_count += 1
 
 
+class _EmptyMappingResult:
+    @staticmethod
+    def mappings():
+        return SimpleNamespace(all=lambda: [])
+
+
+class _SqlCaptureSession:
+    def __init__(self) -> None:
+        self.statement = None
+        self.parameters = None
+
+    async def execute(self, statement, parameters):
+        self.statement = statement
+        self.parameters = parameters
+        return _EmptyMappingResult()
+
+
 @pytest.mark.asyncio
 async def test_rag_answer_uses_one_embedding_request_and_evidence(monkeypatch) -> None:
     _FakeRepository.instances.clear()
@@ -177,6 +195,25 @@ async def test_embedding_dimension_mismatch_is_not_silently_replaced() -> None:
         await service._embed_one("質問")
 
     assert exc_info.value.error_code == "invalid_embedding_output"
+
+
+@pytest.mark.asyncio
+async def test_vector_search_casts_optional_product_for_asyncpg() -> None:
+    session = _SqlCaptureSession()
+
+    result = await InsightRepository(session).search_knowledge_entries(
+        embedding=[0.25, 0.5],
+        product="商品A",
+        limit=5,
+    )
+
+    assert result == []
+    assert "CAST(:product AS TEXT)" in str(session.statement)
+    assert session.parameters == {
+        "embedding": "[0.250000000000,0.500000000000]",
+        "product": "商品A",
+        "limit": 5,
+    }
 
 
 def test_saved_faq_covers_matching_topic_for_same_product() -> None:
