@@ -114,7 +114,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -133,7 +133,7 @@ validation:
 | result.cost_summary | object | 距離、遅延、未割当、時間超過のコスト内訳と総コスト |
 | result.adjustment_candidates | array | 制約違反ごとの調整候補 |
 | result.human_adjustment_record | object | 調整ID、状態、調整者、割当内容、記録有無 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | 制約違反数、最適化コスト、処理時間_ms、人間調整率 を含むKPI |
 | storage | object | JSON保存の成否、保存形式、保存上限、保存件数 |
 
@@ -145,7 +145,7 @@ validation:
 | drafted | 制約違反あり | violation_found | risk_flagged |
 | drafted | 人間調整を適用 | adjusted | human_adjustment_recorded |
 | drafted | 制約違反なし | accepted | execution_completed |
-| any | LM Studio unavailable | current state | lmstudio_fallback_to_mock |
+| any | LM Studio unavailable | error (HTTP 502) | runを保存しない |
 
 system43 の状態候補は drafted / optimized / violation_found / adjusted / accepted とし、画面では現在状態、次状態、終了状態を表示する。
 
@@ -156,7 +156,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system43 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. 最適化・スケジューリング の教材観点に沿って result, audit_log, kpi_snapshot を生成する。
 6. `data/enterprise_ai/system43_runs.json` へUTF-8で保存し、新しい順の直近20件だけを保持する。
 7. `storage` に保存成否、形式、上限、保存件数を設定する。
@@ -191,7 +191,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 |---|---|
 | 制約違反数 / 最適化コスト / 処理時間_ms / 人間調整率 | system43 の主要KPI |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -240,4 +239,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - router.py で /api/system43/metadata, /api/system43/execute, /api/system43/runs を公開する。
 - EnterpriseAiSystemPage.tsx で入力例、状態、割当、ルート、制約違反、コスト、調整候補、監査記録、KPI、保存状態、実行履歴を表示する。
 - src/scripts/system43_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask / JSON保存 / 再起動後の復元を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask / JSON保存 / 再起動後の復元を確認する。

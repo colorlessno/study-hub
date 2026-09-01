@@ -9,7 +9,11 @@ from fastapi.testclient import TestClient
 
 from studyai.app import create_app
 from studyai.systems.enterprise_ai.catalog import SYSTEMS
-from studyai.systems.enterprise_ai.service import EnterpriseAiService
+from studyai.systems.enterprise_ai.service import (
+    EnterpriseAiService,
+    EnterpriseAiUpstreamError,
+    enterprise_ai_service,
+)
 
 
 @pytest.mark.parametrize("system_id", sorted(SYSTEMS))
@@ -54,16 +58,27 @@ def test_enterprise_ai_masks_secret_like_values() -> None:
     assert result["input"]["nested"]["password"] == "***MASKED***"
 
 
-def test_enterprise_ai_lmstudio_mode_falls_back_to_mock() -> None:
+def test_enterprise_ai_lmstudio_mode_reports_failure_without_mock_fallback() -> None:
     def unavailable(*_args: object) -> dict:
         raise ValueError("LM Studio unavailable")
 
     service = EnterpriseAiService(lmstudio_requester=unavailable)
 
-    result = service.execute("system44", {"mode": "lmstudio"})
+    with pytest.raises(EnterpriseAiUpstreamError, match="mockは明示的に選択した場合だけ"):
+        service.execute("system44", {"mode": "lmstudio"})
 
-    assert result["kpi_snapshot"]["mock_fallback_count"] == 1
-    assert any(entry["action"] == "lmstudio_fallback_to_mock" for entry in result["audit_log"])
+    assert service.list_runs("system44") == []
+
+
+def test_enterprise_ai_api_returns_bad_gateway_when_lmstudio_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    def unavailable(*_args: object) -> dict:
+        raise ValueError("LM Studio unavailable")
+
+    monkeypatch.setattr(enterprise_ai_service, "_lmstudio_requester", unavailable)
+    response = TestClient(create_app()).post("/api/system44/execute", json={"input": {}, "mode": "lmstudio"})
+
+    assert response.status_code == 502
+    assert response.json()["detail"]["error_code"] == "system44_lmstudio_failed"
 
 
 def test_enterprise_ai_lmstudio_mode_uses_openai_compatible_result() -> None:
@@ -88,8 +103,6 @@ def test_enterprise_ai_lmstudio_mode_uses_openai_compatible_result() -> None:
     assert result["result"]["selected_candidate"]["id"] == "plan-a"
     assert result["result"]["ai_assessment"]["summary"] == "LM Studioで候補を比較しました。"
     assert result["result"]["ai_assessment"]["recommendations"] == [{"candidate": "plan-a"}]
-    assert result["kpi_snapshot"]["mock_fallback_count"] == 0
-    assert not any(entry["action"] == "lmstudio_fallback_to_mock" for entry in result["audit_log"])
     assert any("LM Studio" in entry["reason"] for entry in result["audit_log"])
 
 

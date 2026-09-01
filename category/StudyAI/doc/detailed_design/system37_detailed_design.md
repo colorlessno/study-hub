@@ -114,7 +114,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -131,7 +131,7 @@ validation:
 | result.transaction_record | object | 操作、候補、状態、記録可否、理由を関連付けた取引記録 |
 | result.confirmation | object | 本人確認、最終確認、確認必須設定の結果 |
 | result.change_cancel_decision | object | 変更・取消条件と操作可否の判定結果 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | 成功率、リスク数、コスト、レイテンシ_ms を含むKPI |
 | storage | object | JSON保存の成否、保存形式、保存上限、保存件数 |
 
@@ -145,7 +145,7 @@ validation:
 | start | 変更条件を満たす | changed | transaction_changed |
 | start | 取消条件を満たす | cancelled | transaction_cancelled |
 | start | 本人確認・価格・候補・変更取消条件に不一致 | escalated | transaction_blocked |
-| any | LM Studio unavailable | current state | lmstudio_fallback_to_mock |
+| any | LM Studio unavailable | error (HTTP 502) | runを保存しない |
 
 system37 の実際の状態は hearing / confirming / executed / changed / cancelled / escalated とし、条件と操作ごとに一つへ確定する。
 
@@ -156,7 +156,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system37 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. 予約・申込・注文 の教材観点に沿って result, audit_log, kpi_snapshot を生成する。
 6. mask済み入力、判断結果、取引記録、監査ログ、KPI、保存情報を1件の実行履歴へまとめる。
 7. 直近20件へ制限し、UTF-8のJSONを一時ファイルへ書き込んでから `system37_runs.json` へ置換する。
@@ -187,7 +187,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 | policy_violation_count | 条件不一致や確認不足の件数 |
 | average_response_ms | 教材用の平均応答時間 |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -237,4 +236,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - router.py で /api/system37/metadata, /api/system37/execute, /api/system37/runs を公開する。
 - EnterpriseAiSystemPage.tsx で入力、状態、結果、監査ログ、KPIを表示する。
 - src/scripts/system37_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask / 実行・変更・取消 / 再起動後の履歴復元を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask / 実行・変更・取消 / 再起動後の履歴復元を確認する。

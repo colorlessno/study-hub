@@ -18,6 +18,10 @@ SECRET_KEYS = ("api_key", "password", "token", "secret", "card_number")
 LmStudioRequester = Callable[[EnterpriseAiSystem, dict[str, Any]], dict[str, Any]]
 
 
+class EnterpriseAiUpstreamError(RuntimeError):
+    """Raised when an explicitly requested external model call fails."""
+
+
 class EnterpriseAiService:
     def __init__(
         self,
@@ -67,7 +71,6 @@ class EnterpriseAiService:
         merged_input = self._mask_secrets({**system.default_input, **input_data})
         run_id = self._run_id(system_id, merged_input)
         started_at = datetime.now(timezone.utc)
-        fallback = False
         decision_source = "mock"
         if mode == "lmstudio":
             try:
@@ -76,15 +79,16 @@ class EnterpriseAiService:
                     self._lmstudio_requester(system, merged_input),
                 )
                 decision_source = "lmstudio"
-            except (httpx.HTTPError, KeyError, TypeError, ValueError):
-                fallback = True
-                result = self._mock_decision(system, merged_input)
+            except (httpx.HTTPError, KeyError, TypeError, ValueError) as exc:
+                raise EnterpriseAiUpstreamError(
+                    "LM Studioへの通信または応答検証に失敗しました。mockは明示的に選択した場合だけ実行できます。"
+                ) from exc
         else:
             result = self._mock_decision(system, merged_input)
         result = self._enrich_result(system, merged_input, result)
-        audit_log = self._audit_log(system, run_id, operator, merged_input, decision_source, fallback)
+        audit_log = self._audit_log(system, run_id, operator, merged_input, decision_source)
         audit_log.extend(self._domain_audit_log(system, run_id, result))
-        kpi_snapshot = self._kpi_snapshot(system, result, fallback)
+        kpi_snapshot = self._kpi_snapshot(system, result)
         run_file = self._run_files.get(system_id)
         run = {
             "run_id": run_id,
@@ -1719,7 +1723,6 @@ class EnterpriseAiService:
         operator: str,
         input_data: dict[str, Any],
         decision_source: str,
-        fallback: bool,
     ) -> list[dict[str, Any]]:
         now = datetime.now(timezone.utc).isoformat()
         entries = [
@@ -1733,18 +1736,6 @@ class EnterpriseAiService:
                 "input_hash": self._hash(input_data),
             }
         ]
-        if fallback:
-            entries.append(
-                {
-                    "timestamp": now,
-                    "run_id": run_id,
-                    "system_id": system.system_id,
-                    "actor": "system",
-                    "action": "lmstudio_fallback_to_mock",
-                    "reason": "LM Studio はローカル起動前提のため、未接続時は mock に切り替えます。",
-                    "input_hash": self._hash(input_data),
-                }
-            )
         entries.append(
             {
                 "timestamp": now,
@@ -1773,7 +1764,7 @@ class EnterpriseAiService:
         )
         return entries
 
-    def _kpi_snapshot(self, system: EnterpriseAiSystem, result: dict[str, Any], fallback: bool) -> dict[str, Any]:
+    def _kpi_snapshot(self, system: EnterpriseAiSystem, result: dict[str, Any]) -> dict[str, Any]:
         values = {name: round((index + 1) / (len(system.kpi_definitions) + 1), 3) for index, name in enumerate(system.kpi_definitions)}
         if system.system_id == "system37":
             confirmation = result.get("confirmation", {})
@@ -1822,7 +1813,6 @@ class EnterpriseAiService:
                 "decision_completion_rate": 1.0 if memo.get("recorded") else 0.0,
             })
         values["risk_flag_count"] = len(result.get("risk_flags", []))
-        values["mock_fallback_count"] = 1 if fallback else 0
         values["latency_ms"] = 120 + len(system.system_id)
         return values
 

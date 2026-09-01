@@ -108,7 +108,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -122,7 +122,7 @@ validation:
 | result.recommendations | array | 推奨、候補、検知、最適化案など |
 | result.explanations | array | 判断理由 |
 | result.risk_flags | array | 本人確認省略、個人情報混入、誤った手続き実行 に基づく注意点 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | 解決率、エスカレーション率、応答時間_ms、本人確認失敗率 を含むKPI |
 
 ## 6. 状態遷移
@@ -133,7 +133,7 @@ validation:
 | received | mock decision completed | classified | decision_generated |
 | classified | risk found | verification_required | risk_flagged |
 | classified | no blocking risk | answered | execution_completed |
-| any | LM Studio unavailable | current state | lmstudio_fallback_to_mock |
+| any | LM Studio unavailable | error (HTTP 502) | runを保存しない |
 
 system39 の状態候補は received / classified / verification_required / answered / processed / escalated / closed とし、画面では現在状態、次状態、終了状態を表示する。
 
@@ -144,7 +144,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system39 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. 問い合わせ・手続き の教材観点に沿って result, audit_log, kpi_snapshot を生成する。
 6. 手続き受付、チケット、引継ぎ、監査記録、KPIを含む実行結果を `system39_runs.json` へ保存する。
 7. response schema に整形して返す。
@@ -175,7 +175,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 |---|---|
 | 解決率 / エスカレーション率 / 応答時間_ms / 本人確認失敗率 | system39 の主要KPI |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -225,4 +224,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - router.py で /api/system39/metadata, /api/system39/execute, /api/system39/runs を公開する。
 - EnterpriseAiSystemPage.tsx で比較例、入力、状態、結果、監査ログ、KPI、保存状態、復元済み履歴を表示する。
 - src/scripts/system39_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask / JSON保存 / 再起動復元を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask / JSON保存 / 再起動復元を確認する。

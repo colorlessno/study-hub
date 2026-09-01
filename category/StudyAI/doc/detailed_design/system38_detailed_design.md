@@ -116,7 +116,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -132,7 +132,7 @@ validation:
 | result.reaction_log | object | 反応ID、商品、反応、記録有無 |
 | result.explanations | array | 判断理由 |
 | result.risk_flags | array | 同質推薦などの注意点 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | catalogで定義したKPI |
 | storage | object | JSON保存有無、形式、上限、保存件数 |
 
@@ -145,7 +145,7 @@ validation:
 | scored | ranking completed | ranked | decision_generated |
 | ranked | recommendation displayed | displayed | execution_completed |
 | displayed | feedback recorded | feedback_recorded | execution_completed |
-| any | LM Studio unavailable | current state | lmstudio_fallback_to_mock |
+| any | LM Studio unavailable | error (HTTP 502) | runを保存しない |
 
 画面では現在状態とcatalogで定義した状態の流れを表示する。
 
@@ -156,7 +156,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system38 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. 推薦・ランキング の教材観点に沿って result, audit_log, kpi_snapshot を生成する。
 6. 推薦結果、variant割当、反応ログ、監査記録、KPIを一つのrunへまとめる。
 7. 直近20件をUTF-8のJSONへ保存する。一時ファイルへ書いた後に履歴本体を置き換える。
@@ -183,7 +183,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 | click_through_rate / conversion_rate | 反応と成果の教材用指標 |
 | diversity_score / freshness_score | 推薦の多様性と鮮度の教材用指標 |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -233,4 +232,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - EnterpriseAiSystemPage.tsx で入力、状態、結果、監査ログ、KPIを表示する。
 - settings.py と service.py でJSON履歴の保存先、再起動時の復元、直近20件の保持を実装する。
 - src/scripts/system38_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask を確認する。

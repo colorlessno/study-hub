@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from studyai.systems.enterprise_ai.catalog import SYSTEMS
-from studyai.systems.enterprise_ai.service import enterprise_ai_service
+from studyai.systems.enterprise_ai.service import EnterpriseAiUpstreamError, enterprise_ai_service
 
 
 class ExecuteRequest(BaseModel):
@@ -38,6 +38,11 @@ def create_enterprise_ai_router(system_id: str) -> APIRouter:
                 system_id,
                 {"input": request.input, "mode": request.mode, "operator": request.operator},
             )
+        except EnterpriseAiUpstreamError as exc:
+            raise HTTPException(
+                status_code=502,
+                detail={"error_code": f"{system_id}_lmstudio_failed", "message": str(exc)},
+            ) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail={"error_code": f"{system_id}_input_invalid", "message": str(exc)}) from exc
 

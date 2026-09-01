@@ -98,7 +98,7 @@ const kpiLabels: Record<string, string> = {
   automation_rate: '自動処理率', escalation_rate: '担当者確認率', first_contact_resolution: '初回解決率',
   policy_block_count: 'ルールによる停止数', answer_quality_score: '回答品質点', forecast_error: '予測誤差',
   stockout_risk_rate: '欠品リスク率', surplus_cost: '余剰在庫コスト', service_level: '在庫充足率',
-  replenishment_count: '補充回数', risk_flag_count: '注意点の数', mock_fallback_count: 'モックへの切替回数',
+  replenishment_count: '補充回数', risk_flag_count: '注意点の数',
   precision_proxy: '適合率の参考値', recall_proxy: '再現率の参考値', review_rate: '確認対象率',
   false_positive_count: '誤検知数', processing_ms: '処理時間', alert_precision_proxy: '警告適合率の参考値',
   blocked_count: '停止件数', investigation_rate: '調査率', false_positive_rate: '誤検知率', response_ms: '応答時間',

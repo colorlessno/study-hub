@@ -116,7 +116,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -132,7 +132,7 @@ validation:
 | result.anomaly_candidates | array | マスタ未登録、センサー不一致、数量不一致などの異常候補 |
 | result.human_review_record | object | `review_id`, `status`, `reviewer`, `decisions`, `recorded` を持つ人間確認記録 |
 | result.risk_flags | array | 画像品質不足、マスタ未登録商品、センサー不一致、レビュー未実施などの注意点 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | 検出精度、マスタ一致率、人間確認率、誤検知率 を含むKPI |
 | storage | object | JSON保存成否、保存形式、保持上限20件、現在の保持件数 |
 
@@ -145,7 +145,7 @@ validation:
 | 処理中 | 確認理由がない | confirmed | multimodal_detection_recorded / execution_completed |
 | 処理中 | 人間確認で採用 | confirmed | human_review_recorded |
 | 処理中 | 人間確認で却下 | rejected | human_review_recorded |
-| 処理中 | LM Studio利用不可 | mock判定の最終状態 | lmstudio_fallback_to_mock |
+| 処理中 | LM Studio利用不可 | error (HTTP 502) | runを保存しない |
 
 metadataの状態候補は uploaded / detected / matched / review_required / confirmed / rejected とし、画面では学習上の処理順として表示する。現在の`execute`は中間状態を個別保存せず、`review_required`, `confirmed`, `rejected`のいずれかを実行履歴へ保存する。
 
@@ -156,7 +156,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system41 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. 商品候補を商品マスタへ照合し、OCR・センサーの数量、画像品質、信頼度しきい値から推定数量と確認理由を生成する。
 6. 人間確認結果を `human_review_record` と監査ログへ記録する。
 7. result, audit_log, kpi_snapshot, storage をresponse schemaへ整形する。
@@ -191,7 +191,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 |---|---|
 | 検出精度 / マスタ一致率 / 人間確認率 / 誤検知率 | system41 の主要KPI |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -244,4 +243,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - router.py で /api/system41/metadata, /api/system41/execute, /api/system41/runs を公開する。
 - EnterpriseAiSystemPage.tsx で入力例、状態、商品照合、確認待ち、異常候補、人間確認結果、監査ログ、KPI、JSON保存状態を表示する。
 - src/scripts/system41_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask / 再起動後の履歴復元を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask / 再起動後の履歴復元を確認する。

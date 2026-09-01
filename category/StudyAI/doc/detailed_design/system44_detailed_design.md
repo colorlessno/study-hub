@@ -114,7 +114,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -134,7 +134,7 @@ validation:
 | result.failure_classifications | array | 失敗分類、件数、改善要否 |
 | result.improvement_candidates | array | 失敗分類または条件違反から作る改善候補 |
 | result.decision_memo | object | 自動判断、人間の判断、理由、改善内容、次の実験、記録有無 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | 実験数、A/B差分、KPI改善率、意思決定完了率 を含むKPI |
 | storage | object | JSON保存の成否、保存形式、保存上限、保存件数 |
 
@@ -146,7 +146,7 @@ validation:
 | planned | KPI比較完了・人間判断未確定 | analyzed | decision_generated |
 | planned | 人間の意思決定を確定 | decided | human_decision_recorded |
 | planned | アーカイブ判断を確定 | archived | human_decision_recorded |
-| any | LM Studio unavailable | current state | lmstudio_fallback_to_mock |
+| any | LM Studio unavailable | error (HTTP 502) | runを保存しない |
 
 system44 の状態候補は planned / running / measured / analyzed / decided / archived とし、画面では現在状態、次状態、終了状態を表示する。
 
@@ -157,7 +157,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system44 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. AI評価・実験 の教材観点に沿って result, audit_log, kpi_snapshot を生成する。
 6. `data/enterprise_ai/system44_runs.json` へUTF-8で保存し、新しい順の直近20件だけを保持する。
 7. `storage` に保存成否、形式、上限、保存件数を設定する。
@@ -192,7 +192,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 |---|---|
 | 実験数 / A/B差分 / KPI改善率 / 意思決定完了率 | system44 の主要KPI |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -241,4 +240,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - router.py で /api/system44/metadata, /api/system44/execute, /api/system44/runs を公開する。
 - EnterpriseAiSystemPage.tsx で入力例、A/B比較、AI品質、コスト、応答時間、失敗分類、改善候補、意思決定、監査記録、KPI、保存状態、実行履歴を表示する。
 - src/scripts/system44_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask / JSON保存 / 再起動後の復元を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask / JSON保存 / 再起動後の復元を確認する。

@@ -21,7 +21,7 @@ AI システム開発を、**要件定義 → 基本設計 → 詳細設計 → 
 | 業務AI | system01〜02、04〜07、14〜16、37〜43、47 | AIの役割と業務ロジック、read-only境界、人間判断をどう分けるか |
 | Agent実装・運用 | system08〜13、45〜46、48 | tool、状態、停止条件、承認、引き継ぎをどう設計するか |
 
-最初は外部LLM・DB・networkを使わない`system17〜22`から始めます。共通ハーネスは概念観察用の決定的シミュレーションであり、実modelのtokenizer、embedding、attention、生成結果そのものではありません。
+最初は外部LLM・DB・networkを使わない`system17`、`system19`、`system20`、`system22`から始めます。これらの共通ハーネスは概念観察用の決定的なローカル処理であり、実modelのtokenizer、attention、生成結果そのものではありません。`system18`はLM StudioのEmbedding API、`system21`はLM StudioのLLM APIへ実際に通信します。
 
 ## 最初に取り組むこと
 
@@ -62,7 +62,7 @@ category/StudyAI/
 
 System01〜16 は `src/backend/src/studyai/systems/systemXX/` に個別実装がありますが、
 **System17〜36（LLM基礎実験系）と System37〜44（業務AI系）は、それぞれ `systems/ai_learning/`・`systems/enterprise_ai/` の共通ハーネス（catalog + service + router）による実装です。**
-各テーマの入力・処理・観察ポイントをカタログとして定義し、共通サービスが決定的シミュレーション（LLM 非使用）として実行します。フロントエンドには全システムのページがあり、Execute で実際に動作します。個別フォルダが無いのは意図した設計です。工程横断の知識整理は [doc/ai_system_dev_knowledge_map.md](doc/ai_system_dev_knowledge_map.md) にまとめています。
+各テーマの入力・処理・観察ポイントをカタログとして定義し、共通サービスから順番に実行します。System17・19・20・22・28〜36はローカルの決定的処理、System18・21・23〜27はテーマに応じてLM StudioのEmbedding・LLM・VLM APIへ実通信します。System37〜44は利用者が`mock`または`lmstudio`を明示的に選択し、`lmstudio`の通信・応答検証に失敗した場合はエラーを返してmockへ自動切替しません。フロントエンドには全システムのページがあり、Executeで実際に動作します。個別フォルダが無いのは意図した設計です。工程横断の知識整理は [doc/ai_system_dev_knowledge_map.md](doc/ai_system_dev_knowledge_map.md) にまとめています。
 
 ## 技術スタック
 

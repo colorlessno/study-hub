@@ -117,7 +117,7 @@ response:
 validation:
 
 - input がobject でない場合は 400 を返す。
-- mode=lmstudio の場合でも、LM Studio 未接続時は mock へ明示的に fallback し、監査ログに記録する。
+- mode=lmstudio の通信・応答検証に失敗した場合は502を返し、mockへ切り替えない。mockは利用者が明示的に選択した場合だけ実行する。
 - 教材用途のため、API key、password、token、実カード番号に相当するキーが入力された場合は保存せず、mask する。
 
 ## 5. response / result schema
@@ -131,7 +131,7 @@ validation:
 | result.recommendations | array | 推奨、候補、検知、最適化案など |
 | result.explanations | array | 判断理由 |
 | result.risk_flags | array | 高リスク取引、要調査、正常取引の誤ブロック、不正取引の見逃しなどの注意点 |
-| audit_log | array | 入力受付、判断、fallback、完了の証跡 |
+| audit_log | array | 入力受付、判断元、完了の証跡 |
 | kpi_snapshot | object | 検知率、誤検知率、処理時間_ms、人間レビュー率 を含むKPI |
 | storage | object | JSON保存の成否、保存形式、保存上限、保存件数 |
 
@@ -145,7 +145,7 @@ validation:
 | held / rejected | 確認結果が正常取引 | false_positive | risk_review_recorded |
 | allowed | 確認結果が不正取引 | false_negative | risk_review_recorded |
 | allowed / held / rejected | 判定と実際の結果が一致 | reviewed | risk_review_recorded |
-| any | LM Studio unavailable | current state | lmstudio_fallback_to_mock |
+| any | LM Studio unavailable | error (HTTP 502) | runを保存しない |
 
 system42 の状態候補は scored / allowed / held / rejected / reviewed / false_positive / false_negative とし、画面では現在状態、次状態、終了状態を表示する。
 
@@ -156,7 +156,7 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 1. catalog.py から system42 の定義を取得する。
 2. request をvalidate し、秘密情報に見える値をmask する。
 3. mode=lmstudio かつ接続情報がある場合は OpenAI互換API呼び出し候補を作る。
-4. LM Studio が利用できない場合は mock decision engine を使う。
+4. LM Studio が利用できない場合は処理を失敗させ、mock判断と実行履歴の保存を行わない。
 5. リスク検知 の教材観点に沿って result, audit_log, kpi_snapshot を生成する。
 6. 実行履歴を新しい順に直近20件へ制限し、`data/enterprise_ai/system42_runs.json` へUTF-8で保存する。
 7. 一時ファイルへの書込みと置換が完了したことを確認し、保存状態を含むresponse schemaに整形して返す。
@@ -191,7 +191,6 @@ EnterpriseAiService.execute(system_id, payload) の処理内容:
 |---|---|
 | 検知率 / 誤検知率 / 処理時間_ms / 人間レビュー率 | system42 の主要KPI |
 | risk_flag_count | risk flags の件数 |
-| mock_fallback_count | mock fallback の発生数 |
 | latency_ms | 処理時間の教材用値 |
 
 KPI は初期MVPでは疑似値を返す。製造工程では固定入力に対して値が安定することをテストする。
@@ -247,4 +246,4 @@ Docker build / run を実行できない場合は、製造工程の検証記録�
 - router.py で /api/system42/metadata, /api/system42/execute, /api/system42/runs を公開する。
 - EnterpriseAiSystemPage.tsx で入力例、入力、状態、結果、保存状態、監査ログ、KPI、実行履歴を表示する。
 - src/scripts/system42_enterprise_demo.py を追加する。
-- test_enterprise_ai_systems.py で metadata / execute / runs / fallback / mask / JSON保存 / 直近20件 / 再起動後の復元を確認する。
+- test_enterprise_ai_systems.py で metadata / execute / runs / LM Studio失敗時の502とmock非代替 / mask / JSON保存 / 直近20件 / 再起動後の復元を確認する。
