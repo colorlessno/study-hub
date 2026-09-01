@@ -54,3 +54,8 @@ category/StudyAI/src/apps/system46_ai_harness_engineering/samples/run_logs/
 category/StudyAI/src/apps/system47_sales_data_analysis_ai/outputs/
 # system48の実行ごとの成果物とログはローカルに保存する
 category/StudyAI/src/apps/system48_local_llm_agent_organization/runs/
+
+# ===== Codex ローカル資料・補助ツール（GitHub 非公開） =====
+/scripts/verify-utf8.mjs
+/study-hub-AGENTS.md
+/study-hub-agents2.md
