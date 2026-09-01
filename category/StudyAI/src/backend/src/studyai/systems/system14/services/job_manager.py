@@ -25,6 +25,7 @@ from studyai.systems.system14.services.pii_masker import PIIMasker
 from studyai.systems.system14.services.sales_scoring_service import SalesScoringService
 from studyai.systems.system14.services.speech_to_text_service import SpeechToTextService
 from studyai.systems.system14.services.utterance_analyzer import UtteranceAnalyzer
+from studyai.systems.system14.services.workflow_dispatcher import WorkflowDispatcher
 
 
 class JobManager:
@@ -40,6 +41,7 @@ class JobManager:
         self.analyzer = UtteranceAnalyzer()
         self.grouping_service = GroupingService()
         self.sales_scoring = SalesScoringService()
+        self.workflow_dispatcher = WorkflowDispatcher()
         self.llm_analysis_pipeline: LLMAnalysisPipeline | None = None
 
     async def upload_data(
@@ -215,13 +217,26 @@ class JobManager:
                     )
                     await repo.create_sales_score(conversation_id=saved_conversation.id, score=score)
                     for row, analyzed in zip(saved_utterances, analyzed_utterances, strict=True):
-                        grouped_items.append(
+                        saved_item = {
+                            **analyzed,
+                            "id": row.id,
+                            "product": safe_metadata.get("product") or safe_metadata.get("product_name"),
+                        }
+                        grouped_items.append(saved_item)
+                    await self.workflow_dispatcher.dispatch_risk_alerts(
+                        session,
+                        job_id=job_id,
+                        conversation_id=saved_conversation.id,
+                        source=source,
+                        metadata=safe_metadata,
+                        utterances=[
                             {
                                 **analyzed,
-                                "id": row.id,
-                                "product": safe_metadata.get("product") or safe_metadata.get("product_name"),
+                                "utterance_id": row.id,
                             }
-                        )
+                            for row, analyzed in zip(saved_utterances, analyzed_utterances, strict=True)
+                        ],
+                    )
 
                 await repo.create_insight_groups(self.grouping_service.build_groups(grouped_items))
                 await repo.update_job(job_id, status="completed", progress=100, completed_at=datetime.utcnow())

@@ -35,6 +35,7 @@ from studyai.systems.system14.schemas.insight import (
     WinLossResponse,
     WorkflowCreateRequest,
     WorkflowCreateResponse,
+    WorkflowDeliveryLogListResponse,
 )
 from studyai.systems.system14.services.agent_chat_service import AgentChatService
 from studyai.systems.system14.services.dummy_crm_service import DummyCrmService
@@ -170,6 +171,20 @@ async def create_workflow(
     session: AsyncSession = Depends(get_db_session),
 ) -> WorkflowCreateResponse:
     return await WorkflowDispatcher().create_workflow(session, body=body)
+
+
+@router.get("/workflows/delivery-logs", response_model=WorkflowDeliveryLogListResponse)
+async def list_workflow_delivery_logs(
+    trigger: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=500),
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> WorkflowDeliveryLogListResponse:
+    return await WorkflowDispatcher().list_delivery_logs(
+        session,
+        trigger=trigger,
+        limit=limit,
+    )
 
 
 @router.get("/dashboard", response_model=DashboardResponse)

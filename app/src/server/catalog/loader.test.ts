@@ -1285,7 +1285,7 @@ describe('実テーマカタログ', () => {
     const catalog = loadActualCatalog();
     const expectedChecklistItemCounts: Record<string, number> = {
       system11: 6,
-      system14: 13,
+      system14: 15,
       system16: 8
     };
 
@@ -1321,7 +1321,7 @@ describe('実テーマカタログ', () => {
           })]
         });
       } else {
-        expect(themeSpecificResources(theme?.resources)).toHaveLength(themeId === 'system14' ? 6 : 4);
+        expect(themeSpecificResources(theme?.resources)).toHaveLength(themeId === 'system14' ? 10 : 4);
         expect(theme?.resources?.filter((resource) => !formalDocumentResourceIds.has(resource.id)).map((resource) => resource.id)).toEqual(expect.arrayContaining([
           'screen-source',
           'api-routes',
@@ -1329,6 +1329,8 @@ describe('実テーマカタログ', () => {
         ]));
         if (themeId === 'system14') {
           expect(theme?.resources?.map((resource) => resource.id)).toEqual(expect.arrayContaining([
+            'risk-alert-dispatcher',
+            'risk-alert-test',
             'rag-service',
             'rag-test'
           ]));

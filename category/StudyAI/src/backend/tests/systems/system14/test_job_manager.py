@@ -44,6 +44,46 @@ class _FakeUtteranceRepository:
         ]
 
 
+class _FakeProcessSession:
+    async def __aenter__(self) -> "_FakeProcessSession":
+        return self
+
+    async def __aexit__(self, *_args: object) -> None:
+        return None
+
+    async def commit(self) -> None:
+        return None
+
+    async def rollback(self) -> None:
+        return None
+
+
+class _FakeProcessRepository:
+    def __init__(self, _session: object) -> None:
+        pass
+
+    async def update_job(self, _job_id: str, **_values: object) -> None:
+        return None
+
+    async def create_conversation(self, **values: object) -> tuple[SimpleNamespace, list[SimpleNamespace]]:
+        utterances = values["utterances"]
+        return SimpleNamespace(id=9), [SimpleNamespace(id=index + 30) for index, _item in enumerate(utterances)]
+
+    async def create_sales_score(self, **_values: object) -> None:
+        return None
+
+    async def create_insight_groups(self, _groups: list[dict]) -> None:
+        return None
+
+
+class _FakeRiskDispatcher:
+    calls: list[dict] = []
+
+    async def dispatch_risk_alerts(self, _session: object, **values: object) -> list[object]:
+        self.__class__.calls.append(dict(values))
+        return []
+
+
 def test_upload_returns_the_processing_failure_status(monkeypatch) -> None:
     manager = JobManager()
 
@@ -106,3 +146,40 @@ def test_upload_rejects_unknown_analysis_mode() -> None:
         )
 
     assert exc_info.value.error_code == "invalid_analysis_mode"
+
+
+def test_process_job_dispatches_saved_high_risk_utterance(monkeypatch) -> None:
+    _FakeRiskDispatcher.calls.clear()
+    manager = JobManager()
+    manager.workflow_dispatcher = _FakeRiskDispatcher()
+
+    async def normalized_input(**_values: object) -> list[dict]:
+        return [
+            {
+                "metadata": {"product": "商品A", "analysis_mode": "rules"},
+                "utterances": [{"speaker": "customer", "text": "法的対応を至急検討します"}],
+            }
+        ]
+
+    monkeypatch.setattr(manager, "_normalize_input", normalized_input)
+    monkeypatch.setattr(job_manager_module, "SessionLocal", _FakeProcessSession)
+    monkeypatch.setattr(job_manager_module, "InsightRepository", _FakeProcessRepository)
+
+    status = asyncio.run(
+        manager._process_job(
+            "job_risk",
+            "risk.json",
+            b"{}",
+            "chat",
+            "chat_support",
+            {},
+        )
+    )
+
+    assert status == "completed"
+    assert len(_FakeRiskDispatcher.calls) == 1
+    call = _FakeRiskDispatcher.calls[0]
+    assert call["job_id"] == "job_risk"
+    assert call["conversation_id"] == 9
+    assert call["utterances"][0]["utterance_id"] == 30
+    assert call["utterances"][0]["urgency"] == "high"

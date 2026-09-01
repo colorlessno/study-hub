@@ -5,7 +5,7 @@
 - 要件定義で扱う「AIの役割範囲・RAG要件（過去対応参照）・ガードレール要件」を説明できる
 - 基本設計で扱う「シングルエージェント設計・LangGraph・埋め込みモデル・pgvector・パイプライン設計」を説明できる
 - 詳細設計で扱う「エージェントループ詳細設計・停止条件・状態管理・メモリ設計（短期）・RAG詳細設計」を説明できる
-- 実装で扱う「faster-whisper区間文字起こし・pyannote話者分離・発話時刻保存・ルール分析・LLM／LangGraph分析・Webhook・SMTP・ダッシュボード配信・DB配信ログ」を説明できる
+- 実装で扱う「faster-whisper区間文字起こし・pyannote話者分離・発話時刻保存・ルール分析・LLM／LangGraph分析・リスク即時通知・Webhook・SMTP・ダッシュボード配信・DB配信ログ」を説明できる
 - 検証で扱う「ガードレール検証（個人情報マスキング・リスク検知）」を説明できる
 - FastAPI・PostgreSQL・SQLAlchemy・Python・順次処理を横断的に使う構成を説明できる
 
@@ -33,18 +33,18 @@ MVP は backend / DB / frontend まで実装済み、Docker 実環境での migr
 - 利用者が明示選択した場合のLM Studio・LangGraph発話分析。マスク済み発話を一件ずつ順番に送信し、感情、スコア、種別、トピック、緊急度をJSONで取得・検証して保存する
 - `POST /api/data/upload`、`GET /api/jobs/{job_id}`、`GET /api/dashboard`
 - `GET /api/insights/voice-ranking`、`GET /api/insights/sales-score`、`GET /api/insights/win-loss`
-- `POST /api/workflows`、`POST /api/agent/chat`、`GET /api/agent/action-proposals`、`GET /api/agent/faq-gaps`
+- `POST /api/workflows`、`GET /api/workflows/delivery-logs`、`POST /api/agent/chat`、`GET /api/agent/action-proposals`、`GET /api/agent/faq-gaps`
 - workflow 完了時の配信ペイロード生成と配信ログ保存（dashboard / webhook / email / ローカル・ダミーCRM）
+- 取込元を指定したリアルタイムworkflow。緊急度`high`の発話をconversation保存直後に検知し、登録順に一件ずつ配信して成功・失敗を配信ログへ永続保存する
 - Bearer認証付きHTTP POST、外部IDによる重複防止、PostgreSQL永続化を行うローカル・ダミーCRM API
 - FAQ、過去の発話、営業スコア、完了済みCRM対応をPostgreSQLへ永続化してpgvector検索するRAG。EmbeddingとLLMの要求は一件ずつ順番に実行し、失敗時に画面内処理やキーワード検索へ自動切替しない
 - `POST /api/knowledge/faqs`、`GET /api/knowledge/faqs`、`POST /api/knowledge/index`によるFAQ管理とRAG索引更新
 - 不足FAQ検出時に、保存済みFAQの商品と本文を照合し、既に対応済みのトピックを不足候補から除外する
-- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRM、分析フィルタ、workflow 配信設定）
+- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRM、分析フィルタ、workflow 配信設定、リスク即時アラート履歴）
 
 **MVP 外として残るもの**
 
 - Webhook / email の運用設定整備とSalesforce等の実CRM connector
-- リスク検知の即時通知
 - 大量データ性能検証
 
 MVP外として残る項目は、本節を正として管理する。
@@ -435,6 +435,12 @@ staff_id:    担当者ID（省略時は全員）
   }
 }
 ```
+
+`trigger`を`realtime`にすると、`data_sources`に一致する取込元で緊急度`high`の発話を保存した直後に、同じ配信設定を一件ずつ実行する。通知失敗で取込結果を失わないよう、配信の成否とエラーは配信ログへ保存する。
+
+### GET /workflows/delivery-logs
+
+ワークフローの配信履歴を新しい順に取得する。`trigger=realtime`を指定すると、リアルタイムworkflowの初回実行と取込時のリスク即時通知を取得できる。リスク通知は`payload.output.type=risk_alert`で識別する。
 
 ### GET /dashboard
 ダッシュボードデータを取得する。

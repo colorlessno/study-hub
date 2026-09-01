@@ -15,6 +15,7 @@ FastAPI
     ├─ GET /jobs/{job_id}
     ├─ GET /insights/*
     ├─ POST /workflows
+    ├─ GET /workflows/delivery-logs
     ├─ GET /dashboard
     ├─ POST /agent/chat
     ├─ GET /agent/action-proposals
@@ -49,7 +50,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | LLMAnalysisPipeline | 明示選択時にマスク済み発話をLM Studioへ一件ずつ送り、LangGraphの要求・検証ノードを順番に実行する |
 | GroupingService | 意味グルーピングとランキング化 |
 | SalesScoringService | 営業トーク評価 |
-| WorkflowDispatcher | workflow 定義保存、配信ペイロード生成、配信結果ログ保存 |
+| WorkflowDispatcher | workflow 定義保存、リスク即時通知、配信ペイロード生成、配信結果ログ保存 |
 | AgentChatService | 分析済みデータへの自然言語Q&A |
 | DummyCrmService | Bearer認証済みの顧客対応履歴を外部IDで重複防止し、ローカルDBへ保存・一覧・更新する |
 
@@ -63,7 +64,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities` |
 | Docker | system14専用のCPU版話者分離依存を持つ`system14`サービス、ホストポート`18014`、モデル永続volume |
 | Frontend | `src/frontend/src/pages/System14Page.tsx`、route `/system14` |
-| 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、workflow 配信ログ・ダミーCRM永続化を確認対象 |
+| 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、リスク即時通知・workflow 配信ログ・ダミーCRM永続化を確認対象 |
 
 ---
 
@@ -95,6 +96,8 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 - `dashboard` はログ保存で成功扱い、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信する
 - `crm_dummy` はBearer認証付きHTTP POSTで同一バックエンド内のダミーCRM APIへ順次送信し、外部IDで重複を防止してDBへ保存する
 - `crm` は実CRM接続環境が提供されていないため、明示的に接続未設定の失敗ログとして扱う
+- `trigger=realtime`の有効なworkflowは、`data_sources`と取込元が一致し、保存した発話に緊急度`high`が含まれる場合だけ発火する
+- リスク通知はconversation保存直後にworkflow ID順で一件ずつ配信し、成功、見送り、失敗、宛先、ペイロード、応答、エラーを既存の配信ログへ保存する
 
 ---
 
@@ -110,6 +113,7 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | GET | `/insights/sales-score` | 営業トークスコア | 同期 |
 | GET | `/insights/win-loss` | 受注失注分析 | 同期 |
 | POST | `/workflows` | 配信ワークフロー定義・即時配信実行 | 同期 |
+| GET | `/workflows/delivery-logs` | 配信履歴・リスク即時アラート履歴 | 同期 |
 | GET | `/dashboard` | 集約ダッシュボード | 同期 |
 | POST | `/agent/chat` | 分析AIチャット | 同期 |
 | GET | `/agent/action-proposals` | 改善提案 | 同期 |
@@ -330,6 +334,7 @@ flowchart TD
 |---|---|---|---|
 | `workflow_editor` | 配信条件設定 | フォーム | POST `/workflows` |
 | `delivery_targets` | 配信先 | 複数入力 | dashboard / Webhook / メール / ローカル・ダミーCRM / 実CRMを指定可能。実CRMは接続先未提供を明示する |
+| `risk_alert_logs` | リスク即時アラート履歴 | 更新ボタン・カード一覧 | GET `/workflows/delivery-logs?trigger=realtime`のうち`risk_alert`を表示 |
 | `agent_question` | 分析AI質問 | テキストエリア | POST `/agent/chat` |
 | `agent_answer` | 分析AI回答 | テキスト表示 | 根拠付き回答 |
 
@@ -352,6 +357,7 @@ sequenceDiagram
     participant JM as ジョブ管理
     participant STT as 文字起こし
     participant AN as 発話分析
+    participant WF as 即時通知
     participant DB as PostgreSQL
 
     U->>API: データ取込要求
@@ -362,6 +368,10 @@ sequenceDiagram
     JM->>AN: 発話分析・グルーピング
     AN-->>JM: conversations / utterances / groups
     JM->>DB: 分析結果保存
+    alt 緊急度highかつ対象のrealtime workflowあり
+        JM->>WF: リスク通知をworkflow ID順に実行
+        WF->>DB: 配信結果ログ保存
+    end
     JM->>DB: data_jobs 完了更新
     API-->>U: job_id 返却
 ```

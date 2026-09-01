@@ -103,6 +103,8 @@ const themeResources = {
     { id: 'trust-boundary', label: '検索文書の信頼境界', kind: 'material', format: 'markdown', path: 'category/StudySecurity/doc/learning_notes/security18_rag_safety/rag_trust_boundary.md' }
   ],
   system14: [
+    { id: 'risk-alert-dispatcher', label: 'リスク即時通知と配信履歴', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/workflow_dispatcher.py' },
+    { id: 'risk-alert-test', label: '緊急度判定と順次配信のテスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_workflow_dispatcher.py' },
     { id: 'speaker-diarization', label: 'ローカル話者分離と時刻重なり割当', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/speaker_diarization_service.py' },
     { id: 'speaker-diarization-test', label: '話者分離の失敗境界と割当テスト', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/tests/systems/system14/test_speaker_diarization_service.py' },
     { id: 'rag-service', label: 'RAG・FAQ・過去対応履歴の処理', kind: 'source', format: 'source', path: 'category/StudyAI/src/backend/src/studyai/systems/system14/services/rag_knowledge_service.py' },

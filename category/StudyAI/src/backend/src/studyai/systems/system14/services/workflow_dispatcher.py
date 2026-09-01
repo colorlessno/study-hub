@@ -14,6 +14,8 @@ from studyai.systems.system14.repositories.insight_repository import InsightRepo
 from studyai.systems.system14.schemas.insight import (
     WorkflowCreateRequest,
     WorkflowCreateResponse,
+    WorkflowDeliveryLogItem,
+    WorkflowDeliveryLogListResponse,
     WorkflowDeliveryResult,
 )
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
@@ -36,16 +38,87 @@ class WorkflowDispatcher:
             delivery_result=delivery_result,
         )
 
+    async def dispatch_risk_alerts(
+        self,
+        session: AsyncSession,
+        *,
+        job_id: str,
+        conversation_id: int,
+        source: str,
+        metadata: dict[str, Any],
+        utterances: list[dict[str, Any]],
+    ) -> list[WorkflowDeliveryResult]:
+        alerts = [item for item in utterances if item.get("urgency") == "high"]
+        if not alerts:
+            return []
+
+        repo = InsightRepository(session)
+        workflows = await repo.list_active_workflows(trigger="realtime")
+        results: list[WorkflowDeliveryResult] = []
+        for workflow in workflows:
+            if workflow.data_sources and source not in workflow.data_sources:
+                continue
+            payload = self._build_risk_alert_payload(
+                workflow,
+                job_id=job_id,
+                conversation_id=conversation_id,
+                source=source,
+                metadata=metadata,
+                alerts=alerts,
+            )
+            results.append(await self._deliver_and_log(repo, workflow, payload))
+        return results
+
+    async def list_delivery_logs(
+        self,
+        session: AsyncSession,
+        *,
+        trigger: str | None,
+        limit: int,
+    ) -> WorkflowDeliveryLogListResponse:
+        rows = await InsightRepository(session).list_workflow_delivery_logs(
+            trigger=trigger,
+            limit=limit,
+        )
+        return WorkflowDeliveryLogListResponse(
+            logs=[
+                WorkflowDeliveryLogItem(
+                    log_id=log.id,
+                    workflow_id=workflow.id,
+                    workflow_name=workflow.name,
+                    trigger=workflow.trigger,
+                    output_type=workflow.output_type,
+                    method=log.method,
+                    destination=log.destination,
+                    status=log.status,
+                    payload=log.payload,
+                    response=log.response_json,
+                    error_message=log.error_message,
+                    delivered_at=log.delivered_at,
+                    created_at=log.created_at,
+                )
+                for log, workflow in rows
+            ]
+        )
+
     async def _dispatch(
         self,
         session: AsyncSession,
         repo: InsightRepository,
         workflow: System14Workflow,
     ) -> WorkflowDeliveryResult:
+        payload = await self._build_payload(session, workflow)
+        return await self._deliver_and_log(repo, workflow, payload)
+
+    async def _deliver_and_log(
+        self,
+        repo: InsightRepository,
+        workflow: System14Workflow,
+        payload: dict[str, Any],
+    ) -> WorkflowDeliveryResult:
         delivery = workflow.delivery or {}
         method = str(delivery.get("method") or "dashboard")
         destination = self._destination(delivery)
-        payload = await self._build_payload(session, workflow)
         delivered_at = datetime.utcnow()
 
         try:
@@ -75,6 +148,43 @@ class WorkflowDispatcher:
             error_message=log.error_message,
             delivered_at=log.delivered_at,
         )
+
+    @staticmethod
+    def _build_risk_alert_payload(
+        workflow: System14Workflow,
+        *,
+        job_id: str,
+        conversation_id: int,
+        source: str,
+        metadata: dict[str, Any],
+        alerts: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        event_id = f"{job_id}-conversation-{conversation_id}"
+        return {
+            "workflow": {
+                "id": workflow.id,
+                "name": workflow.name,
+                "trigger": workflow.trigger,
+                "output_type": "risk_alert",
+                "data_sources": workflow.data_sources,
+                "analysis_steps": workflow.analysis_steps,
+            },
+            "filters": workflow.filters or {},
+            "generated_at": datetime.utcnow().isoformat(timespec="seconds"),
+            "output": {
+                "type": "risk_alert",
+                "data": {
+                    "event_id": event_id,
+                    "job_id": job_id,
+                    "conversation_id": conversation_id,
+                    "source": source,
+                    "metadata": metadata,
+                    "urgency": "high",
+                    "risk_count": len(alerts),
+                    "alerts": alerts,
+                },
+            },
+        }
 
     async def _build_payload(self, session: AsyncSession, workflow: System14Workflow) -> dict[str, Any]:
         service = InsightQueryService()
@@ -290,17 +400,35 @@ class WorkflowDispatcher:
         output = payload.get("output") or {}
         output_type = str(output.get("type") or "insight_delivery")
         output_data = output.get("data") or {}
+        source_metadata = output_data.get("metadata") or {}
         workflow_id = workflow.get("id")
+        event_id = WorkflowDispatcher._clean(output_data.get("event_id"))
+        external_id = f"system14-workflow-{workflow_id}"
+        if event_id:
+            external_id = f"{external_id}-{event_id}"[:120]
+        alerts = output_data.get("alerts") or []
+        first_alert = alerts[0] if alerts else {}
         return {
-            "external_id": f"system14-workflow-{workflow_id}",
-            "customer_id": WorkflowDispatcher._clean(filters.get("customer_id")),
-            "customer_name": WorkflowDispatcher._clean(filters.get("customer_name")),
+            "external_id": external_id,
+            "customer_id": WorkflowDispatcher._clean(
+                filters.get("customer_id") or source_metadata.get("customer_id")
+            ),
+            "customer_name": WorkflowDispatcher._clean(
+                filters.get("customer_name") or source_metadata.get("customer_name")
+            ),
             "contact_type": output_type,
             "summary": WorkflowDispatcher._summarize_dummy_crm_output(output_type, output_data),
-            "sentiment": WorkflowDispatcher._clean(filters.get("sentiment")),
-            "urgency": WorkflowDispatcher._normalize_urgency(filters.get("urgency")),
+            "sentiment": WorkflowDispatcher._clean(
+                filters.get("sentiment") or first_alert.get("sentiment")
+            ),
+            "urgency": WorkflowDispatcher._normalize_urgency(
+                filters.get("urgency") or output_data.get("urgency")
+            ),
             "assigned_to": WorkflowDispatcher._clean(
-                filters.get("assigned_to") or filters.get("staff_id") or filters.get("staffId")
+                filters.get("assigned_to")
+                or filters.get("staff_id")
+                or filters.get("staffId")
+                or source_metadata.get("staff_id")
             ),
             "next_action": WorkflowDispatcher._dummy_crm_next_action(output_type, output_data),
             "follow_up_at": filters.get("follow_up_at"),
@@ -310,6 +438,12 @@ class WorkflowDispatcher:
 
     @staticmethod
     def _summarize_dummy_crm_output(output_type: str, data: dict[str, Any]) -> str:
+        if output_type == "risk_alert":
+            alerts = data.get("alerts") or []
+            if alerts:
+                first_text = str(alerts[0].get("text") or "緊急対応が必要な発言")
+                return f"緊急度が高い発言を{len(alerts)}件検知しました: {first_text[:300]}"
+            return "緊急度が高い発言を検知しました。"
         if output_type == "voice_ranking":
             ranking = data.get("ranking") or []
             if ranking:

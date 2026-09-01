@@ -22,6 +22,38 @@ interface UploadAcceptedResponse {
   file_count: number
 }
 
+interface RiskAlertPayload {
+  output?: {
+    type?: string
+    data?: {
+      job_id?: string
+      conversation_id?: number
+      source?: string
+      risk_count?: number
+      alerts?: { text?: string; speaker?: string | null; urgency?: string }[]
+    }
+  }
+}
+
+interface WorkflowDeliveryLog {
+  log_id: number
+  workflow_id: number
+  workflow_name: string
+  trigger: string
+  output_type?: string | null
+  method: string
+  destination?: string | null
+  status: string
+  payload: RiskAlertPayload
+  error_message?: string | null
+  delivered_at?: string | null
+  created_at: string
+}
+
+interface WorkflowDeliveryLogListResponse {
+  logs: WorkflowDeliveryLog[]
+}
+
 interface JobUtterance {
   id: number
   conversation_id: number
@@ -463,6 +495,8 @@ export default function System14Page() {
   const [workflowEndpoint, setWorkflowEndpoint] = useState('')
   const [workflowRecipients, setWorkflowRecipients] = useState('')
   const [workflowResult, setWorkflowResult] = useState('')
+  const [riskAlerts, setRiskAlerts] = useState<WorkflowDeliveryLog[]>([])
+  const [riskAlertMessage, setRiskAlertMessage] = useState('')
   const [crmCustomerId, setCrmCustomerId] = useState('customer-001')
   const [crmCustomerName, setCrmCustomerName] = useState('株式会社サンプル')
   const [crmAssignedTo, setCrmAssignedTo] = useState('staff-001')
@@ -507,6 +541,7 @@ export default function System14Page() {
       setJobUtterances([])
       if (data.status === 'completed') {
         await loadJobUtterances(data.job_id)
+        await loadRiskAlerts()
       }
       setMessage(
         data.status === 'failed'
@@ -546,6 +581,7 @@ export default function System14Page() {
       setJob(res.data)
       if (res.data.status === 'completed') {
         await loadJobUtterances(res.data.job_id)
+        await loadRiskAlerts()
       }
       setMessage(res.data.status === 'completed' ? '取込処理が完了しました。' : '取込状態を更新しました。')
     } catch (error) {
@@ -623,6 +659,7 @@ export default function System14Page() {
         .filter(Boolean)
       const workflowFilters = {
         ...buildFilterPayload(filters),
+        ...(workflowTrigger === 'realtime' ? { urgency: 'high' } : {}),
         ...(workflowDeliveryMethod === 'crm_dummy'
           ? {
               customer_id: cleanValue(crmCustomerId),
@@ -635,8 +672,8 @@ export default function System14Page() {
       const res = await client.post('/workflows', {
         name: workflowName,
         trigger: workflowTrigger,
-        data_sources: ['chat_support', 'callcenter'],
-        analysis_steps: ['sentiment', 'topic_extraction', 'grouping', 'ranking'],
+        data_sources: [source.trim()],
+        analysis_steps: ['sentiment', 'topic_extraction', 'urgency', 'grouping', 'ranking'],
         output_type: workflowOutputType,
         filters: workflowFilters,
         delivery: {
@@ -653,8 +690,25 @@ export default function System14Page() {
       if (workflowDeliveryMethod === 'crm_dummy' && delivery?.status === 'success') {
         await loadDummyCrm()
       }
+      if (workflowTrigger === 'realtime') {
+        await loadRiskAlerts()
+      }
     } catch (error) {
       setWorkflowResult(getErrorMessage(error, 'ワークフロー保存に失敗しました'))
+    }
+  }
+
+  async function loadRiskAlerts() {
+    setRiskAlertMessage('即時アラート履歴を更新中...')
+    try {
+      const res = await client.get<WorkflowDeliveryLogListResponse>('/workflows/delivery-logs', {
+        params: { trigger: 'realtime', limit: 100 },
+      })
+      const alerts = res.data.logs.filter(item => item.payload.output?.type === 'risk_alert')
+      setRiskAlerts(alerts)
+      setRiskAlertMessage(`即時アラート履歴を${alerts.length}件取得しました。`)
+    } catch (error) {
+      setRiskAlertMessage(getErrorMessage(error, '即時アラート履歴を取得できませんでした'))
     }
   }
 
@@ -1126,6 +1180,11 @@ export default function System14Page() {
             <button data-testid="save-workflow" style={{ ...button(Boolean(workflowName.trim())), marginTop: 8 }} disabled={!workflowName.trim()} onClick={createWorkflow}>
               保存して実行する
             </button>
+            {workflowTrigger === 'realtime' && (
+              <p style={{ color: COLOR.muted, fontSize: '0.82rem', lineHeight: 1.6 }}>
+                リアルタイム設定は、現在の取込元「{source}」で緊急度「高」の発言を保存した直後に発火します。複数の設定がある場合もワークフローID順に一件ずつ配信します。
+              </p>
+            )}
             <p style={{ color: workflowDeliveryMethod === 'crm' ? COLOR.danger : COLOR.muted, fontSize: '0.82rem', lineHeight: 1.6 }}>
               {workflowDeliveryMethod === 'dashboard' && '配信内容と実行結果をStudyAIのDBに保存します。'}
               {workflowDeliveryMethod === 'webhook' && '保存時にバックエンドから指定したURLへHTTP POSTし、実行結果をDBに記録します。'}
@@ -1134,6 +1193,37 @@ export default function System14Page() {
               {workflowDeliveryMethod === 'crm' && '実CRMの接続先は提供されていません。送信せず、接続未設定エラーを配信結果としてDBに記録します。'}
             </p>
             {workflowResult && <p data-testid="workflow-result" style={{ color: COLOR.muted }}>{workflowResult}</p>}
+            <div style={{ borderTop: `1px solid ${COLOR.border}`, marginTop: '1rem', paddingTop: '1rem' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                <strong>リスク即時アラート履歴</strong>
+                <button data-testid="load-risk-alerts" style={button(true)} onClick={loadRiskAlerts}>
+                  履歴を更新
+                </button>
+              </div>
+              {riskAlertMessage && <p style={{ color: COLOR.muted, fontSize: '0.82rem' }}>{riskAlertMessage}</p>}
+              {riskAlerts.length === 0 && !riskAlertMessage && (
+                <p style={{ color: COLOR.muted, fontSize: '0.82rem' }}>保存済みの即時アラートはありません。</p>
+              )}
+              {riskAlerts.slice(0, 10).map(item => {
+                const data = item.payload.output?.data
+                const firstAlert = data?.alerts?.[0]
+                return (
+                  <div key={item.log_id} data-testid="risk-alert-log" style={{ ...card(), background: COLOR.band, marginTop: '0.8rem', marginBottom: 0 }}>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                      <strong>{item.workflow_name}</strong>
+                      <span style={{ color: item.status === 'success' ? COLOR.ok : COLOR.danger }}>
+                        {labelOf({ success: '成功', skipped: '見送り', failed: '失敗' }, item.status)}
+                      </span>
+                    </div>
+                    <div style={{ color: COLOR.muted, fontSize: '0.82rem', marginTop: 6 }}>
+                      {formatDateTime(item.delivered_at ?? item.created_at)} / {item.method} / {data?.source ?? '-'} / {data?.risk_count ?? 0}件
+                    </div>
+                    {firstAlert?.text && <p style={{ marginBottom: 0, lineHeight: 1.6 }}>{firstAlert.text}</p>}
+                    {item.error_message && <p style={{ color: COLOR.danger, marginBottom: 0 }}>{item.error_message}</p>}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </section>
       )}

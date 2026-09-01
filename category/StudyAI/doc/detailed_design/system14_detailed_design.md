@@ -49,7 +49,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 | GroupingService | 意味グルーピング | `build_groups()` |
 | SalesScoringService | 営業会話評価 | `score_sales_conversation()` |
 | InsightQueryService | dashboard / insight API 提供 | `get_dashboard()`, `get_voice_ranking()`, `get_sales_score()` |
-| WorkflowDispatcher | workflow 定義保存・配信ペイロード生成・配信ログ保存 | `create_workflow()` |
+| WorkflowDispatcher | workflow 定義保存・リスク即時通知・配信ペイロード生成・配信ログ保存 | `create_workflow()`, `dispatch_risk_alerts()`, `list_delivery_logs()` |
 | AgentChatService | 自然語 Q&A | `answer_agent_query()` |
 | PIIMasker | DB 保存前の簡易マスキング | `mask()`, `mask_metadata()` |
 | DummyCrmService | 顧客対応履歴の登録・一覧・個別取得・更新 | `upsert_activity()`, `list_activities()`, `get_activity()`, `update_activity()` |
@@ -60,7 +60,7 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - Docker サービス `system14` は `18014:8014` で起動する。
 - Alembic revision は `20260901_0020`。
 - Frontend は `/system14` route で、データ取込、ダッシュボード、分析、エージェント、RAG・FAQ、ダミーCRMの6タブ構成。
-- workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。
+- workflow は作成時に配信ペイロードを生成し、dashboard / webhook / email / ローカル・ダミーCRM / 実CRMの配信結果を `system14_workflow_delivery_logs` に保存する。`realtime` workflowは取込元が一致する緊急度`high`の発話をconversation保存直後に通知し、同じテーブルへ結果を保存する。
 - `crm_dummy`は同一バックエンド内のダミーCRM APIへBearer認証付きHTTP POSTを行い、`system14_dummy_crm_activities`へ永続化する。
 - 音声・動画はfaster-whisperの各区間から開始秒・終了秒を取得後、永続volume上の`pyannote/speaker-diarization-community-1`をローカル実行する。文字起こし区間と話者区間の重なりが最大の匿名ラベルをDBへ保存して取込画面へ表示する。重なりがない区間だけを`unknown`とし、匿名ラベルから顧客・担当者を推測しない。Salesforce等の実CRM connectorは接続環境未提供を明示する。
 
@@ -139,12 +139,13 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 
 ### 4.4 ワークフロー / 分析AI API
 
-**対象API**: `POST /workflows`, `POST /agent/chat`, `GET /agent/action-proposals`, `GET /agent/faq-gaps`
+**対象API**: `POST /workflows`, `GET /workflows/delivery-logs`, `POST /agent/chat`, `GET /agent/action-proposals`, `GET /agent/faq-gaps`
 
 | 項目 | 型 | 説明 |
 |---|---|---|
 | `name`, `trigger`, `data_sources[]`, `analysis_steps[]` | mixed | ワークフロー定義 |
 | `delivery_result` | object | 配信ログID・配信方法・宛先・成功・失敗・skip・エラー内容 |
+| `logs[]` | object[] | workflow名・trigger・配信方法・宛先・ペイロード・応答・エラー・配信日時 |
 | `question` | string | AIへの質問 |
 | `filters` | object | 対象条件 |
 | `answer` | string | 根拠付き回答 |
@@ -289,6 +290,9 @@ backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py
 - workflow は topic、sentiment、source、score 条件で配信を制御する
 - workflow 作成時に `output_type` に応じた分析データを生成し、`dashboard` はログ保存、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信、`crm` は未対応として failed log を残す
 - `crm_dummy`は`SYSTEM14_DUMMY_CRM_ENDPOINT`へBearer認証付きHTTP POSTを1件ずつ送り、成功・失敗と応答本文を配信ログへ保存する
+- 取込処理はconversationと発話を保存後、緊急度`high`の発話だけを抽出する。対象がある場合は有効な`realtime` workflowをID順に読み、取込元が`data_sources`に一致する設定だけを一件ずつ配信する
+- リスク通知ペイロードはjob ID、conversation ID、取込元、マスク済みmetadata、発話ID、話者、本文、感情、種別、トピック、緊急度、開始秒、終了秒を保持し、`output.type=risk_alert`で通常配信と区別する
+- dashboard、Webhook、SMTP、ダミーCRMへの通知成否は取込ジョブと同じtransaction内の配信ログへ保存する。外部送信失敗はfailed logとして残し、後続workflowの実行と分析結果の保存を継続する
 - ダミーCRM APIは`external_id`で登録済みデータを確認し、新規登録または更新を行ってから応答する
 - `agent/chat` は分析済みデータと`system14_knowledge_entries`だけを参照し、取込元ファイルを再走査しない
 

@@ -163,6 +163,26 @@ class WorkflowCreateResponse(BaseModel):
     delivery_result: WorkflowDeliveryResult | None = None
 
 
+class WorkflowDeliveryLogItem(BaseModel):
+    log_id: int
+    workflow_id: int
+    workflow_name: str
+    trigger: str
+    output_type: str | None = None
+    method: str
+    destination: str | None = None
+    status: str
+    payload: dict[str, Any] = Field(default_factory=dict)
+    response: dict[str, Any] = Field(default_factory=dict)
+    error_message: str | None = None
+    delivered_at: datetime | None = None
+    created_at: datetime
+
+
+class WorkflowDeliveryLogListResponse(BaseModel):
+    logs: list[WorkflowDeliveryLogItem] = Field(default_factory=list)
+
+
 class DummyCrmActivityCreate(BaseModel):
     external_id: str = Field(min_length=1, max_length=120)
     customer_id: str | None = Field(default=None, max_length=100)

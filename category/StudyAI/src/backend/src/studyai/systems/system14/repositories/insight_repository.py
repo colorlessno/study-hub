@@ -236,6 +236,37 @@ class InsightRepository:
         await self.session.refresh(workflow)
         return workflow
 
+    async def list_active_workflows(self, *, trigger: str) -> list[System14Workflow]:
+        result = await self.session.execute(
+            select(System14Workflow)
+            .where(
+                System14Workflow.is_active.is_(True),
+                System14Workflow.trigger == trigger,
+            )
+            .order_by(System14Workflow.id.asc())
+        )
+        return list(result.scalars().all())
+
+    async def list_workflow_delivery_logs(
+        self,
+        *,
+        trigger: str | None = None,
+        limit: int = 100,
+    ) -> list[tuple[System14WorkflowDeliveryLog, System14Workflow]]:
+        stmt = select(System14WorkflowDeliveryLog, System14Workflow).join(
+            System14Workflow,
+            System14WorkflowDeliveryLog.workflow_id == System14Workflow.id,
+        )
+        if trigger:
+            stmt = stmt.where(System14Workflow.trigger == trigger)
+        result = await self.session.execute(
+            stmt.order_by(
+                System14WorkflowDeliveryLog.created_at.desc(),
+                System14WorkflowDeliveryLog.id.desc(),
+            ).limit(limit)
+        )
+        return list(result.all())
+
     async def create_workflow_delivery_log(
         self,
         *,

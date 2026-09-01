@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 
 from studyai.systems.system14.services import workflow_dispatcher as workflow_module
 from studyai.systems.system14.services.workflow_dispatcher import WorkflowDispatcher
@@ -57,6 +58,31 @@ class _FakeSmtp:
 
     def send_message(self, message: object) -> None:
         self.__class__.messages.append(str(message))
+
+
+class _FakeRiskRepository:
+    workflows: list[SimpleNamespace] = []
+    delivery_values: list[dict] = []
+
+    def __init__(self, _session: object) -> None:
+        pass
+
+    async def list_active_workflows(self, *, trigger: str) -> list[SimpleNamespace]:
+        assert trigger == "realtime"
+        return self.__class__.workflows
+
+    async def create_workflow_delivery_log(self, **values: object) -> SimpleNamespace:
+        self.__class__.delivery_values.append(dict(values))
+        return SimpleNamespace(
+            id=len(self.__class__.delivery_values),
+            method=values["method"],
+            destination=values["destination"],
+            status=values["status"],
+            payload=values["payload"],
+            response_json=values["response"],
+            error_message=values["error_message"],
+            delivered_at=values["delivered_at"],
+        )
 
 
 def test_workflow_dispatcher_normalizes_ui_filters() -> None:
@@ -230,3 +256,73 @@ def test_workflow_dispatcher_crm_delivery_returns_explicit_failure() -> None:
     assert status == "failed"
     assert response["message"] == "crm_delivery_not_configured"
     assert error_message is not None
+
+
+def test_workflow_dispatcher_delivers_high_risk_alerts_in_workflow_order(monkeypatch) -> None:
+    _FakeRiskRepository.delivery_values.clear()
+    _FakeRiskRepository.workflows = [
+        SimpleNamespace(
+            id=3,
+            name="一次通知",
+            trigger="realtime",
+            output_type="voice_ranking",
+            data_sources=["chat_support"],
+            analysis_steps=["urgency"],
+            filters={"urgency": "high"},
+            delivery={"method": "dashboard"},
+        ),
+        SimpleNamespace(
+            id=8,
+            name="二次通知",
+            trigger="realtime",
+            output_type="dashboard",
+            data_sources=["chat_support"],
+            analysis_steps=["urgency"],
+            filters={"urgency": "high"},
+            delivery={"method": "dashboard"},
+        ),
+    ]
+    monkeypatch.setattr(workflow_module, "InsightRepository", _FakeRiskRepository)
+
+    results = asyncio.run(
+        WorkflowDispatcher().dispatch_risk_alerts(
+            object(),
+            job_id="job_risk",
+            conversation_id=15,
+            source="chat_support",
+            metadata={"product": "商品A"},
+            utterances=[
+                {"utterance_id": 20, "text": "通常の問い合わせ", "urgency": "low"},
+                {"utterance_id": 21, "text": "法的対応を検討します", "urgency": "high"},
+            ],
+        )
+    )
+
+    assert [item.status for item in results] == ["success", "success"]
+    assert [item["workflow_id"] for item in _FakeRiskRepository.delivery_values] == [3, 8]
+    first_payload = _FakeRiskRepository.delivery_values[0]["payload"]
+    assert first_payload["output"]["type"] == "risk_alert"
+    assert first_payload["output"]["data"]["risk_count"] == 1
+    assert first_payload["output"]["data"]["alerts"] == [
+        {"utterance_id": 21, "text": "法的対応を検討します", "urgency": "high"}
+    ]
+
+
+def test_workflow_dispatcher_does_not_dispatch_without_high_risk(monkeypatch) -> None:
+    _FakeRiskRepository.delivery_values.clear()
+    _FakeRiskRepository.workflows = []
+    monkeypatch.setattr(workflow_module, "InsightRepository", _FakeRiskRepository)
+
+    results = asyncio.run(
+        WorkflowDispatcher().dispatch_risk_alerts(
+            object(),
+            job_id="job_normal",
+            conversation_id=16,
+            source="chat_support",
+            metadata={},
+            utterances=[{"utterance_id": 22, "text": "質問です", "urgency": "low"}],
+        )
+    )
+
+    assert results == []
+    assert _FakeRiskRepository.delivery_values == []

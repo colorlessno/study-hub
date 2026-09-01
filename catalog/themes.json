@@ -2014,6 +2014,20 @@
           "kind": "design",
           "format": "markdown",
           "path": "category/StudyAI/doc/detailed_design/system14_detailed_design.md"
+        },
+        {
+          "id": "risk-alert-dispatcher",
+          "label": "リスク即時通知と配信履歴",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/src/studyai/systems/system14/services/workflow_dispatcher.py"
+        },
+        {
+          "id": "risk-alert-test",
+          "label": "緊急度判定と順次配信のテスト",
+          "kind": "source",
+          "format": "source",
+          "path": "category/StudyAI/src/backend/tests/systems/system14/test_workflow_dispatcher.py"
         }
       ],
       "connection": {
