@@ -38,5 +38,6 @@ venv/
 .env.*
 !.env.example
 !.env.docker
+.env.local
 *.pem
 *.key
