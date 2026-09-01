@@ -1,19 +1,27 @@
 from __future__ import annotations
 
+import os
+import secrets
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, Query, Request, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from studyai.common.auth.dependencies import require_authenticated, require_roles
 from studyai.common.auth.models import AuthenticatedUser
 from studyai.common.db.session import get_db_session
-from studyai.common.errors.models import ValidationAppError
+from studyai.common.errors.models import AppError, ValidationAppError
 from studyai.systems.system14.schemas.insight import (
     ActionProposalResponse,
     AgentChatRequest,
     AgentChatResponse,
     DashboardResponse,
+    DummyCrmActivityCreate,
+    DummyCrmActivityListResponse,
+    DummyCrmActivityResponse,
+    DummyCrmActivityStatus,
+    DummyCrmActivityUpdate,
+    DummyCrmUpsertResponse,
     FAQGapResponse,
     JobStatusResponse,
     SalesScoreResponse,
@@ -24,11 +32,31 @@ from studyai.systems.system14.schemas.insight import (
     WorkflowCreateResponse,
 )
 from studyai.systems.system14.services.agent_chat_service import AgentChatService
+from studyai.systems.system14.services.dummy_crm_service import DummyCrmService
 from studyai.systems.system14.services.insight_query_service import InsightQueryService
 from studyai.systems.system14.services.job_manager import JobManager
 from studyai.systems.system14.services.workflow_dispatcher import WorkflowDispatcher
 
 router = APIRouter()
+
+
+def _require_dummy_crm_token(
+    authorization: str | None = Header(default=None, alias="Authorization"),
+) -> None:
+    expected = os.environ.get("SYSTEM14_DUMMY_CRM_TOKEN", "").strip()
+    if not expected:
+        raise AppError(
+            "dummy_crm_not_configured",
+            "SYSTEM14_DUMMY_CRM_TOKEN is not configured.",
+            503,
+        )
+    scheme, separator, token = (authorization or "").partition(" ")
+    if separator != " " or scheme.lower() != "bearer" or not secrets.compare_digest(token, expected):
+        raise AppError(
+            "dummy_crm_authentication_failed",
+            "A valid dummy CRM bearer token is required.",
+            401,
+        )
 
 
 @router.post("/data/upload", response_model=UploadAcceptedResponse)
@@ -172,6 +200,52 @@ async def get_faq_gaps(
     session: AsyncSession = Depends(get_db_session),
 ) -> FAQGapResponse:
     return await InsightQueryService().get_faq_gaps(session, product=product, limit=limit)
+
+
+@router.post("/dummy-crm/activities", response_model=DummyCrmUpsertResponse)
+async def upsert_dummy_crm_activity(
+    body: DummyCrmActivityCreate,
+    _: None = Depends(_require_dummy_crm_token),
+    session: AsyncSession = Depends(get_db_session),
+) -> DummyCrmUpsertResponse:
+    return await DummyCrmService().upsert_activity(session, body=body)
+
+
+@router.get("/dummy-crm/activities", response_model=DummyCrmActivityListResponse)
+async def list_dummy_crm_activities(
+    status: DummyCrmActivityStatus | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=500),
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> DummyCrmActivityListResponse:
+    return await DummyCrmService().list_activities(
+        session,
+        status=status,
+        limit=limit,
+    )
+
+
+@router.get("/dummy-crm/activities/{activity_id}", response_model=DummyCrmActivityResponse)
+async def get_dummy_crm_activity(
+    activity_id: int,
+    _: AuthenticatedUser = Depends(require_authenticated),
+    session: AsyncSession = Depends(get_db_session),
+) -> DummyCrmActivityResponse:
+    return await DummyCrmService().get_activity(session, activity_id=activity_id)
+
+
+@router.patch("/dummy-crm/activities/{activity_id}", response_model=DummyCrmActivityResponse)
+async def update_dummy_crm_activity(
+    activity_id: int,
+    body: DummyCrmActivityUpdate,
+    _: AuthenticatedUser = Depends(require_roles("admin", "manager")),
+    session: AsyncSession = Depends(get_db_session),
+) -> DummyCrmActivityResponse:
+    return await DummyCrmService().update_activity(
+        session,
+        activity_id=activity_id,
+        body=body,
+    )
 
 
 def _validate_date_range(from_date: date | None, to_date: date | None) -> None:

@@ -11,6 +11,7 @@ from studyai.systems.system14.models.insight import (
     System14AgentAnswer,
     System14Conversation,
     System14DataJob,
+    System14DummyCrmActivity,
     System14InsightGroup,
     System14SalesScore,
     System14Utterance,
@@ -270,6 +271,65 @@ class InsightRepository:
             related_links=related_links,
         )
         self.session.add(row)
+        await self.session.flush()
+        await self.session.refresh(row)
+        return row
+
+    async def upsert_dummy_crm_activity(
+        self,
+        *,
+        values: dict,
+    ) -> tuple[System14DummyCrmActivity, bool]:
+        result = await self.session.execute(
+            select(System14DummyCrmActivity).where(
+                System14DummyCrmActivity.external_id == values["external_id"]
+            )
+        )
+        row = result.scalar_one_or_none()
+        created = row is None
+        if row is None:
+            row = System14DummyCrmActivity(**values)
+            self.session.add(row)
+        else:
+            for key, value in values.items():
+                if key != "external_id":
+                    setattr(row, key, value)
+        await self.session.flush()
+        await self.session.refresh(row)
+        return row, created
+
+    async def get_dummy_crm_activity(self, activity_id: int) -> System14DummyCrmActivity:
+        row = await self.session.get(System14DummyCrmActivity, activity_id)
+        if row is None:
+            raise NotFoundAppError(
+                "dummy_crm_activity_not_found",
+                "The dummy CRM activity was not found.",
+            )
+        return row
+
+    async def list_dummy_crm_activities(
+        self,
+        *,
+        status: str | None = None,
+        limit: int = 100,
+    ) -> list[System14DummyCrmActivity]:
+        stmt = select(System14DummyCrmActivity)
+        if status:
+            stmt = stmt.where(System14DummyCrmActivity.status == status)
+        result = await self.session.execute(
+            stmt.order_by(System14DummyCrmActivity.updated_at.desc()).limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def update_dummy_crm_activity(
+        self,
+        activity_id: int,
+        *,
+        values: dict,
+    ) -> System14DummyCrmActivity:
+        row = await self.get_dummy_crm_activity(activity_id)
+        for key, value in values.items():
+            setattr(row, key, value)
         await self.session.flush()
         await self.session.refresh(row)
         return row

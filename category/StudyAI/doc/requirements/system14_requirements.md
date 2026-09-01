@@ -19,27 +19,28 @@
 
 ---
 
-## 実装状況（2026-04-22）
+## 実装状況（2026-09-01）
 
 MVP は backend / DB / frontend まで実装済み、Docker 実環境での migration、API スモーク、UI 動線確認まで完了している。
 
 **実装済み**
 
 - `system14` Docker サービス（ポート `18014`）
-- Alembic revision `20260421_0016` / `20260422_0017` による System14 テーブル作成
+- Alembic revision `20260421_0016` / `20260422_0017` / `20260901_0019` による System14 テーブル作成
 - テスト系データ：CSV / JSON / text 取込、正規化、発話分析、グルーピング、営業スコア、勝敗要因、ダッシュボード集計
 - `POST /api/data/upload`、`GET /api/jobs/{job_id}`、`GET /api/dashboard`
 - `GET /api/insights/voice-ranking`、`GET /api/insights/sales-score`、`GET /api/insights/win-loss`
 - `POST /api/workflows`、`POST /api/agent/chat`、`GET /api/agent/action-proposals`、`GET /api/agent/faq-gaps`
-- workflow 完了時の配信ペイロード生成と配信ログ保存（dashboard / webhook / email / CRM）
-- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、分析フィルタ、workflow 配信設定）
+- workflow 完了時の配信ペイロード生成と配信ログ保存（dashboard / webhook / email / ローカル・ダミーCRM）
+- Bearer認証付きHTTP POST、外部IDによる重複防止、PostgreSQL永続化を行うローカル・ダミーCRM API
+- frontend `/system14` 画面（データ取込、ダッシュボード、分析、エージェント、ダミーCRM、分析フィルタ、workflow 配信設定）
 
 **MVP 外として残るもの**
 
 - 音声・動画の本格的な話者分離と timestamp 保存
 - LLM / LangGraph による本格分析パイプライン
 - RAG / 過去対応履歴 / FAQ 連携
-- Webhook / email の運用設定整備と CRM connector の本格実装
+- Webhook / email の運用設定整備とSalesforce等の実CRM connector
 - リスク検知の即時通知
 - 大量データ性能検証
 
@@ -183,7 +184,8 @@ MVP外として残る項目は、本節を正として管理する。
 
 - 会話内容の自動要約・メモ生成
 - 次アクション・タスクの自動抽出
-- CRM（Salesforceなど）への自動入力
+- ローカル・ダミーCRMへの自動入力
+- Salesforceなどの実CRMへの自動入力は、接続環境が提供された場合の拡張対象とする
 - フォローアップメール文案の自動生成
 
 ### 8. ワークフロー設定機能（ノーコード）
@@ -211,7 +213,8 @@ MVP外として残る項目は、本節を正として管理する。
 - Webhook（Slack等）
 - メール
 - ダッシュボード表示
-- CRM連携
+- ローカル・ダミーCRM連携
+- 実CRM連携（接続環境が提供された場合）
 
 ### 10. リスク検知・アラート機能
 コンプライアンスリスク・緊急対応が必要な案件を自動検知して通知する。
@@ -272,7 +275,7 @@ MVP外として残る項目は、本節を正として管理する。
 |------|------|
 | 処理速度 | アップロード要求をサーバープロセス共通の先入れ順で1件ずつ処理し、結果を保存してから応答する |
 | 対応データ量 | 月次数万件のデータに対応 |
-| セキュリティ | 顧客情報・通話内容は暗号化して保存。外部送信なし |
+| セキュリティ | 顧客情報・通話内容はローカルDBへ保存する。外部送信は利用者が明示的に設定したWebhook・メールに限定し、ダミーCRMはループバック接続だけを使用する |
 | 対応言語 | 日本語・英語 |
 | 動作環境 | ローカル環境（完全オフライン）またはオンプレミス |
 
@@ -303,7 +306,7 @@ MVP外として残る項目は、本節を正として管理する。
     ワークフローエンジン
     （部門別配信設定に基づいて配信）
         ↓
-    Webhook / メール / CRM連携 / ダッシュボード
+    Webhook / メール / ローカル・ダミーCRM / ダッシュボード
 ```
 
 ---
@@ -512,6 +515,20 @@ limit:    取得件数（デフォルト: 10）
 
 ---
 
+### POST /dummy-crm/activities
+ローカル・ダミーCRMへ顧客対応履歴を登録する。`Authorization: Bearer <token>`を必須とし、同じ`external_id`の再送では新規行を増やさず既存行を更新する。
+
+### GET /dummy-crm/activities
+ローカル・ダミーCRMへ登録済みの顧客対応履歴を更新日時の降順で取得する。
+
+### GET /dummy-crm/activities/{activity_id}
+顧客対応履歴を1件取得する。
+
+### PATCH /dummy-crm/activities/{activity_id}
+担当者、次アクション、緊急度、対応状態などを更新する。
+
+---
+
 ## データモデル
 
 ### system14_data_jobsテーブル
@@ -605,6 +622,27 @@ CREATE TABLE system14_workflows (
     filters         JSONB,
     delivery        JSONB,
     is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+```
+
+### system14_dummy_crm_activitiesテーブル
+```sql
+CREATE TABLE system14_dummy_crm_activities (
+    id              SERIAL PRIMARY KEY,
+    external_id     VARCHAR(120) UNIQUE NOT NULL,
+    customer_id     VARCHAR(100),
+    customer_name   VARCHAR(200),
+    contact_type    VARCHAR(50) NOT NULL,
+    summary         TEXT NOT NULL,
+    sentiment       VARCHAR(20),
+    urgency         VARCHAR(20) NOT NULL,
+    assigned_to     VARCHAR(100),
+    next_action     TEXT,
+    follow_up_at    TIMESTAMP,
+    status          VARCHAR(20) NOT NULL,
+    source_payload  JSONB NOT NULL,
     created_at      TIMESTAMP DEFAULT NOW(),
     updated_at      TIMESTAMP DEFAULT NOW()
 );
@@ -733,7 +771,8 @@ CREATE TABLE system14_workflows (
 | DB | PostgreSQL |
 | ORM | SQLAlchemy |
 | 取込実行 | FastAPIリクエスト内でファイルを1件ずつ順次処理 |
-| CRM連携 | httpx（REST API） |
+| ローカル・ダミーCRM連携 | httpx（Bearer認証付きREST API）、FastAPI、PostgreSQL |
+| 実CRM連携 | 接続環境が提供された場合にhttpxコネクターを追加する |
 | トレース・ログ | 共通監査ログ、ジョブ、ワークフロー配信ログ |
 
 ---

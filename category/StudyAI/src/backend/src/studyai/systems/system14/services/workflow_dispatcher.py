@@ -157,6 +157,8 @@ class WorkflowDispatcher:
             return await self._deliver_webhook(delivery, payload)
         if method == "email":
             return await self._deliver_email(delivery, payload)
+        if method == "crm_dummy":
+            return await self._deliver_dummy_crm(payload)
         if method == "crm":
             return (
                 "failed",
@@ -164,6 +166,48 @@ class WorkflowDispatcher:
                 "CRM delivery is not implemented. Configure a CRM connector before enabling this method.",
             )
         return ("failed", {}, f"Unsupported delivery method: {method}")
+
+    async def _deliver_dummy_crm(
+        self,
+        payload: dict[str, Any],
+    ) -> tuple[str, dict[str, Any], str | None]:
+        endpoint = os.environ.get("SYSTEM14_DUMMY_CRM_ENDPOINT", "").strip()
+        token = os.environ.get("SYSTEM14_DUMMY_CRM_TOKEN", "").strip()
+        if not endpoint:
+            return (
+                "failed",
+                {"message": "dummy_crm_endpoint_not_configured"},
+                "SYSTEM14_DUMMY_CRM_ENDPOINT is not configured.",
+            )
+        if not token:
+            return (
+                "failed",
+                {"message": "dummy_crm_token_not_configured"},
+                "SYSTEM14_DUMMY_CRM_TOKEN is not configured.",
+            )
+
+        request_body = self._build_dummy_crm_activity(payload)
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": request_body["external_id"],
+        }
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(endpoint, json=request_body, headers=headers)
+        try:
+            response_body = response.json()
+        except ValueError:
+            response_body = {"body": response.text[:1000]}
+        response_payload = {
+            "status_code": response.status_code,
+            "body": response_body,
+        }
+        if response.status_code >= 400:
+            return (
+                "failed",
+                response_payload,
+                f"Dummy CRM returned HTTP {response.status_code}.",
+            )
+        return ("success", response_payload, None)
 
     async def _deliver_webhook(
         self,
@@ -232,10 +276,94 @@ class WorkflowDispatcher:
         method = str(delivery.get("method") or "dashboard")
         if method in {"webhook", "crm"}:
             return delivery.get("endpoint")
+        if method == "crm_dummy":
+            return os.environ.get("SYSTEM14_DUMMY_CRM_ENDPOINT")
         if method == "email":
             recipients = delivery.get("recipients") or []
             return ",".join(str(item) for item in recipients)
         return "dashboard"
+
+    @staticmethod
+    def _build_dummy_crm_activity(payload: dict[str, Any]) -> dict[str, Any]:
+        workflow = payload.get("workflow") or {}
+        filters = payload.get("filters") or {}
+        output = payload.get("output") or {}
+        output_type = str(output.get("type") or "insight_delivery")
+        output_data = output.get("data") or {}
+        workflow_id = workflow.get("id")
+        return {
+            "external_id": f"system14-workflow-{workflow_id}",
+            "customer_id": WorkflowDispatcher._clean(filters.get("customer_id")),
+            "customer_name": WorkflowDispatcher._clean(filters.get("customer_name")),
+            "contact_type": output_type,
+            "summary": WorkflowDispatcher._summarize_dummy_crm_output(output_type, output_data),
+            "sentiment": WorkflowDispatcher._clean(filters.get("sentiment")),
+            "urgency": WorkflowDispatcher._normalize_urgency(filters.get("urgency")),
+            "assigned_to": WorkflowDispatcher._clean(
+                filters.get("assigned_to") or filters.get("staff_id") or filters.get("staffId")
+            ),
+            "next_action": WorkflowDispatcher._dummy_crm_next_action(output_type, output_data),
+            "follow_up_at": filters.get("follow_up_at"),
+            "status": "open",
+            "source_payload": payload,
+        }
+
+    @staticmethod
+    def _summarize_dummy_crm_output(output_type: str, data: dict[str, Any]) -> str:
+        if output_type == "voice_ranking":
+            ranking = data.get("ranking") or []
+            if ranking:
+                top = ranking[0]
+                return f"顧客の声の最多項目は「{top.get('group_label', '未分類')}」で{top.get('count', 0)}件です。"
+            return "条件に一致する顧客の声はありません。"
+        if output_type == "sales_score":
+            scores = data.get("scores") or []
+            if scores:
+                top = scores[0]
+                staff = top.get("staff_name") or top.get("staff_id") or "担当者"
+                return f"{staff}の営業スコアは{top.get('overall_score', 0)}点です。"
+            return "条件に一致する営業スコアはありません。"
+        if output_type == "win_loss":
+            rows = data.get("win_loss") or []
+            if rows:
+                top = rows[0]
+                return f"主要な受注・失注要因は「{top.get('reason', '未分類')}」で{top.get('count', 0)}件です。"
+            return "条件に一致する受注・失注要因はありません。"
+        if output_type == "action_proposals":
+            proposals = data.get("proposals") or []
+            if proposals:
+                return str(proposals[0].get("issue") or "改善提案を登録しました。")
+            return "条件に一致する改善提案はありません。"
+        if output_type == "faq_gaps":
+            gaps = data.get("faq_gaps") or []
+            if gaps:
+                return f"FAQ不足候補「{gaps[0].get('call_reason', '未分類')}」を登録しました。"
+            return "条件に一致するFAQ不足候補はありません。"
+        cards = data.get("cards") or []
+        if cards:
+            values = [f"{item.get('label', item.get('key', '項目'))}={item.get('value', 0)}" for item in cards[:3]]
+            return "ダッシュボード集計: " + "、".join(values)
+        return "System14の分析結果を登録しました。"
+
+    @staticmethod
+    def _dummy_crm_next_action(output_type: str, data: dict[str, Any]) -> str:
+        if output_type == "action_proposals":
+            proposals = data.get("proposals") or []
+            if proposals:
+                return str(proposals[0].get("recommended_action") or "代表発言を確認する")
+        if output_type == "faq_gaps":
+            gaps = data.get("faq_gaps") or []
+            if gaps:
+                suggested = gaps[0].get("suggested_faq") or {}
+                return f"FAQ案を確認する: {suggested.get('question', '質問未設定')}"
+        return "分析結果の根拠を確認し、担当部門の対応方針を決定する"
+
+    @staticmethod
+    def _normalize_urgency(value: Any) -> str:
+        normalized = WorkflowDispatcher._clean(value)
+        if normalized in {"low", "normal", "high"}:
+            return normalized
+        return "normal"
 
     @staticmethod
     def _normalize_filters(filters: dict[str, Any]) -> dict[str, Any]:

@@ -10,9 +10,17 @@ class _FakeHttpResponse:
     status_code = 202
     text = "accepted"
 
+    @staticmethod
+    def json() -> dict:
+        return {
+            "created": True,
+            "activity": {"id": 1, "external_id": "system14-workflow-42"},
+        }
+
 
 class _FakeAsyncClient:
     received: list[dict] = []
+    received_headers: list[dict | None] = []
 
     def __init__(self, **_kwargs: object) -> None:
         pass
@@ -23,8 +31,9 @@ class _FakeAsyncClient:
     async def __aexit__(self, *_args: object) -> None:
         return None
 
-    async def post(self, _endpoint: str, *, json: dict) -> _FakeHttpResponse:
+    async def post(self, _endpoint: str, *, json: dict, headers: dict | None = None) -> _FakeHttpResponse:
         self.__class__.received.append(json)
+        self.__class__.received_headers.append(headers)
         return _FakeHttpResponse()
 
 
@@ -82,6 +91,7 @@ def test_workflow_dispatcher_dashboard_delivery_succeeds() -> None:
 
 def test_workflow_dispatcher_posts_payload_to_webhook(monkeypatch) -> None:
     _FakeAsyncClient.received.clear()
+    _FakeAsyncClient.received_headers.clear()
     monkeypatch.setattr(workflow_module.httpx, "AsyncClient", _FakeAsyncClient)
     payload = {"workflow": {"name": "顧客の声を配信"}, "output": {"type": "voice_ranking"}}
 
@@ -97,6 +107,80 @@ def test_workflow_dispatcher_posts_payload_to_webhook(monkeypatch) -> None:
     assert response == {"status_code": 202, "body": "accepted"}
     assert error_message is None
     assert _FakeAsyncClient.received == [payload]
+
+
+def test_workflow_dispatcher_posts_activity_to_dummy_crm(monkeypatch) -> None:
+    _FakeAsyncClient.received.clear()
+    _FakeAsyncClient.received_headers.clear()
+    monkeypatch.setattr(workflow_module.httpx, "AsyncClient", _FakeAsyncClient)
+    monkeypatch.setenv(
+        "SYSTEM14_DUMMY_CRM_ENDPOINT",
+        "http://127.0.0.1:8014/api/dummy-crm/activities",
+    )
+    monkeypatch.setenv("SYSTEM14_DUMMY_CRM_TOKEN", "local-test-token")
+    payload = {
+        "workflow": {"id": 42, "name": "顧客の声をCRMへ登録"},
+        "filters": {
+            "customer_id": "customer-001",
+            "customer_name": "株式会社サンプル",
+            "staff_id": "staff-001",
+            "sentiment": "negative",
+            "urgency": "high",
+        },
+        "output": {
+            "type": "voice_ranking",
+            "data": {
+                "ranking": [{"group_label": "配送遅延", "count": 3}],
+            },
+        },
+    }
+
+    status, response, error_message = asyncio.run(
+        WorkflowDispatcher()._deliver("crm_dummy", {"method": "crm_dummy"}, payload)
+    )
+
+    assert status == "success"
+    assert response["status_code"] == 202
+    assert error_message is None
+    assert _FakeAsyncClient.received == [
+        {
+            "external_id": "system14-workflow-42",
+            "customer_id": "customer-001",
+            "customer_name": "株式会社サンプル",
+            "contact_type": "voice_ranking",
+            "summary": "顧客の声の最多項目は「配送遅延」で3件です。",
+            "sentiment": "negative",
+            "urgency": "high",
+            "assigned_to": "staff-001",
+            "next_action": "分析結果の根拠を確認し、担当部門の対応方針を決定する",
+            "follow_up_at": None,
+            "status": "open",
+            "source_payload": payload,
+        }
+    ]
+    assert _FakeAsyncClient.received_headers == [
+        {
+            "Authorization": "Bearer local-test-token",
+            "Idempotency-Key": "system14-workflow-42",
+        }
+    ]
+
+
+def test_workflow_dispatcher_dummy_crm_requires_configuration(monkeypatch) -> None:
+    monkeypatch.delenv("SYSTEM14_DUMMY_CRM_ENDPOINT", raising=False)
+    monkeypatch.delenv("SYSTEM14_DUMMY_CRM_TOKEN", raising=False)
+
+    status, response, error_message = asyncio.run(
+        WorkflowDispatcher()._deliver(
+            "crm_dummy",
+            {"method": "crm_dummy"},
+            {"workflow": {"id": 1}, "filters": {}, "output": {}},
+        )
+    )
+
+    assert status == "failed"
+    assert response["message"] == "dummy_crm_endpoint_not_configured"
+    assert error_message == "SYSTEM14_DUMMY_CRM_ENDPOINT is not configured."
 
 
 def test_workflow_dispatcher_email_delivery_skips_without_smtp(monkeypatch) -> None:

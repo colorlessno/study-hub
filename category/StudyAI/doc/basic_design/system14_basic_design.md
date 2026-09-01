@@ -18,7 +18,8 @@ FastAPI
     ├─ GET /dashboard
     ├─ POST /agent/chat
     ├─ GET /agent/action-proposals
-    └─ GET /agent/faq-gaps
+    ├─ GET /agent/faq-gaps
+    └─ POST /dummy-crm/activities、GET /dummy-crm/activities、PATCH /dummy-crm/activities/{id}
     ↓
 InsightPipelineOrchestrator
     ├─ IngestionJobManager
@@ -28,9 +29,10 @@ InsightPipelineOrchestrator
     ├─ SalesScoringService
     ├─ InsightGenerator
     ├─ WorkflowDispatcher
-    └─ AgentChatService
+    ├─ AgentChatService
+    └─ DummyCrmService
     ↓
-PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores, workflows, workflow_delivery_logs）
+PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores, workflows, workflow_delivery_logs, dummy_crm_activities）
 ```
 
 ### 1.2 コンポーネント一覧
@@ -45,18 +47,19 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | SalesScoringService | 営業トーク評価 |
 | WorkflowDispatcher | workflow 定義保存、配信ペイロード生成、配信結果ログ保存 |
 | AgentChatService | 分析済みデータへの自然言語Q&A |
+| DummyCrmService | Bearer認証済みの顧客対応履歴を外部IDで重複防止し、ローカルDBへ保存・一覧・更新する |
 
-### 1.3 現行実装状況（2026-04-22）
+### 1.3 現行実装状況（2026-09-01）
 | 項目 | 現状 |
 |---|---|
 | Backend | `src/backend/src/studyai/systems/system14/` に実装済み |
 | Entrypoint | `src/backend/src/studyai/system14_main.py` |
 | API router | `src/backend/src/studyai/systems/system14/api/router.py` |
-| DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`, `src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py` |
-| DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers` |
+| DB migration | `src/backend/alembic/versions/20260421_0016_init_system14.py`, `src/backend/alembic/versions/20260422_0017_add_system14_workflow_delivery_logs.py`, `src/backend/alembic/versions/20260901_0019_add_system14_dummy_crm.py` |
+| DB tables | `system14_data_jobs`, `system14_conversations`, `system14_utterances`, `system14_insight_groups`, `system14_sales_scores`, `system14_workflows`, `system14_workflow_delivery_logs`, `system14_agent_answers`, `system14_dummy_crm_activities` |
 | Docker | `system14` サービス、ホストポート `18014` |
 | Frontend | `src/frontend/src/pages/System14Page.tsx`、route `/system14` |
-| 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent 表示、workflow 配信ログ保存を確認対象 |
+| 検証 | Docker migration、API CSV upload、UI upload、dashboard / analysis / agent / dummy CRM 表示、workflow 配信ログ・ダミーCRM永続化を確認対象 |
 
 ---
 
@@ -81,7 +84,9 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 - workflow は `data_sources / analysis_steps / output_type / delivery` を保持する
 - 配信前に部門別の出力粒度へ整形する
 - workflow 作成時に指定された `output_type` の分析ペイロードを生成し、配信結果を `system14_workflow_delivery_logs` に保存する
-- `dashboard` はログ保存で成功扱い、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信、`crm` は connector 未実装で明示的に失敗ログとして扱う
+- `dashboard` はログ保存で成功扱い、`webhook` は HTTP POST、`email` は SMTP 設定時のみ送信する
+- `crm_dummy` はBearer認証付きHTTP POSTで同一バックエンド内のダミーCRM APIへ順次送信し、外部IDで重複を防止してDBへ保存する
+- `crm` は実CRM接続環境が提供されていないため、明示的に接続未設定の失敗ログとして扱う
 
 ---
 
@@ -101,6 +106,10 @@ PostgreSQL（data_jobs, conversations, utterances, insight_groups, sales_scores,
 | POST | `/agent/chat` | 分析AIチャット | 同期 |
 | GET | `/agent/action-proposals` | 改善提案 | 同期 |
 | GET | `/agent/faq-gaps` | 不足FAQ検出 | 同期 |
+| POST | `/dummy-crm/activities` | Bearer認証、顧客対応履歴の登録・外部IDによる更新 | 同期 |
+| GET | `/dummy-crm/activities` | 顧客対応履歴一覧 | 同期 |
+| GET | `/dummy-crm/activities/{activity_id}` | 顧客対応履歴詳細 | 同期 |
+| PATCH | `/dummy-crm/activities/{activity_id}` | 対応状態・担当・次アクション更新 | 同期 |
 
 ---
 
@@ -138,6 +147,24 @@ workflow 条件に応じて通知
 根拠付き回答生成
 ```
 
+### 4.3 ローカル・ダミーCRM配信
+
+```
+workflow作成
+  ↓
+配信用分析ペイロード生成
+  ↓
+ダミーCRM登録データへ変換
+  ↓
+Bearer認証付きHTTP POST
+  ↓
+external_idで既存レコードを確認
+  ↓
+新規登録または更新
+  ↓
+顧客対応履歴とworkflow配信結果をDB保存
+```
+
 ---
 
 ## 5. データ設計
@@ -151,6 +178,7 @@ workflow 条件に応じて通知
 | `sales_scores` | conversation ごとの営業スコア |
 | `workflows` | 配信条件と配信先 |
 | `workflow_delivery_logs` | 配信方法、宛先、payload、response、成功/失敗/skip 状態 |
+| `dummy_crm_activities` | 顧客、対応要約、緊急度、担当、次アクション、対応状態、元の分析payload |
 
 ---
 
@@ -214,13 +242,14 @@ workflow 条件に応じて通知
 | ダッシュボードタブ | 集約カード、顧客の声ランキング、直近ジョブを表示する | 実装済み |
 | 分析タブ | 顧客の声ランキング、営業スコア、勝敗要因を表示する | 実装済み |
 | エージェントタブ | 分析AIチャットとワークフロー定義保存・配信実行を行う | 実装済み |
+| ダミーCRMタブ | HTTP送信された顧客対応履歴の一覧と対応状態更新を行う | 実装済み |
 
 ## 11. 権限制御
 
 | ロール | 利用可能画面 | 主要操作 |
 |---|---|---|
 | 分析担当者 | データ取込タブ／ダッシュボードタブ／分析タブ | データ投入, 分析確認 |
-| 管理者 | 全タブ | 配信設定／深掘り分析 |
+| 管理者 | 全タブ | 配信設定／深掘り分析／ダミーCRM対応状態更新 |
 | 閲覧者 | ダッシュボードタブ／分析タブ | 結果閲覧 |
 
 ## 12. 主要導線
@@ -228,6 +257,7 @@ workflow 条件に応じて通知
 - 投入導線: データ取込タブからジョブを起動し、ダッシュボードタブで結果を確認する。
 - 分析導線: 分析タブでランキング、営業スコア、勝敗要因を確認する。
 - 深掘り導線: エージェントタブで配信設定と分析AI質問を実施する。
+- CRM導線: エージェントタブで`crm_dummy`配信を実行し、ダミーCRMタブで登録結果と対応状態を確認する。
 
 ## 13. 画面遷移図
 
@@ -236,6 +266,8 @@ flowchart TD
     A[データ取込タブ] --> B[ダッシュボードタブ]
     B --> C[分析タブ]
     C --> D[エージェントタブ]
+    D --> E[ダミーCRMタブ]
+    E --> D
     D --> B
     B --> A
 ```
@@ -243,6 +275,7 @@ flowchart TD
 - 新規データ投入後は `ダッシュボードタブ` で分析結果を確認する。
 - 詳細指定は `分析タブ` で確認する。
 - 配信条件調整や深掘り質問は `エージェントタブ` へ遷移する。
+- ローカルCRM配信後は `ダミーCRMタブ` で登録結果を確認する。
 
 ## 14. 画面項目定義
 ### 14.1 データ取込画面
@@ -272,15 +305,24 @@ flowchart TD
 | `action_proposals` | 改善提案 | 表 | GET `/agent/action-proposals` |
 | `faq_gaps` | FAQ不足一覧 | 表 | GET `/agent/faq-gaps` |
 
-備考: `action_proposals` と `faq_gaps` は Backend API 実装済み。専用 UI 表示は残作業。
+備考: `action_proposals` と `faq_gaps` は Backend API と専用 UI を実装済み。
 
 ### 14.4 エージェントタブ
 | 項目ID | 項目名 | UI種別 | 備考 |
 |---|---|---|---|
 | `workflow_editor` | 配信条件設定 | フォーム | POST `/workflows` |
-| `delivery_targets` | 配信先 | 複数入力 | dashboard / Webhook / メール / CRM を指定可能、CRM は connector 未実装で明示する |
+| `delivery_targets` | 配信先 | 複数入力 | dashboard / Webhook / メール / ローカル・ダミーCRM / 実CRMを指定可能。実CRMは接続先未提供を明示する |
 | `agent_question` | 分析AI質問 | テキストエリア | POST `/agent/chat` |
 | `agent_answer` | 分析AI回答 | テキスト表示 | 根拠付き回答 |
+
+### 14.5 ダミーCRMタブ
+| 項目ID | 項目名 | UI種別 | 備考 |
+|---|---|---|---|
+| `load_dummy_crm` | 登録内容を更新 | ボタン | GET `/dummy-crm/activities` |
+| `dummy_crm_activities` | 顧客対応履歴 | カード一覧 | 顧客、要約、緊急度、担当、次アクションを表示 |
+| `crm_status_open` | 未対応にする | ボタン | PATCH `/dummy-crm/activities/{activity_id}` |
+| `crm_status_in_progress` | 対応中にする | ボタン | PATCH `/dummy-crm/activities/{activity_id}` |
+| `crm_status_completed` | 完了にする | ボタン | PATCH `/dummy-crm/activities/{activity_id}` |
 
 ## 15. シーケンス図
 ### 15.1 データ取込ジョブ

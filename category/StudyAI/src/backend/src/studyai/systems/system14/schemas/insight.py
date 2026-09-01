@@ -3,12 +3,14 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 DataType = Literal["audio", "video", "chat", "email", "call_log"]
 Sentiment = Literal["positive", "negative", "neutral"]
 JobStatus = Literal["queued", "running", "completed", "failed"]
-DeliveryMethod = Literal["webhook", "email", "crm", "dashboard"]
+DeliveryMethod = Literal["webhook", "email", "crm", "crm_dummy", "dashboard"]
+DummyCrmActivityStatus = Literal["open", "in_progress", "completed"]
+DummyCrmUrgency = Literal["low", "normal", "high"]
 
 
 class UploadAcceptedResponse(BaseModel):
@@ -145,6 +147,69 @@ class WorkflowCreateResponse(BaseModel):
     is_active: bool
     created_at: datetime
     delivery_result: WorkflowDeliveryResult | None = None
+
+
+class DummyCrmActivityCreate(BaseModel):
+    external_id: str = Field(min_length=1, max_length=120)
+    customer_id: str | None = Field(default=None, max_length=100)
+    customer_name: str | None = Field(default=None, max_length=200)
+    contact_type: str = Field(default="insight_delivery", min_length=1, max_length=50)
+    summary: str = Field(min_length=1, max_length=5000)
+    sentiment: Sentiment | None = None
+    urgency: DummyCrmUrgency = "normal"
+    assigned_to: str | None = Field(default=None, max_length=100)
+    next_action: str | None = Field(default=None, max_length=5000)
+    follow_up_at: datetime | None = None
+    status: DummyCrmActivityStatus = "open"
+    source_payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class DummyCrmActivityUpdate(BaseModel):
+    customer_id: str | None = Field(default=None, max_length=100)
+    customer_name: str | None = Field(default=None, max_length=200)
+    contact_type: str | None = Field(default=None, min_length=1, max_length=50)
+    summary: str | None = Field(default=None, min_length=1, max_length=5000)
+    sentiment: Sentiment | None = None
+    urgency: DummyCrmUrgency | None = None
+    assigned_to: str | None = Field(default=None, max_length=100)
+    next_action: str | None = Field(default=None, max_length=5000)
+    follow_up_at: datetime | None = None
+    status: DummyCrmActivityStatus | None = None
+
+    @model_validator(mode="after")
+    def require_update_field(self) -> "DummyCrmActivityUpdate":
+        if not self.model_fields_set:
+            raise ValueError("at least one update field is required")
+        return self
+
+
+class DummyCrmActivityResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    external_id: str
+    customer_id: str | None = None
+    customer_name: str | None = None
+    contact_type: str
+    summary: str
+    sentiment: str | None = None
+    urgency: str
+    assigned_to: str | None = None
+    next_action: str | None = None
+    follow_up_at: datetime | None = None
+    status: str
+    source_payload: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+    updated_at: datetime
+
+
+class DummyCrmUpsertResponse(BaseModel):
+    created: bool
+    activity: DummyCrmActivityResponse
+
+
+class DummyCrmActivityListResponse(BaseModel):
+    activities: list[DummyCrmActivityResponse] = Field(default_factory=list)
 
 
 class AgentChatRequest(BaseModel):

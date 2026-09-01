@@ -179,3 +179,28 @@ class System14AgentAnswer(Base):
     evidence: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     related_links: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+
+
+class System14DummyCrmActivity(Base):
+    __tablename__ = "system14_dummy_crm_activities"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    external_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    customer_id: Mapped[str | None] = mapped_column(String(100))
+    customer_name: Mapped[str | None] = mapped_column(String(200))
+    contact_type: Mapped[str] = mapped_column(String(50), nullable=False, default="insight_delivery")
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    sentiment: Mapped[str | None] = mapped_column(String(20))
+    urgency: Mapped[str] = mapped_column(String(20), nullable=False, default="normal")
+    assigned_to: Mapped[str | None] = mapped_column(String(100))
+    next_action: Mapped[str | None] = mapped_column(Text)
+    follow_up_at: Mapped[datetime | None] = mapped_column(DateTime)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
+    source_payload: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

@@ -3,7 +3,7 @@ import { createSystemClient } from '../api/client'
 
 const client = createSystemClient('system14')
 
-type Screen = 'upload' | 'dashboard' | 'analysis' | 'agent'
+type Screen = 'upload' | 'dashboard' | 'analysis' | 'agent' | 'crm'
 
 interface JobStatus {
   job_id: string
@@ -121,6 +121,27 @@ interface AgentAnswer {
   related_links: { label: string; endpoint: string }[]
 }
 
+interface DummyCrmActivity {
+  id: number
+  external_id: string
+  customer_id?: string | null
+  customer_name?: string | null
+  contact_type: string
+  summary: string
+  sentiment?: string | null
+  urgency: string
+  assigned_to?: string | null
+  next_action?: string | null
+  follow_up_at?: string | null
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+interface DummyCrmActivityListResponse {
+  activities: DummyCrmActivity[]
+}
+
 interface AnalysisFilters {
   fromDate: string
   toDate: string
@@ -231,7 +252,20 @@ const WORKFLOW_DELIVERY_LABELS: Record<string, string> = {
   dashboard: 'ダッシュボードに保存',
   webhook: 'Webhookへ送信',
   email: 'メール送信',
-  crm: 'CRM連携（コネクター未実装）',
+  crm_dummy: 'ローカル・ダミーCRMへ送信',
+  crm: '実CRM連携（接続先未提供）',
+}
+
+const CRM_STATUS_LABELS: Record<string, string> = {
+  open: '未対応',
+  in_progress: '対応中',
+  completed: '完了',
+}
+
+const CRM_URGENCY_LABELS: Record<string, string> = {
+  low: '低',
+  normal: '通常',
+  high: '高',
 }
 
 const SAMPLE_ROWS = [
@@ -259,6 +293,12 @@ function getErrorMessage(error: unknown, fallback: string) {
 function labelOf(labels: Record<string, string>, value?: string | null) {
   if (!value) return '-'
   return labels[value] ?? value
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return '-'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('ja-JP')
 }
 
 const emptyFilters: AnalysisFilters = {
@@ -362,6 +402,12 @@ export default function System14Page() {
   const [workflowEndpoint, setWorkflowEndpoint] = useState('')
   const [workflowRecipients, setWorkflowRecipients] = useState('')
   const [workflowResult, setWorkflowResult] = useState('')
+  const [crmCustomerId, setCrmCustomerId] = useState('customer-001')
+  const [crmCustomerName, setCrmCustomerName] = useState('株式会社サンプル')
+  const [crmAssignedTo, setCrmAssignedTo] = useState('staff-001')
+  const [crmUrgency, setCrmUrgency] = useState('normal')
+  const [crmActivities, setCrmActivities] = useState<DummyCrmActivity[]>([])
+  const [crmMessage, setCrmMessage] = useState('')
 
   async function uploadFile(targetFile: File, targetDataType = dataType, targetSource = source, targetMetadata = metadata) {
     setUploading(true)
@@ -487,13 +533,24 @@ export default function System14Page() {
         .split(',')
         .map(item => item.trim())
         .filter(Boolean)
+      const workflowFilters = {
+        ...buildFilterPayload(filters),
+        ...(workflowDeliveryMethod === 'crm_dummy'
+          ? {
+              customer_id: cleanValue(crmCustomerId),
+              customer_name: cleanValue(crmCustomerName),
+              assigned_to: cleanValue(crmAssignedTo),
+              urgency: crmUrgency,
+            }
+          : {}),
+      }
       const res = await client.post('/workflows', {
         name: workflowName,
         trigger: workflowTrigger,
         data_sources: ['chat_support', 'callcenter'],
         analysis_steps: ['sentiment', 'topic_extraction', 'grouping', 'ranking'],
         output_type: workflowOutputType,
-        filters: buildFilterPayload(filters),
+        filters: workflowFilters,
         delivery: {
           method: workflowDeliveryMethod,
           endpoint: workflowEndpoint.trim() || undefined,
@@ -505,8 +562,33 @@ export default function System14Page() {
         ? ` / 実行結果=${labelOf({ success: '成功', skipped: '見送り', failed: '失敗' }, delivery.status)}${delivery.error_message ? ` (${delivery.error_message})` : ''}`
         : ''
       setWorkflowResult(`ワークフローID ${res.data.workflow_id} を保存しました${deliveryMessage}`)
+      if (workflowDeliveryMethod === 'crm_dummy' && delivery?.status === 'success') {
+        await loadDummyCrm()
+      }
     } catch (error) {
       setWorkflowResult(getErrorMessage(error, 'ワークフロー保存に失敗しました'))
+    }
+  }
+
+  async function loadDummyCrm() {
+    setCrmMessage('ダミーCRMを更新中...')
+    try {
+      const res = await client.get<DummyCrmActivityListResponse>('/dummy-crm/activities')
+      setCrmActivities(res.data.activities)
+      setCrmMessage(`登録済みの顧客対応履歴を${res.data.activities.length}件取得しました。`)
+    } catch (error) {
+      setCrmMessage(getErrorMessage(error, 'ダミーCRMの取得に失敗しました'))
+    }
+  }
+
+  async function updateDummyCrmStatus(activityId: number, status: string) {
+    setCrmMessage('対応状態を保存中...')
+    try {
+      const res = await client.patch<DummyCrmActivity>(`/dummy-crm/activities/${activityId}`, { status })
+      setCrmActivities(current => current.map(item => item.id === activityId ? res.data : item))
+      setCrmMessage(`対応状態を「${labelOf(CRM_STATUS_LABELS, status)}」へ更新しました。`)
+    } catch (error) {
+      setCrmMessage(getErrorMessage(error, '対応状態の更新に失敗しました'))
     }
   }
 
@@ -523,6 +605,7 @@ export default function System14Page() {
           ['dashboard', 'ダッシュボード'],
           ['analysis', '分析'],
           ['agent', 'エージェント'],
+          ['crm', 'ダミーCRM'],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -839,6 +922,31 @@ export default function System14Page() {
                 <input data-testid="workflow-recipients" style={field()} value={workflowRecipients} onChange={e => setWorkflowRecipients(e.target.value)} placeholder="team@example.com, manager@example.com" />
               </div>
             )}
+            {workflowDeliveryMethod === 'crm_dummy' && (
+              <div style={{ ...card(), background: COLOR.band, marginTop: '0.8rem', marginBottom: 0 }}>
+                <strong>ダミーCRM登録情報</strong>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem', marginTop: '0.8rem' }}>
+                  <div>
+                    <label>顧客ID</label>
+                    <input data-testid="crm-customer-id" style={field()} value={crmCustomerId} onChange={e => setCrmCustomerId(e.target.value)} />
+                  </div>
+                  <div>
+                    <label>顧客名</label>
+                    <input data-testid="crm-customer-name" style={field()} value={crmCustomerName} onChange={e => setCrmCustomerName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label>担当者</label>
+                    <input data-testid="crm-assigned-to" style={field()} value={crmAssignedTo} onChange={e => setCrmAssignedTo(e.target.value)} />
+                  </div>
+                  <div>
+                    <label>緊急度</label>
+                    <select data-testid="crm-urgency" style={field()} value={crmUrgency} onChange={e => setCrmUrgency(e.target.value)}>
+                      {Object.entries(CRM_URGENCY_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
             <button data-testid="save-workflow" style={{ ...button(Boolean(workflowName.trim())), marginTop: 8 }} disabled={!workflowName.trim()} onClick={createWorkflow}>
               保存して実行する
             </button>
@@ -846,10 +954,64 @@ export default function System14Page() {
               {workflowDeliveryMethod === 'dashboard' && '配信内容と実行結果をStudyAIのDBに保存します。'}
               {workflowDeliveryMethod === 'webhook' && '保存時にバックエンドから指定したURLへHTTP POSTし、実行結果をDBに記録します。'}
               {workflowDeliveryMethod === 'email' && '保存時にバックエンドから設定済みのSMTPサーバーへ送信し、実行結果をDBに記録します。'}
-              {workflowDeliveryMethod === 'crm' && 'CRMコネクターは未実装です。設定と未実装エラーを配信結果としてDBに記録します。'}
+              {workflowDeliveryMethod === 'crm_dummy' && 'バックエンドからローカル・ダミーCRM APIへBearer認証付きHTTP POSTを行い、顧客対応履歴と配信結果をDBに保存します。'}
+              {workflowDeliveryMethod === 'crm' && '実CRMの接続先は提供されていません。送信せず、接続未設定エラーを配信結果としてDBに記録します。'}
             </p>
             {workflowResult && <p data-testid="workflow-result" style={{ color: COLOR.muted }}>{workflowResult}</p>}
           </div>
+        </section>
+      )}
+
+      {screen === 'crm' && (
+        <section style={card()}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div>
+              <h3 style={{ margin: 0 }}>ローカル・ダミーCRM</h3>
+              <p style={{ color: COLOR.muted, marginBottom: 0, lineHeight: 1.6 }}>
+                ワークフローからHTTP送信された顧客対応履歴を表示します。Salesforce等の実CRMではありません。
+              </p>
+            </div>
+            <button data-testid="load-dummy-crm" style={button(true)} onClick={loadDummyCrm}>登録内容を更新</button>
+          </div>
+          {crmMessage && <p data-testid="crm-message" style={{ color: COLOR.muted }}>{crmMessage}</p>}
+          {crmActivities.length === 0 ? (
+            <EmptyText>登録された顧客対応履歴はありません。「エージェント」の配信方法で「ローカル・ダミーCRMへ送信」を実行してください。</EmptyText>
+          ) : (
+            <div style={{ display: 'grid', gap: '0.8rem', marginTop: '1rem' }}>
+              {crmActivities.map(activity => (
+                <article key={activity.id} data-testid="dummy-crm-activity" style={{ background: COLOR.bg, border: `1px solid ${COLOR.border}`, borderRadius: 8, padding: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                    <strong>{activity.customer_name || activity.customer_id || '顧客未指定'}</strong>
+                    <span style={{ color: activity.urgency === 'high' ? COLOR.danger : COLOR.muted }}>
+                      {labelOf(CRM_STATUS_LABELS, activity.status)} / 緊急度: {labelOf(CRM_URGENCY_LABELS, activity.urgency)}
+                    </span>
+                  </div>
+                  <p style={{ color: COLOR.text, lineHeight: 1.7 }}>{activity.summary}</p>
+                  <dl style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '0.35rem 0.8rem', color: COLOR.muted, fontSize: '0.84rem' }}>
+                    <dt>外部ID</dt><dd style={{ margin: 0 }}>{activity.external_id}</dd>
+                    <dt>登録種別</dt><dd style={{ margin: 0 }}>{labelOf(WORKFLOW_OUTPUT_LABELS, activity.contact_type)}</dd>
+                    <dt>担当者</dt><dd style={{ margin: 0 }}>{activity.assigned_to || '-'}</dd>
+                    <dt>次の対応</dt><dd style={{ margin: 0 }}>{activity.next_action || '-'}</dd>
+                    <dt>フォロー期限</dt><dd style={{ margin: 0 }}>{formatDateTime(activity.follow_up_at)}</dd>
+                    <dt>更新日時</dt><dd style={{ margin: 0 }}>{formatDateTime(activity.updated_at)}</dd>
+                  </dl>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: '0.8rem' }}>
+                    {Object.entries(CRM_STATUS_LABELS).map(([status, label]) => (
+                      <button
+                        key={status}
+                        data-testid={`crm-status-${status}`}
+                        style={button(activity.status !== status)}
+                        disabled={activity.status === status}
+                        onClick={() => updateDummyCrmStatus(activity.id, status)}
+                      >
+                        {label}にする
+                      </button>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       )}
     </div>
