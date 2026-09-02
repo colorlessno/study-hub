@@ -13,12 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY src/backend/pyproject.toml /app/backend/pyproject.toml
+RUN pip install --upgrade pip setuptools wheel
+RUN mkdir -p /app/backend/src/studyai \
+    && touch /app/backend/src/studyai/__init__.py \
+    && pip install -e .
+
 COPY src/backend/alembic.ini /app/backend/alembic.ini
 COPY src/backend/alembic /app/backend/alembic
 COPY src/backend/src /app/backend/src
-
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install -e .
 
 EXPOSE 8000
 
