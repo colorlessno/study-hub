@@ -9,7 +9,7 @@
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       TZ: Asia/Tokyo
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${STUDYAI_POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - studyai_postgres_data:/var/lib/postgresql/data
     healthcheck:

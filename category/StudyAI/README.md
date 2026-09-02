@@ -83,6 +83,7 @@ docker compose up -d
 
 - `db`（PostgreSQL + pgvector）→ `migrate`（Alembic マイグレーション）→ `backend` の順に起動します。
 - Composeで公開する画面・API・DBのポートは、ローカル教材環境だけから利用できるよう`127.0.0.1`へバインドします。
+- PostgreSQLのホスト側5432番を利用できない場合は、内部接続先を変えずに`STUDYAI_POSTGRES_HOST_PORT`だけを変更できます。Windowsのcmd.exeでは、たとえば`set STUDYAI_POSTGRES_HOST_PORT=15432`を実行してから`docker compose up -d`を実行します。
 - `.env.docker`では教材用のヘッダー認証を明示的に有効化し、フロントエンドが送る教材用ユーザーとロールは`STUDYAI_DEMO_USER_ID`、`STUDYAI_DEMO_USER_ROLES`で変更できます。この方式を外部公開環境の認証に使用せず、外部公開時は教材用認証を無効化してAPI Gateway等の実認証へ置き換えてください。
 - バックエンド単体やフロントエンドの起動方法は各 `src/backend` / `src/frontend` を参照してください。
 - AI を使うシステムは、OpenAI 互換のローカル LLM サーバ（LM Studio 等）を前提とします。
