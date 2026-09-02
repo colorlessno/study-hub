@@ -128,6 +128,21 @@ function validateJobOrder(name, lines) {
     return;
   }
 
+  for (let index = 0; index < jobs.length; index += 1) {
+    const current = jobs[index];
+    const nextIndex = jobs[index + 1]?.index ?? lines.length;
+    const block = lines.slice(current.index + 1, nextIndex);
+    if (block.some((line) => line.startsWith('    uses: '))) {
+      continue;
+    }
+
+    const timeoutLine = block.find((line) => line.startsWith('    timeout-minutes: '));
+    const timeout = Number(timeoutLine?.slice('    timeout-minutes: '.length));
+    if (!Number.isInteger(timeout) || timeout < 1 || timeout > 360) {
+      errors.push(`${name}: job ${current.name} must set timeout-minutes from 1 to 360`);
+    }
+  }
+
   for (let index = 1; index < jobs.length; index += 1) {
     const current = jobs[index];
     const previous = jobs[index - 1];
