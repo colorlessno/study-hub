@@ -1,22 +1,10 @@
 name: StudyDesktop validation
 
 on:
-  push:
-    paths:
-      - "category/StudyDesktop/**"
-      - ".github/workflows/studydesktop-validation.yml"
-  pull_request:
-    paths:
-      - "category/StudyDesktop/**"
-      - ".github/workflows/studydesktop-validation.yml"
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
-
-concurrency:
-  group: studydesktop-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   validate-electron-boundaries:

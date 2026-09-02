@@ -1,15 +1,7 @@
 name: StudyDevOps CI
 
 on:
-  push:
-    paths:
-      - "category/StudyDevOps/**"
-      - ".github/workflows/studydevops-ci.yml"
-  pull_request:
-    paths:
-      - "category/StudyDevOps/**"
-      - ".github/workflows/studydevops-ci.yml"
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

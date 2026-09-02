@@ -1,21 +1,10 @@
 name: IdeaForge validation
 
 on:
-  push:
-    paths:
-      - "category/StudyIdeaForge/**"
-      - ".github/workflows/ideaforge-validation.yml"
-  pull_request:
-    paths:
-      - "category/StudyIdeaForge/**"
-      - ".github/workflows/ideaforge-validation.yml"
+  workflow_call:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ideaforge-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   validate-no-ai-storage:

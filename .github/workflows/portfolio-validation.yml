@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: repository-validation-${{ github.ref }}
+  group: repository-validation
   cancel-in-progress: false
 
 jobs:
@@ -22,6 +22,9 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: app/package-lock.json
+
+      - name: Validate sequential workflow configuration
+        run: node scripts/validate-workflow-sequential.mjs
 
       - name: Install StudyHub dependencies
         run: npm ci
@@ -41,3 +44,55 @@ jobs:
 
       - name: Validate field contracts
         run: node scripts/validate-study-catalog.mjs
+
+  validate-studybase:
+    needs: validate-documents
+    uses: ./.github/workflows/studybase-validation.yml
+
+  validate-studyweb:
+    needs: validate-studybase
+    uses: ./.github/workflows/studyweb-validation.yml
+
+  validate-studysecurity:
+    needs: validate-studyweb
+    uses: ./.github/workflows/studysecurity-validation.yml
+
+  validate-studydevops:
+    needs: validate-studysecurity
+    uses: ./.github/workflows/studydevops-ci.yml
+
+  validate-studyaws:
+    needs: validate-studydevops
+    uses: ./.github/workflows/studyaws-validation.yml
+
+  validate-studydb:
+    needs: validate-studyaws
+    uses: ./.github/workflows/studydb-validation.yml
+
+  validate-studydesktop:
+    needs: validate-studydb
+    uses: ./.github/workflows/studydesktop-validation.yml
+
+  validate-studyarchitecture:
+    needs: validate-studydesktop
+    uses: ./.github/workflows/studyarchitecture-validation.yml
+
+  validate-studyapi:
+    needs: validate-studyarchitecture
+    uses: ./.github/workflows/studyapi-validation.yml
+
+  validate-study-ai-idea-generation:
+    needs: validate-studyapi
+    uses: ./.github/workflows/study-ai-idea-generation-validation.yml
+
+  validate-study-ai-corporate-employee:
+    needs: validate-study-ai-idea-generation
+    uses: ./.github/workflows/study-ai-corporate-employee-validation.yml
+
+  validate-ideaforge:
+    needs: validate-study-ai-corporate-employee
+    uses: ./.github/workflows/ideaforge-validation.yml
+
+  validate-studyai-learning:
+    needs: validate-ideaforge
+    uses: ./.github/workflows/studyai-learning-validation.yml

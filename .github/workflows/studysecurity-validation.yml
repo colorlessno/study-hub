@@ -1,22 +1,14 @@
 name: StudySecurity representative tests
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "category/StudySecurity/**"
-      - ".github/workflows/studysecurity-validation.yml"
-  pull_request:
-    paths:
-      - "category/StudySecurity/**"
-      - ".github/workflows/studysecurity-validation.yml"
+  workflow_call:
 
 jobs:
   representative-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         theme:
           - security03_rbac

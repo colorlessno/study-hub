@@ -1,22 +1,10 @@
 name: StudyAWS validation
 
 on:
-  push:
-    paths:
-      - "category/StudyAWS/**"
-      - ".github/workflows/studyaws-validation.yml"
-  pull_request:
-    paths:
-      - "category/StudyAWS/**"
-      - ".github/workflows/studyaws-validation.yml"
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
-
-concurrency:
-  group: studyaws-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   validate-local-lessons:
