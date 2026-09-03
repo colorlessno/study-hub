@@ -140,6 +140,27 @@ function validateMatrices(name, lines) {
   }
 }
 
+function validateExternalActionPins(name, lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = lines[index].match(/^\s*(?:-\s+)?uses:\s+([^\s#]+)(?:\s+#\s+(\S+))?\s*$/);
+    if (!match) {
+      continue;
+    }
+
+    const reference = match[1];
+    if (reference.startsWith('./')) {
+      continue;
+    }
+
+    if (!/^[^@\s]+@[0-9a-f]{40}$/.test(reference)) {
+      errors.push(`${name}:${index + 1}: external actions must use a full commit SHA`);
+    }
+    if (!/^v\d+(?:\.\d+(?:\.\d+)?)?$/.test(match[2] ?? '')) {
+      errors.push(`${name}:${index + 1}: pinned external actions must retain a version comment`);
+    }
+  }
+}
+
 function validateJobOrder(name, lines) {
   const jobsIndex = lines.indexOf('jobs:');
   if (jobsIndex < 0) {
@@ -214,6 +235,7 @@ for (const name of workflowNames) {
   validateConcurrency(name, lines);
   validatePermissions(name, lines);
   validateMatrices(name, lines);
+  validateExternalActionPins(name, lines);
   validateJobOrder(name, lines);
 }
 
