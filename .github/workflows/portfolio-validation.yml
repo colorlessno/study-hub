@@ -9,6 +9,9 @@ concurrency:
   group: repository-validation
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   validate-documents:
     runs-on: windows-latest

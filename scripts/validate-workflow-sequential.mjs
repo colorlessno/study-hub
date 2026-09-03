@@ -82,6 +82,38 @@ function validateTrigger(name, lines) {
   }
 }
 
+function validatePermissions(name, lines) {
+  const sectionIndexes = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (lines[index] === 'permissions:') {
+      sectionIndexes.push(index);
+    }
+  }
+
+  if (sectionIndexes.length !== 1) {
+    errors.push(`${name}: top-level permissions must appear exactly once`);
+    return;
+  }
+
+  const block = [];
+  for (let index = sectionIndexes[0] + 1; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line !== '' && !line.startsWith('  ')) {
+      break;
+    }
+    block.push(line);
+  }
+
+  const grants = block.filter((line) => /^  [A-Za-z0-9-]+:/.test(line));
+  if (grants.length !== 1 || grants[0] !== '  contents: read') {
+    errors.push(`${name}: permissions must grant only contents read access`);
+  }
+
+  if (lines.includes('    permissions:')) {
+    errors.push(`${name}: job-level permissions are not allowed`);
+  }
+}
+
 function validateMatrices(name, lines) {
   for (let index = 0; index < lines.length; index += 1) {
     if (lines[index] !== '      matrix:') {
@@ -180,6 +212,7 @@ for (const name of workflowNames) {
   const lines = text.replaceAll('\r\n', '\n').split('\n');
   validateTrigger(name, lines);
   validateConcurrency(name, lines);
+  validatePermissions(name, lines);
   validateMatrices(name, lines);
   validateJobOrder(name, lines);
 }

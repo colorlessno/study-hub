@@ -3,6 +3,9 @@ name: StudyWeb representative tests
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   representative-tests:
     runs-on: ubuntu-latest
