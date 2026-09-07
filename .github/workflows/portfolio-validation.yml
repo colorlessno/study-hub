@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   validate-documents:
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 30
     steps:
       - name: Checkout

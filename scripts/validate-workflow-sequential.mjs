@@ -238,6 +238,23 @@ function validateNodeRuntime(name, lines) {
   }
 }
 
+function validateRunnerImages(name, lines) {
+  const expectedRunner = name === orchestratorName
+    ? '    runs-on: windows-2025'
+    : '    runs-on: ubuntu-24.04';
+  const runnerLines = lines.filter((line) => line.startsWith('    runs-on:'));
+
+  if (runnerLines.length === 0) {
+    errors.push(`${name}: no runner image is configured`);
+    return;
+  }
+  for (const line of runnerLines) {
+    if (line !== expectedRunner) {
+      errors.push(`${name}: runner images must use the explicit ${expectedRunner.trim()} label`);
+    }
+  }
+}
+
 function validateArtifactUploads(name, lines) {
   for (let index = 0; index < lines.length; index += 1) {
     if (!lines[index].includes('uses: actions/upload-artifact@')) {
@@ -348,6 +365,7 @@ for (const name of workflowNames) {
   validatePublicWorkflowSafety(name, lines);
   validateDependencyInstalls(name, lines);
   validateNodeRuntime(name, lines);
+  validateRunnerImages(name, lines);
   validateArtifactUploads(name, lines);
   validateJobOrder(name, lines);
 }

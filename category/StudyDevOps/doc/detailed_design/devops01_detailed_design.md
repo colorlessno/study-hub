@@ -20,12 +20,12 @@ category/StudyDevOps/src/apps/devops01_github_actions_build/
 ```yaml
 jobs:
   node-quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
       - run: npm ci
         working-directory: category/StudyDevOps/src/apps/devops01_github_actions_build/app
       - run: npm run build

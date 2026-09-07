@@ -9,7 +9,7 @@ permissions:
 jobs:
   node-quality:
     name: Build, lint, and unit test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -43,7 +43,7 @@ jobs:
   api-integration:
     name: API integration test
     needs: node-quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -68,7 +68,7 @@ jobs:
   browser-e2e:
     name: Playwright E2E test
     needs: api-integration
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -105,7 +105,7 @@ jobs:
   database-integration:
     name: PostgreSQL integration test
     needs: browser-e2e
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -127,7 +127,7 @@ jobs:
   operations-signals:
     name: Logging, health, and incident evidence
     needs: database-integration
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
       - name: Checkout

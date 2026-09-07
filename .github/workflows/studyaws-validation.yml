@@ -9,7 +9,7 @@ permissions:
 jobs:
   validate-local-lessons:
     name: Validate local cloud lessons
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Checkout
