@@ -214,6 +214,38 @@ function validateDependencyInstalls(name, lines) {
   }
 }
 
+function validateArtifactUploads(name, lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!lines[index].includes('uses: actions/upload-artifact@')) {
+      continue;
+    }
+
+    let end = index + 1;
+    while (end < lines.length) {
+      const line = lines[end];
+      const indent = line.length - line.trimStart().length;
+      if (line !== '' && indent <= 6) {
+        break;
+      }
+      end += 1;
+    }
+    const block = lines.slice(index + 1, end);
+
+    if (lines[index - 1] !== '        if: failure()') {
+      errors.push(`${name}:${index + 1}: artifacts may only be uploaded after a failed validation`);
+    }
+    if (!block.includes('          if-no-files-found: ignore')) {
+      errors.push(`${name}:${index + 1}: missing failure artifacts must not fail the validation`);
+    }
+    if (!block.includes('          retention-days: 7')) {
+      errors.push(`${name}:${index + 1}: failure artifacts must expire after 7 days`);
+    }
+    if (!block.includes('          include-hidden-files: false')) {
+      errors.push(`${name}:${index + 1}: artifact uploads must exclude hidden files`);
+    }
+  }
+}
+
 function validateJobOrder(name, lines) {
   const jobsIndex = lines.indexOf('jobs:');
   if (jobsIndex < 0) {
@@ -291,6 +323,7 @@ for (const name of workflowNames) {
   validateExternalActionPins(name, lines);
   validatePublicWorkflowSafety(name, lines);
   validateDependencyInstalls(name, lines);
+  validateArtifactUploads(name, lines);
   validateJobOrder(name, lines);
 }
 

@@ -96,6 +96,8 @@ jobs:
         with:
           name: devops04-playwright-failure
           if-no-files-found: ignore
+          retention-days: 7
+          include-hidden-files: false
           path: |
             category/StudyDevOps/src/apps/devops04_playwright_e2e/playwright-report/
             category/StudyDevOps/src/apps/devops04_playwright_e2e/test-results/
