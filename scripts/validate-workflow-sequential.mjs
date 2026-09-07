@@ -167,6 +167,29 @@ function validateExternalActionPins(name, lines) {
   }
 }
 
+function validatePublicWorkflowSafety(name, lines) {
+  const forbiddenTriggers = new Set([
+    '  issue_comment:',
+    '  pull_request_target:',
+    '  repository_dispatch:',
+    '  workflow_run:'
+  ]);
+  const untrustedExpression = /\$\{\{\s*(?:github\.event(?:\b|\.)|github\.(?:actor|head_ref|ref_name|triggering_actor)\b)/;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (forbiddenTriggers.has(line)) {
+      errors.push(`${name}:${index + 1}: public validation must not use the ${line.trimEnd()} trigger`);
+    }
+    if (/\$\{\{\s*secrets\./.test(line)) {
+      errors.push(`${name}:${index + 1}: public validation must not consume repository secrets`);
+    }
+    if (untrustedExpression.test(line)) {
+      errors.push(`${name}:${index + 1}: public validation must not use untrusted GitHub context values`);
+    }
+  }
+}
+
 function validateJobOrder(name, lines) {
   const jobsIndex = lines.indexOf('jobs:');
   if (jobsIndex < 0) {
@@ -242,6 +265,7 @@ for (const name of workflowNames) {
   validatePermissions(name, lines);
   validateMatrices(name, lines);
   validateExternalActionPins(name, lines);
+  validatePublicWorkflowSafety(name, lines);
   validateJobOrder(name, lines);
 }
 
