@@ -190,6 +190,30 @@ function validatePublicWorkflowSafety(name, lines) {
   }
 }
 
+function validateDependencyInstalls(name, lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    if (/\bnpm\s+install(?:\s|$)/.test(lines[index])) {
+      errors.push(`${name}:${index + 1}: Node.js dependencies must be installed with npm ci`);
+    }
+  }
+
+  if (name !== 'studyai-learning-validation.yml') {
+    return;
+  }
+
+  const expectedInstall = '        run: python -m pip install -e ".[dev]"';
+  const pipInstalls = lines.filter((line) => line.includes('python -m pip install'));
+  if (pipInstalls.length !== 1 || pipInstalls[0] !== expectedInstall) {
+    errors.push(`${name}: Python dependencies must be installed once from the backend pyproject`);
+  }
+  if (!lines.includes('          cache: pip')) {
+    errors.push(`${name}: setup-python must enable the pip cache`);
+  }
+  if (!lines.includes('          cache-dependency-path: category/StudyAI/src/backend/pyproject.toml')) {
+    errors.push(`${name}: the pip cache must be keyed by the backend pyproject`);
+  }
+}
+
 function validateJobOrder(name, lines) {
   const jobsIndex = lines.indexOf('jobs:');
   if (jobsIndex < 0) {
@@ -266,6 +290,7 @@ for (const name of workflowNames) {
   validateMatrices(name, lines);
   validateExternalActionPins(name, lines);
   validatePublicWorkflowSafety(name, lines);
+  validateDependencyInstalls(name, lines);
   validateJobOrder(name, lines);
 }
 
