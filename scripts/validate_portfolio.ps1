@@ -10,8 +10,49 @@ $textExtensions = [System.Collections.Generic.HashSet[string]]::new([System.Stri
     ".ps1", ".py", ".sql", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml"
 ) | ForEach-Object { [void]$textExtensions.Add($_) }
 
+$legacyBomPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+@(
+    "category/StudyAI/.gitignore",
+    "category/StudyAI/doc/detailed_design/system17_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system18_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system19_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system20_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system21_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system22_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system23_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system24_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system25_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system26_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system27_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system28_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system29_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system30_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system31_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system32_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system33_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system34_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system35_detailed_design.md",
+    "category/StudyAI/doc/detailed_design/system36_detailed_design.md",
+    "category/StudyAI/docker-compose.yml",
+    "category/StudyAI/src/backend/Dockerfile",
+    "category/StudyAI/src/backend/Dockerfile.test",
+    "category/StudyAI/src/frontend/Dockerfile",
+    "category/StudyAI/src/scripts/docker_pytest.ps1",
+    "category/StudyAWS/src/infra/aws07_lambda_local_api/template.yaml",
+    "category/StudyAWS/src/infra/aws08_api_gateway_lambda/template.yaml",
+    "category/StudyWeb/.gitignore",
+    "category/StudyWeb/src/infra/compose/web19_fetch_task_list/docker-compose.yml",
+    "category/StudyWeb/src/infra/compose/web20_create_task_form/docker-compose.yml",
+    "category/StudyWeb/src/infra/compose/web21_network_debug/docker-compose.yml",
+    "category/StudyWeb/src/infra/compose/web22_tanstack_query/docker-compose.yml",
+    "category/StudyWeb/src/infra/compose/web26_docker_compose_web_api_db/docker-compose.yml",
+    "category/StudyWeb/src/infra/compose/web27_nginx_static_reverse_proxy/docker-compose.yml",
+    "category/StudyWeb/src/infra/compose/web28_env_config/docker-compose.yml"
+) | ForEach-Object { [void]$legacyBomPaths.Add($_) }
+
 $errors = [System.Collections.Generic.List[string]]::new()
-$warnings = [System.Collections.Generic.List[string]]::new()
+$checkedLegacyBomPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$validatedLegacyBomPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
 Push-Location $repoRoot
 try {
@@ -21,7 +62,10 @@ try {
     }
 
     $textFiles = @($files | Where-Object {
-        $textExtensions.Contains([IO.Path]::GetExtension($_))
+        $fileName = [IO.Path]::GetFileName($_)
+        $textExtensions.Contains([IO.Path]::GetExtension($_)) `
+            -or $fileName -ieq ".gitignore" `
+            -or $fileName -ilike "Dockerfile*"
     })
 
     $decoded = @{}
@@ -30,12 +74,31 @@ try {
         try {
             $bytes = [IO.File]::ReadAllBytes($absolutePath)
             $decoded[$relativePath] = $strictUtf8.GetString($bytes)
-            if ($bytes.Length -ge 3 -and $bytes[0] -eq 239 -and $bytes[1] -eq 187 -and $bytes[2] -eq 191) {
-                $warnings.Add("UTF-8 BOM: $relativePath")
+            $hasBom = $bytes.Length -ge 3 `
+                -and $bytes[0] -eq 239 `
+                -and $bytes[1] -eq 187 `
+                -and $bytes[2] -eq 191
+            if ($legacyBomPaths.Contains($relativePath)) {
+                [void]$checkedLegacyBomPaths.Add($relativePath)
+                if ($hasBom) {
+                    [void]$validatedLegacyBomPaths.Add($relativePath)
+                }
+                else {
+                    $errors.Add("Preserved UTF-8 BOM is missing: $relativePath")
+                }
+            }
+            elseif ($hasBom) {
+                $errors.Add("Unexpected UTF-8 BOM: $relativePath")
             }
         }
         catch {
             $errors.Add("Invalid UTF-8: $relativePath")
+        }
+    }
+
+    foreach ($legacyBomPath in $legacyBomPaths) {
+        if (-not $checkedLegacyBomPaths.Contains($legacyBomPath)) {
+            $errors.Add("Legacy UTF-8 BOM baseline path is missing: $legacyBomPath")
         }
     }
 
@@ -104,10 +167,7 @@ try {
 
     Write-Host "Checked text files: $($textFiles.Count)"
     Write-Host "Checked Markdown files: $($markdownFiles.Count)"
-    Write-Host "Warnings: $($warnings.Count)"
-    foreach ($warning in $warnings) {
-        Write-Warning $warning
-    }
+    Write-Host "Validated legacy UTF-8 BOM files: $($validatedLegacyBomPaths.Count) / $($legacyBomPaths.Count)"
 
     if ($errors.Count -gt 0) {
         Write-Host "Errors: $($errors.Count)" -ForegroundColor Red

@@ -125,7 +125,7 @@ READMEは`npm run dev`後にポート3000を案内するが、`dev`はフロン�
 - カタログ生成整合: 合格
 - StudyHub本番ビルド: 合格
 - StudyHubテスト: 合格（実行基盤22件を含む全テスト）
-- ポートフォリオ検証: 合格。ただしUTF-8 BOM警告31件
+- ポートフォリオ検証: 合格。従来のUTF-8 BOM警告31件と、拡張子による検査対象外だった`.gitignore`・Dockerfile 5件を合わせた既存36件を維持基準として照合し、新しいBOMの混入と既存BOMの意図しない除去をエラーにする
 - StudyAIバックエンドpytest: 261件すべて合格（専用Dockerテストイメージ）
 - StudyAIフロントエンドビルド: 合格（専用Dockerイメージ）
 - StudyAI Compose設定検証: 合格
