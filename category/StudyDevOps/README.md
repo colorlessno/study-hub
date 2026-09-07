@@ -63,7 +63,7 @@ category/StudyDevOps/
 
 ## 技術と範囲
 
-- Node.js 20 / JavaScript / TypeScript
+- Node.js 22 / JavaScript / TypeScript
 - GitHub Actions、Playwright、Docker / Docker Compose、PostgreSQL
 - 教材用の固定値だけを使い、secret、token、個人情報、本番DBは扱いません。
 - CIは品質の一部を自動確認する教材であり、本番デプロイや組織向け運用設計までは対象外です。

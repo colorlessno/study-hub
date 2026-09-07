@@ -4,7 +4,7 @@ AWSの概念を、まず認証情報不要のローカル教材で観察し、�
 
 ## 最初に取り組むこと
 
-リポジトリルートで次を実行します。Node.js 20以上を使い、AWSアカウント、AWS CLI、アクセスキー、外部通信は必要ありません。
+リポジトリルートで次を実行します。Node.js 22以上を使い、AWSアカウント、AWS CLI、アクセスキー、外部通信は必要ありません。
 
 ```powershell
 node category/StudyAWS\scripts\validate-studyaws.mjs aws01

@@ -45,7 +45,7 @@ scripts/
 | 作業依頼 | Issue 化する小さい変更 |
 | 変更ファイル | PR で差分するファイル |
 | review 指摘 | 修正すべき観点 |
-| ローカル環境 | Git、Node.js 20以上、Docker Desktop |
+| ローカル環境 | Git、Node.js 22以上、Docker Desktop |
 | Gitサーバー | `127.0.0.1`で起動したGitea |
 
 ## 5. 出力

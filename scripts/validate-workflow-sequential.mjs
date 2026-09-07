@@ -214,6 +214,30 @@ function validateDependencyInstalls(name, lines) {
   }
 }
 
+function validateNodeRuntime(name, lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!lines[index].includes('uses: actions/setup-node@')) {
+      continue;
+    }
+
+    let end = index + 1;
+    while (end < lines.length) {
+      const line = lines[end];
+      const indent = line.length - line.trimStart().length;
+      if (line !== '' && indent <= 6) {
+        break;
+      }
+      end += 1;
+    }
+    const versionLines = lines
+      .slice(index + 1, end)
+      .filter((line) => line.startsWith('          node-version:'));
+    if (versionLines.length !== 1 || versionLines[0] !== '          node-version: "22"') {
+      errors.push(`${name}:${index + 1}: setup-node must use the supported Node.js 22 release line`);
+    }
+  }
+}
+
 function validateArtifactUploads(name, lines) {
   for (let index = 0; index < lines.length; index += 1) {
     if (!lines[index].includes('uses: actions/upload-artifact@')) {
@@ -323,6 +347,7 @@ for (const name of workflowNames) {
   validateExternalActionPins(name, lines);
   validatePublicWorkflowSafety(name, lines);
   validateDependencyInstalls(name, lines);
+  validateNodeRuntime(name, lines);
   validateArtifactUploads(name, lines);
   validateJobOrder(name, lines);
 }

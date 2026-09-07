@@ -4,7 +4,7 @@
 
 ## 最初に取り組むこと
 
-リポジトリルートで次を実行します。Node.js 20以上とGitを使い、外部通信や既存リポジトリの変更は行いません。
+リポジトリルートで次を実行します。Node.js 22以上とGitを使い、外部通信や既存リポジトリの変更は行いません。
 
 ```powershell
 node category/StudyBase\scripts\validate-studybase.mjs base01

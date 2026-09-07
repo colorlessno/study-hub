@@ -15,7 +15,7 @@ Giteaを社内Gitサーバーに見立て、企業案件で使われるPull Requ
 
 ## 前提と安全事項
 
-- Docker Desktop、Git、Node.js 20以上を使用する。
+- Docker Desktop、Git、Node.js 22以上を使用する。
 - 演習専用のユーザー名とパスワードを使い、GitHubや業務システムと共用しない。
 - Web UIは`http://127.0.0.1:3418/`だけで使用する。
 - コマンドはGitea演習フォルダから実行する。

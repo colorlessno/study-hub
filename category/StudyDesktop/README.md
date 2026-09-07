@@ -31,7 +31,7 @@ GUIを使えないCI、SSH、WSLなどでは `npm run verify` まででコード
 
 | 確認内容 | 必要なもの |
 |----------|------------|
-| GUIなし検証 | Node.js 20以上、npm。依存パッケージのインストールは不要 |
+| GUIなし検証 | Node.js 22以上、npm。依存パッケージのインストールは不要 |
 | Electron UI | Node.js、npm、`npm ci`、デスクトップ画面を表示できるOSセッション |
 | headless環境 | `npm run verify` を使用し、Electron UIの起動確認はデスクトップ環境で行う |
 

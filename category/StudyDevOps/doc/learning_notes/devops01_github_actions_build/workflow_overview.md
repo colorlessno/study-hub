@@ -9,7 +9,7 @@ devops01に関係する処理は次の順番です。
 | 順番 | GitHub Actionsの処理 | 対象 |
 | --- | --- | --- |
 | 1 | リポジトリのソースを取得する | `actions/checkout@v4` |
-| 2 | Node.js 20を準備する | `actions/setup-node@v4` |
+| 2 | Node.js 22を準備する | `actions/setup-node@v4` |
 | 3 | 依存パッケージを準備する | `npm ci` |
 | 4 | ビルド処理を実行する | `npm run build` |
 
