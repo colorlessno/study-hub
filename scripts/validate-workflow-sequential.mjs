@@ -158,6 +158,12 @@ function validateExternalActionPins(name, lines) {
     if (!/^v\d+(?:\.\d+(?:\.\d+)?)?$/.test(match[2] ?? '')) {
       errors.push(`${name}:${index + 1}: pinned external actions must retain a version comment`);
     }
+    if (
+      reference.startsWith('actions/checkout@') &&
+      (lines[index + 1] !== '        with:' || lines[index + 2] !== '          persist-credentials: false')
+    ) {
+      errors.push(`${name}:${index + 1}: checkout must disable persisted credentials`);
+    }
   }
 }
 
