@@ -32,6 +32,9 @@ jobs:
       - name: Validate sequential workflow configuration
         run: node scripts/validate-workflow-sequential.mjs
 
+      - name: Validate maintained Node.js runtime configuration
+        run: node scripts/validate-node-runtime-baseline.mjs
+
       - name: Install StudyHub dependencies
         run: npm ci
         working-directory: app

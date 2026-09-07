@@ -35,7 +35,7 @@ category/StudyDevOps/doc/learning_notes/devops02_lint_unit_test/
 ## 4. Docker設計
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
