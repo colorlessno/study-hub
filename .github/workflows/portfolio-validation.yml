@@ -35,6 +35,9 @@ jobs:
       - name: Validate maintained Node.js runtime configuration
         run: node scripts/validate-node-runtime-baseline.mjs
 
+      - name: Validate pinned Docker image references
+        run: node scripts/validate-docker-image-lock.mjs
+
       - name: Install StudyHub dependencies
         run: npm ci
         working-directory: app

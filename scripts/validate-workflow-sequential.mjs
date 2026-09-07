@@ -346,6 +346,20 @@ function validateReusableCalls(lines) {
   }
 }
 
+function validateRequiredRepositoryChecks(name, lines) {
+  if (name !== orchestratorName) {
+    return;
+  }
+
+  const requiredCommands = ['        run: node scripts/validate-docker-image-lock.mjs'];
+  for (const command of requiredCommands) {
+    const count = lines.filter((line) => line === command).length;
+    if (count !== 1) {
+      errors.push(`${name}: ${command.trim()} must run exactly once`);
+    }
+  }
+}
+
 for (const name of workflowNames) {
   const path = resolve(workflowDirectory, name);
   let text;
@@ -368,6 +382,7 @@ for (const name of workflowNames) {
   validateRunnerImages(name, lines);
   validateArtifactUploads(name, lines);
   validateJobOrder(name, lines);
+  validateRequiredRepositoryChecks(name, lines);
 }
 
 try {

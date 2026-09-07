@@ -42,7 +42,7 @@
 | 静的フロントエンド | `src/frontend/static/studyweb/systems/` |
 | 学習手順・確認記録 | `doc/learning_notes/` |
 
-Docker化するNode.jsサンプルは`node:22-alpine`、静的HTMLサンプルは`nginx:1.27-alpine`を基本イメージとする。個別テーマの要件が異なる場合は、各詳細設計を優先する。
+Docker化するNode.jsサンプルは`node:22-alpine`、静的HTMLサンプルは`nginx:1.30-alpine`を基本tagとする。実際の参照はルートの`docker-images.lock.json`に記録したmulti-platform manifest digestを併記し、個別テーマの要件が異なる場合は各詳細設計を優先する。
 
 ## 使い方
 

@@ -1,6 +1,6 @@
 services:
   web:
-    image: node:22-alpine
+    image: node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
     working_dir: /app
     command: node web/server.js
     volumes:
@@ -10,7 +10,7 @@ services:
     depends_on:
       - api
   api:
-    image: node:22-alpine
+    image: node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
     working_dir: /app
     command: node api/server.js
     environment:
@@ -22,7 +22,7 @@ services:
     depends_on:
       - db
   db:
-    image: node:22-alpine
+    image: node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
     working_dir: /app
     command: node db/server.js
     volumes:

@@ -142,9 +142,12 @@ Electron教材を初めて動かす場合は、`category/StudyDesktop/src/apps/d
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/validate_portfolio.ps1
 node scripts/validate-study-catalog.mjs
+node scripts/validate-docker-image-lock.mjs
 node scripts/run-study-check.mjs --list
 ```
 
 PowerShell 7 (`pwsh`) を使用する場合は、`pwsh -File scripts/validate_portfolio.ps1` でも実行できます。
+
+公開対象のDockerfileとComposeが参照する外部イメージは、version tagとmulti-platform manifest digestを併記して固定しています。固定値、提供元での更新確認、差し替え後の検証手順は[Dockerイメージ固定・更新方針](./DOCKER_IMAGE_POLICY.md)を参照してください。
 
 `docker-compose.yml` 等に含まれる `postgres / postgres` などの接続情報は、ローカル学習用の慣例的なデフォルト値です。環境変数（`POSTGRES_PASSWORD` / `DATABASE_URL` 等）で上書きできます。本番用途では必ず変更してください。

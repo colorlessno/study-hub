@@ -2,7 +2,7 @@ name: studybase-gitea-lab
 
 services:
   server:
-    image: docker.gitea.com/gitea:1.27.1
+    image: docker.gitea.com/gitea:1.27.1@sha256:34e3f6b75f5cbb6aebce588037fc5a53c84213e4d4b00da0a8d73e031a558e52
     restart: "no"
     environment:
       - USER_UID=1000

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "resolvedAt": "2026-09-07",
+  "images": [
+    {
+      "tag": "axllent/mailpit:v1.30.4",
+      "digest": "sha256:5a49a77c5bdbe7c5474450b4f46348d09949df3695257729c93a30369382d4f6",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "docker.gitea.com/gitea:1.27.1",
+      "digest": "sha256:34e3f6b75f5cbb6aebce588037fc5a53c84213e4d4b00da0a8d73e031a558e52",
+      "registry": "docker.gitea.com"
+    },
+    {
+      "tag": "mcr.microsoft.com/playwright:v1.59.1-noble",
+      "digest": "sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53",
+      "registry": "mcr.microsoft.com"
+    },
+    {
+      "tag": "nginx:1.30-alpine",
+      "digest": "sha256:dc5069ad14f19660b141b21236140b91656bf89bbc3e2417c70ae650cd66104c",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "node:22-alpine",
+      "digest": "sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "node:22-bookworm",
+      "digest": "sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "pgvector/pgvector:pg16",
+      "digest": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "postgres:16",
+      "digest": "sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "postgres:16-alpine",
+      "digest": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+      "registry": "docker.io"
+    },
+    {
+      "tag": "python:3.11-slim",
+      "digest": "sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534",
+      "registry": "docker.io"
+    }
+  ]
+}

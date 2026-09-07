@@ -40,7 +40,7 @@ postgres start -> healthcheck -> schema.sql -> seed.sql -> tests/db.test.js
 ```yaml
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
   test:
