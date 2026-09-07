@@ -8,7 +8,29 @@ const workflowNames = readdirSync(workflowDirectory)
   .filter((name) => name.endsWith('.yml') || name.endsWith('.yaml'))
   .sort();
 const orchestratorName = 'portfolio-validation.yml';
+const additionalActionReferencePaths = [
+  'category/StudyDevOps/doc/detailed_design/devops01_detailed_design.md',
+  'category/StudyDevOps/src/apps/devops01_github_actions_build/.github/workflows/build.yml'
+];
 const errors = [];
+const approvedExternalActions = new Map([
+  ['actions/checkout', {
+    revision: '3d3c42e5aac5ba805825da76410c181273ba90b1',
+    version: 'v7.0.1'
+  }],
+  ['actions/setup-node', {
+    revision: '820762786026740c76f36085b0efc47a31fe5020',
+    version: 'v7.0.0'
+  }],
+  ['actions/setup-python', {
+    revision: '5fda3b95a4ea91299a34e894583c3862153e4b97',
+    version: 'v7.0.0'
+  }],
+  ['actions/upload-artifact', {
+    revision: '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a',
+    version: 'v7.0.1'
+  }]
+]);
 
 function readStrictUtf8(path) {
   const bytes = readFileSync(path);
@@ -158,6 +180,21 @@ function validateExternalActionPins(name, lines) {
     if (!/^v\d+(?:\.\d+(?:\.\d+)?)?$/.test(match[2] ?? '')) {
       errors.push(`${name}:${index + 1}: pinned external actions must retain a version comment`);
     }
+
+    const separatorIndex = reference.lastIndexOf('@');
+    const actionName = separatorIndex < 0 ? reference : reference.slice(0, separatorIndex);
+    const approved = approvedExternalActions.get(actionName);
+    if (!approved) {
+      errors.push(`${name}:${index + 1}: external action ${actionName} is not approved`);
+    } else {
+      const expectedReference = `${actionName}@${approved.revision}`;
+      if (reference !== expectedReference || match[2] !== approved.version) {
+        errors.push(
+          `${name}:${index + 1}: ${actionName} must use ${expectedReference} # ${approved.version}`
+        );
+      }
+    }
+
     if (
       reference.startsWith('actions/checkout@') &&
       (lines[index + 1] !== '        with:' || lines[index + 2] !== '          persist-credentials: false')
@@ -383,6 +420,16 @@ for (const name of workflowNames) {
   validateArtifactUploads(name, lines);
   validateJobOrder(name, lines);
   validateRequiredRepositoryChecks(name, lines);
+}
+
+for (const relativePath of additionalActionReferencePaths) {
+  try {
+    const path = resolve(repositoryRoot, relativePath);
+    const lines = readStrictUtf8(path).replaceAll('\r\n', '\n').split('\n');
+    validateExternalActionPins(relativePath, lines);
+  } catch (error) {
+    errors.push(`${relativePath}: ${error.message}`);
+  }
 }
 
 try {
